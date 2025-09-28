@@ -108,3 +108,35 @@ input[type="date"]:valid{ -webkit-text-fill-color: var(--text); }
 input[type="date"]::placeholder{ opacity: 0.4; }
 
 
+/* ---------- Responsive adjustments ---------- */
+/* Tablet and below: allow header to wrap, shrink brand, make nav horizontally scrollable */
+@media (max-width: 900px){
+	.site-header header{flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+	.brand .logo{width:48px;height:48px}
+	.brand h1{font-size:16px}
+	#site-sub{display:none}
+	.header-right{width:100%;justify-content:space-between}
+	#main-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:6px;scrollbar-width:thin}
+	#main-nav a{white-space:nowrap;padding:6px 10px;height:34px}
+	.lang-toggle button{height:34px;padding:6px 10px}
+}
+
+/* Mobile: stack brand and controls vertically for compact layout */
+@media (max-width: 600px){
+	.brand h1{font-size:15px}
+	.header-right{flex-wrap:wrap;gap:8px}
+	#main-nav{order:2;width:100%}
+	.lang-toggle{order:1;margin-left:auto}
+}
+
+/* Booking page room rows: stack gracefully on smaller screens */
+.room-row.grid{display:grid;grid-template-columns:2fr 2fr 1fr;gap:12px;align-items:start}
+@media (max-width: 980px){
+	.room-row.grid{grid-template-columns:1fr 1fr}
+	.room-row.grid > :last-child{grid-column:1 / -1}
+}
+@media (max-width: 760px){
+	.room-row.grid{grid-template-columns:1fr}
+}
+
+

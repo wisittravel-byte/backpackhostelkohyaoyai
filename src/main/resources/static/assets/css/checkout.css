@@ -34,6 +34,9 @@ main.layout::before{
 /* Slight upward nudge for first card to visually align with other pages */
 .layout > .card:first-child{ margin-top:-8px }
 @media(min-width:980px){ main.layout{grid-template-columns:2fr 1fr} .sticky{position:sticky;top:14px} }
+@media(max-width:979px){
+  main.layout{grid-template-columns:1fr}
+}
 
 /* components */
 .card{background:var(--card);border-radius:12px;box-shadow:0 8px 20px rgba(3,50,59,.04);padding:12px}
