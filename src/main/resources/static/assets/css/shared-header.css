@@ -26,13 +26,14 @@
 	padding-right:16px;
 	min-height:var(--header-inner-height);
 }
+.site-header.header-sticky{padding-left: max(0px, env(safe-area-inset-left)); padding-right: max(0px, env(safe-area-inset-right));}
 .brand{display:flex;align-items:center;gap:12px}
 .brand .logo{width:56px;height:56px;border-radius:8px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px}
 /* Match the index.html heading size so the shared header looks identical across pages */
 .brand h1{margin:0;font-size:18px}
 .header-right{display:flex;gap:12px;align-items:center}
 /* ensure nav and lang toggle alignment matches index page */
-#main-nav{display:flex;align-items:center;gap:10px}
+#main-nav{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 #main-nav a{display:flex;align-items:center;height:38px;padding:8px 12px;border-radius:10px;color:var(--text);font-weight:600}
 /* Remove underline from header nav links; keep visible keyboard focus for accessibility */
 #main-nav a{
@@ -116,7 +117,7 @@ input[type="date"]::placeholder{ opacity: 0.4; }
 	.brand h1{font-size:16px}
 	#site-sub{display:none}
 	.header-right{width:100%;justify-content:space-between}
-	#main-nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:6px;scrollbar-width:thin}
+	#main-nav{gap:6px}
 	#main-nav a{white-space:nowrap;padding:6px 10px;height:34px}
 	.lang-toggle button{height:34px;padding:6px 10px}
 }

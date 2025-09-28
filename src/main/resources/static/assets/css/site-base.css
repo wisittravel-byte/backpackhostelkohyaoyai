@@ -1,5 +1,9 @@
 /* Site base styles: shared utilities, components, and accessibility helpers */
 
+/* Global mobile-friendly defaults */
+html{ -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+img{ max-width: 100%; height: auto; }
+
 /* Buttons */
 .btn{background:var(--brand,#2aa6b8);color:#fff;border:none;border-radius:10px;padding:8px 12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .btn.secondary{background:#fff;color:var(--brand,#2aa6b8);border:1px solid rgba(3,50,59,.1)}
@@ -97,3 +101,8 @@ button:focus, a:focus, input:focus, select:focus, textarea:focus{outline:3px sol
 /* Misc */
 .object-cover{object-fit:cover}
 .bg-white{background:#fff}
+
+/* Slightly reduce container padding on very small screens */
+@media(max-width:420px){
+	.wrap{padding-left:10px;padding-right:10px}
+}
