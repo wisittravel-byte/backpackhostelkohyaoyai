@@ -23,6 +23,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Generate responsive images
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y imagemagick
+          cd src/main/resources/static/assets/image
+          if [ -f Beach4.jpg ]; then
+            convert Beach4.jpg -resize 480x -quality 82 Beach4-480.jpg
+            convert Beach4.jpg -resize 768x -quality 85 Beach4-768.jpg
+          fi
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

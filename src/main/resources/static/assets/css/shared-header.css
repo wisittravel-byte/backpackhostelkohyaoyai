@@ -118,9 +118,21 @@ input[type="date"]::placeholder{ opacity: 0.4; }
 	#site-sub{display:none}
 	.header-right{width:100%;justify-content:space-between}
 		.menu-toggle{display:inline-flex;align-items:center;justify-content:center;width:40px;height:36px;border-radius:8px;border:1px solid rgba(3,50,59,.1);background:#fff;color:var(--text);cursor:pointer}
-		/* collapsed nav by default on tablet */
-		#main-nav{display:none}
-		.header-right[data-menu-open="true"] #main-nav{display:flex}
+			/* collapsed nav by default on tablet with smooth transition */
+			#main-nav{
+				display:block;
+				max-height:0;
+				opacity:0;
+				transform:translateY(-6px);
+				transition:max-height .25s ease, opacity .2s ease, transform .2s ease;
+				overflow:hidden;
+				width:100%;
+			}
+			.header-right[data-menu-open="true"] #main-nav{
+				max-height:240px;
+				opacity:1;
+				transform:translateY(0);
+			}
 	#main-nav{gap:6px}
 	#main-nav a{white-space:nowrap;padding:6px 10px;height:34px}
 	.lang-toggle button{height:34px;padding:6px 10px}
@@ -138,7 +150,7 @@ input[type="date"]::placeholder{ opacity: 0.4; }
 	/* desktop/tablet large: show nav, hide hamburger */
 	@media (min-width: 901px){
 		.menu-toggle{display:none}
-		#main-nav{display:flex}
+		#main-nav{display:flex;max-height:none;opacity:1;transform:none;overflow:visible}
 	}
 
 /* Booking page room rows: stack gracefully on smaller screens */
