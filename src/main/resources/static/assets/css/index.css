@@ -28,8 +28,8 @@ nav a:hover{background:rgba(0,0,0,0.04)}
 .lang-toggle button.active{background:var(--brand);color:#fff}
 
 /* main margin-top is provided by shared-header.css using --space-section for consistent layout */
-.hero{background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));padding:16px;border-radius:var(--radius);display:flex;gap:14px;align-items:center;flex-direction:column}
-@media(min-width:900px){.hero{flex-direction:row;align-items:flex-start;padding:20px;gap:18px}}
+.hero{background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));padding:16px;border-radius:var(--radius);display:flex;gap:14px;align-items:stretch;flex-direction:column}
+@media(min-width:900px){.hero{padding:20px;gap:18px}}
 .hero .left{flex:1}
 .hero-image{margin-top:12px}
 .hero-image img{width:100%;height:240px;object-fit:cover;border-radius:10px;box-shadow:0 8px 20px rgba(3,50,59,0.08);display:block}
@@ -37,6 +37,17 @@ nav a:hover{background:rgba(0,0,0,0.04)}
 .hero h2{margin:0 0 6px;font-size:20px}
 @media(min-width:900px){ .hero h2{font-size:22px} }
 .hero p{margin:0;color:var(--muted)}
+
+/* Search form on hero card */
+.hero .card .search-grid{grid-template-columns:1fr}
+@media(min-width:480px){
+  .hero .card .search-grid{grid-template-columns:1fr 1fr;align-items:end}
+  .hero .card .search-grid .actions{grid-column:1 / -1}
+}
+@media(min-width:720px){
+  .hero .card .search-grid{grid-template-columns:1fr 1fr 1fr 1fr auto}
+  .hero .card .search-grid .actions{grid-column:auto}
+}
 
 .booking-card{display:grid;grid-template-columns:1fr;gap:12px;margin-top:16px}
 @media(min-width:800px){.booking-card{grid-template-columns:repeat(3,1fr)}}

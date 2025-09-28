@@ -26,28 +26,26 @@
     <main>
       <!-- Horizontal search bar -->
   <section class="card search-sticky">
-        <form id="searchBar">
-          <div class="grid search-grid">
+        <form id="searchBar" class="grid search-grid">
             <div>
               <label for="checkin" data-i18n="form.checkin">เช็คอิน</label>
-              <input id="checkin" type="date" required />
+              <input id="checkin" type="date" required class="form-control" />
             </div>
             <div>
               <label for="checkout" data-i18n="form.checkout">เช็คเอาท์</label>
-              <input id="checkout" type="date" required />
+              <input id="checkout" type="date" required class="form-control" />
             </div>
             <div>
               <label for="guests" data-i18n="form.guests">จำนวนผู้เข้าพัก</label>
-              <select id="guests"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select>
+              <select id="guests" class="form-control"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select>
             </div>
             <div>
               <label for="rooms" data-i18n="form.rooms">จำนวนห้อง</label>
-              <select id="rooms"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+              <select id="rooms" class="form-control"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
             </div>
-            <div class="flex items-center">
+            <div class="actions flex items-center">
               <a class="btn" href="#rooms" data-i18n="form.search">ค้นหา</a>
             </div>
-          </div>
         </form>
       </section>
       <!-- Rooms section (rich cards) -->
