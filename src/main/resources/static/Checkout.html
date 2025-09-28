@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Security & SEO -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self';">
+  <meta property="og:title" content="Checkout — Backpack Hostel Kohyaoyai" />
+  <meta property="og:description" content="ชำระเงินออนไลน์และยืนยันการจองกับ Backpack Hostel Kohyaoyai" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="http://example.com/Checkout.html" />
+  <title>Checkout — Backpack Hostel Kohyaoyai</title>
+  <meta name="description" content="Checkout sample styled like reference UI, with original theme colors">
+  <!-- Shared/base styles -->
+  <link rel="stylesheet" href="assets/css/shared-header.css">
+  <link rel="stylesheet" href="assets/css/site-base.css">
+  <link rel="stylesheet" href="assets/css/spacing.css">
+  <!-- Reuse index form/hero styles for consistent sizing -->
+  <link rel="stylesheet" href="assets/css/index.css">
+  <!-- Keep checkout components (summary table, pills, etc.) -->
+  <link rel="stylesheet" href="assets/css/checkout.css">
+  <link rel="stylesheet" href="assets/css/site-footer.css">
+</head>
+<body>
+  <div class="site-header header-sticky"></div>
+  <div class="wrap header-gap compact">
+    <main>
+      <!-- Layout inspired by index hero: left summary, right form -->
+      <section class="hero" id="checkout2">
+        <!-- LEFT: Guest Information (moved here) -->
+        <div class="left">
+          <div class="card">
+            <!-- Guest Information layout adapted to requested design -->
+            <form id="guestForm">
+              <!-- Header row: title + OR + Sign In button -->
+              <div class="inline justify-between items-center">
+                <h2 class="mb-0 color-brand" data-i18n="checkout.guestInfo">Guest Information</h2>
+                <div class="inline items-center" style="gap:10px">
+                  <span class="muted" data-i18n="checkout.or">- OR -</span>
+                  <button type="button" class="btn secondary" id="signInBtn">🔒 <span data-i18n="checkout.signInFast">Sign In To Book Faster</span></button>
+                </div>
+              </div>
+
+              <!-- Guest Name row: 3 columns -->
+              <div class="grid gap-8 mt-8">
+                <label class="span-all"><span data-i18n="checkout.label.guestName">Guest Name</span> <span class="text-danger">*</span></label>
+                <div class="row cols-3">
+                  <select id="title" class="form-control" aria-label="Title">
+                    <option value="">--Select--</option>
+                    <option>Mr.</option>
+                    <option>Ms.</option>
+                    <option>Mrs.</option>
+                  </select>
+                  <input id="firstName" class="form-control" data-i18n-placeholder="checkout.placeholder.firstName" placeholder="First Name">
+                  <input id="lastName" class="form-control" data-i18n-placeholder="checkout.placeholder.lastName" placeholder="Last Name">
+                </div>
+
+                
+
+                <!-- Mobile row: 2 columns -->
+                <label class="span-all" for="mobile"><span data-i18n="checkout.label.mobile">Mobile</span> <span class="text-danger">*</span></label>
+                <div class="row cols-2">
+                  <select id="countryCode" class="form-control" aria-label="Country Code">
+                    <option value="" data-i18n="checkout.countryCode">Country Code</option>
+                    <option value="+66">+66</option>
+                    <option value="+65">+65</option>
+                    <option value="+60">+60</option>
+                  </select>
+                  <input id="mobile" class="form-control" data-i18n-placeholder="checkout.placeholder.mobile" placeholder="Phone number">
+                </div>
+
+                <!-- Email row with icon -->
+                <label class="span-all" for="email"><span data-i18n="checkout.label.email">Email</span> <span class="text-danger">*</span></label>
+                <div class="inline span-all">
+                  <span style="display:inline-flex;align-items:center;opacity:.7">✉️</span>
+                  <input id="email" type="email" class="form-control flex-1" data-i18n-placeholder="checkout.placeholder.email" placeholder="you@example.com">
+                </div>
+                
+
+                
+
+                <!-- Removed Online Payment section; keep a divider for visual separation -->
+                <div class="divider span-all"></div>
+                <label class="inline mb-0 span-all"><input type="checkbox" id="agree"> <span data-i18n="checkout.agree">I acknowledge and accept the Terms of all Policy.</span></label>
+
+                <div class="btn-group span-all justify-between">
+                  <div></div>
+                  <div class="inline" style="gap:10px">
+                    <button id="reviewBtn" class="btn secondary" type="button" data-i18n="checkout.review.btn">Review Your Booking</button>
+                    <button id="bookBtn" class="btn" type="button" data-i18n="checkout.book.btn">Book Now</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- RIGHT: Booking summary (moved here) -->
+        <div class="right">
+          <div class="card">
+            <h3 id="sumTitle">Your booking summary</h3>
+            <div class="section">
+              <div class="hotel-row">
+                <div>
+                  <a href="#" class="inline gap-6"><strong data-i18n="header.title">Backpack Hostel Kohyaoyai</strong><span class="muted">★★★</span></a>
+                  <div class="muted fs-12" data-i18n="checkout.address">55 Koh Yao Yai Rd, Phang Nga 82160, Thailand</div>
+                  <div class="muted fs-12" data-i18n="checkout.contact">☎ +66 8X-XXX-XXXX · ✉ hello@backpackhostel.com</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="row cols-2">
+                <div>
+                  <div class="muted" data-i18n="form.checkin">Check-In</div>
+                  <strong id="sumCheckIn">27/09/2025</strong>
+                </div>
+                <div>
+                  <div class="muted" data-i18n="form.checkout">Check-Out</div>
+                  <strong id="sumCheckOut">28/09/2025</strong>
+                </div>
+              </div>
+              <small class="muted" data-i18n="checkout.nightStay">1 Night Stay</small>
+              <div><button class="btn ghost mt-6" type="button" data-i18n="checkout.changeDates">Change Dates</button></div>
+            </div>
+
+            <div class="section">
+              <strong data-i18n="checkout.roomsRates">Rooms & Rates ( Price for 1 Night )</strong>
+              <div class="mt-6">
+                <div><span class="muted" data-i18n="checkout.roomLabel">Room :</span></div>
+                <div data-i18n="checkout.rateplan">Rateplan Name : Twin/Double Shared (Fan) - Room Only <span class="badge" data-i18n="checkout.nonRefundable">Non-Refundable</span></div>
+                <div class="muted" data-i18n="checkout.paxDetails">Pax Details : 2 Adults , 0 Child</div>
+              </div>
+
+              <table class="mt-8 table">
+                <tbody>
+                  <tr><td data-i18n="checkout.price.roomCharges">Room Charges</td><td class="text-right">THB <span id="sumRoomCharge">401.87</span></td></tr>
+                  <tr><td data-i18n="checkout.price.taxesFees">Taxes & Fees</td><td class="text-right">THB <span id="sumTax">28.13</span></td></tr>
+                </tbody>
+              </table>
+              <div class="summary">
+                <div class="line mt-8"><span data-i18n="checkout.price.totalRoom">Total Room Charges</span><strong>THB <span id="sumSub">401.87</span></strong></div>
+                <div class="line"><span data-i18n="checkout.price.totalTaxes">Total Taxes</span><strong>THB <span id="sumTax2">28.13</span></strong></div>
+                <div class="line"><span data-i18n="checkout.price.totalPrice">Total Price (Inc. Of Taxes)</span><strong>THB <span id="sumTotal">430.00</span></strong></div>
+                <div class="line"><span data-i18n="checkout.price.totalPayNow">Total Payable Now</span><strong>THB <span id="sumPayNow">430.00</span></strong></div>
+                <div class="line"><span data-i18n="checkout.price.amountDue">Amount due at time of check-in</span><strong>THB 0.00</strong></div>
+              </div>
+              <div class="mt-4"><a href="#" data-i18n="checkout.price.breakdown">Price Breakdown / Rate Details</a></div>
+            </div>
+
+            <div class="paybox">
+              <div class="pay-now">
+                <div class="pill" data-i18n="checkout.pay.payNow">Pay Now</div>
+                <div class="pay-total">THB <span id="payNowRight">430.00</span></div>
+              </div>
+              <div class="promo">
+                <input id="promo" data-i18n-placeholder="checkout.promo.placeholder" placeholder="Enter Promotional code">
+                <button id="apply" class="btn secondary" type="button" data-i18n="checkout.apply">Apply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="site-footer"></div>
+  </div>
+
+  <script src="assets/js/checkout.js" defer></script>
+  <script src="assets/js/i18n.js" defer></script>
+  <script src="assets/js/header-content.js" defer></script>
+  <script src="assets/js/load-shared-header.js" defer></script>
+  <script src="assets/js/lang-fix.js" defer></script>
+  <script src="assets/js/load-shared-footer.js" defer></script>
+</body>
+</html>

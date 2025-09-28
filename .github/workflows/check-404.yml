@@ -1,0 +1,26 @@
+name: Check 404s
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  check-404:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start static server (PowerShell)
+        shell: powershell
+        working-directory: ./src/main/resources/static
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File ./ps-static-server-v2.ps1 -Port 8080 &
+          Start-Sleep -Seconds 2
+
+      - name: Run 404 checker
+        shell: powershell
+        working-directory: ./src/main/resources/static
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/check-404.ps1 -BaseUrl 'http://127.0.0.1:8080/'

@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Static Server (PowerShell)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+  "-File",
+  "${workspaceFolder}\\src\\main\\resources\\static\\ps-static-server-v2.ps1",
+        "-Port",
+        "8080"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}\\src\\main\\resources\\static"
+      },
+      "presentation": {
+        "panel": "dedicated",
+        "echo": true,
+        "reveal": "always",
+        "focus": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Static Server (Python)",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "http.server",
+        "8080"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}\\src\\main\\resources\\static"
+      },
+      "presentation": {
+        "panel": "dedicated",
+        "echo": true,
+        "reveal": "always",
+        "focus": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}
