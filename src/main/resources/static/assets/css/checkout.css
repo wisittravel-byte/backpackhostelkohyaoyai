@@ -38,6 +38,16 @@ main.layout::before{
   main.layout{grid-template-columns:1fr}
 }
 
+/* Override index .hero for Checkout: stack on mobile, side-by-side on tablet/desktop */
+#checkout2{display:flex;gap:14px;flex-direction:column}
+@media(min-width:760px){
+  #checkout2{flex-direction:row;align-items:flex-start;gap:18px}
+  #checkout2 .left{flex:2 1 0}
+  #checkout2 .right{flex:1 1 0}
+  /* Keep the summary visible while scrolling */
+  #checkout2 .right .card{position:sticky;top:calc(var(--header-inner-height,72px) + 12px)}
+}
+
 /* components */
 .card{background:var(--card);border-radius:12px;box-shadow:0 8px 20px rgba(3,50,59,.04);padding:12px}
 .section{border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:12px;background:#fff}
