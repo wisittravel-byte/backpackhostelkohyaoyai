@@ -38,7 +38,7 @@ nav a:hover{background:rgba(0,0,0,0.04)}
 @media(min-width:900px){ .hero h2{font-size:22px} }
 .hero p{margin:0;color:var(--muted)}
 
-/* Search form on hero card */
+/* Search form on hero card (match booking page breakpoints) */
 .hero .card .search-grid{grid-template-columns:1fr}
 @media(min-width:480px){
   .hero .card .search-grid{grid-template-columns:1fr 1fr;align-items:end}
