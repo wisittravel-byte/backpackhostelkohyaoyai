@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://backpackhostel.example/sitemap.xml
+Sitemap: https://wisittravel-byte.github.io/backpackhostelkohyaoyai/sitemap.xml
