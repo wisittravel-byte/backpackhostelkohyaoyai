@@ -106,3 +106,19 @@ button:focus, a:focus, input:focus, select:focus, textarea:focus{outline:3px sol
 @media(max-width:420px){
 	.wrap{padding-left:10px;padding-right:10px}
 }
+
+/* -------- Container Query support -------- */
+/* Enable container-based responsiveness for cards */
+.card{container-type:inline-size}
+@container (max-width: 520px){
+	.card .inline{flex-wrap:wrap}
+	.card .btn-group{flex-wrap:wrap}
+}
+
+/* Make simple tables scroll or stack inside narrow cards */
+.table{width:100%;border-collapse:collapse;border:1px solid #e6f6f7}
+@container (max-width: 420px){
+	.table thead{display:none}
+	.table tr{display:block;border-bottom:1px solid #eef6f7;padding:6px 0}
+	.table td{display:flex;justify-content:space-between;border:none;padding:6px 0}
+}

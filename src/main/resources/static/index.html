@@ -22,6 +22,7 @@
   <script src="assets/js/i18n.js" defer></script>
   <script src="assets/js/header-content.js" defer></script>
   <script src="assets/js/load-shared-header.js" defer></script>
+  <script src="assets/js/header-menu.js" defer></script>
   <script src="assets/js/lang-fix.js" defer></script>
     <!-- <script src="assets/js/date-hint.js" defer></script> -->
   <link rel="stylesheet" href="assets/css/index.css">
@@ -38,7 +39,11 @@
           <p data-i18n="hero.lead">พักสบาย ใกล้ท่าเรือ และที่เที่ยวสำคัญของเกาะยาวใหญ่</p>
           <!-- hero image (single) -->
           <div class="hero-image" aria-hidden="false" role="img" aria-label="Backpack Hostel view">
-            <img src="assets/image/Beach4.jpg" alt="วิวหน้าที่พัก Backpack Hostel" />
+            <img 
+              src="assets/image/Beach4.jpg"
+              srcset="assets/image/Beach4.jpg 480w, assets/image/Beach4.jpg 768w, assets/image/Beach4.jpg 1200w"
+              sizes="(max-width: 600px) 100vw, (max-width: 900px) 90vw, 50vw"
+              alt="วิวหน้าที่พัก Backpack Hostel" />
           </div>
         </div>
         <div class="right">
