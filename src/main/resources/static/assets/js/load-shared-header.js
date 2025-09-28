@@ -34,8 +34,8 @@
           container.innerHTML = html;
           // signal that header is ready for page scripts on next macrotask so other deferred scripts can bind
           setTimeout(()=>{
-            try{ document.dispatchEvent(new CustomEvent('sharedHeaderLoaded')); }catch(e){}
             try{ window.sharedHeaderLoaded = true; }catch(e){}
+            try{ document.dispatchEvent(new CustomEvent('sharedHeaderLoaded')); }catch(e){}
             try{ if(window.applyLang) window.applyLang(window.currentLang); }catch(e){}
             try{ if(window.wireLangButtons) window.wireLangButtons(); }catch(e){}
             try{
@@ -57,8 +57,8 @@
         console.info('load-shared-header: using embedded fallback header (window.__SHARED_HEADER_HTML)');
         container.innerHTML = window.__SHARED_HEADER_HTML;
         setTimeout(()=>{
-          try{ document.dispatchEvent(new CustomEvent('sharedHeaderLoaded')); }catch(e){}
           try{ window.sharedHeaderLoaded = true; }catch(e){}
+          try{ document.dispatchEvent(new CustomEvent('sharedHeaderLoaded')); }catch(e){}
           try{ if(window.applyLang) window.applyLang(window.currentLang); }catch(e){}
           try{ if(window.wireLangButtons) window.wireLangButtons(); }catch(e){}
         },0);
@@ -76,8 +76,9 @@
       if(container.innerHTML && container.innerHTML.trim().length>0) return; // already injected
       if(window && window.__SHARED_HEADER_HTML){
         console.info('load-shared-header: extraFallbackCheck injecting embedded header');
-        container.innerHTML = window.__SHARED_HEADER_HTML;
-        document.dispatchEvent(new CustomEvent('sharedHeaderLoaded'));
+  container.innerHTML = window.__SHARED_HEADER_HTML;
+  try{ window.sharedHeaderLoaded = true; }catch(e){}
+  document.dispatchEvent(new CustomEvent('sharedHeaderLoaded'));
         try{ if(window.applyLang) window.applyLang(window.currentLang); }catch(e){}
         try{ if(window.wireLangButtons) window.wireLangButtons(); }catch(e){}
       }
