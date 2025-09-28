@@ -13,9 +13,10 @@ window.__SHARED_HEADER_HTML = `
     <nav aria-label="main navigation" id="main-nav">
   <a href="index.html" data-i18n="nav.home">หน้าแรก</a>
   <a href="Booking.html" data-i18n="nav.booking">จองที่พัก</a>
+      <a href="gallery.html" data-i18n="nav.gallery">แกลเลอรี</a>
       <a href="#promo" data-i18n="nav.promo">โปรโมชั่น</a>
       <a href="#ferry" data-i18n="nav.ferry">ตารางเดินเรือ</a>
-      <a href="#contact" data-i18n="nav.contact">ติดต่อเรา</a>
+      <a href="#footer" data-i18n="nav.contact">ติดต่อเรา</a>
     </nav>
     <div class="lang-toggle" role="group" aria-label="language toggle">
   <button id="thBtn" class="active" aria-pressed="true" data-lang="th" onclick="(window.requestLangChange||function(l){document.dispatchEvent(new CustomEvent('requestLangChange',{detail:{lang:l}}));})('th')">ไทย</button>
