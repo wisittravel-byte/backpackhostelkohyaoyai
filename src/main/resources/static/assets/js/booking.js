@@ -47,7 +47,7 @@
   function validateForm(){
     const guestNameEl = qs('#guestName');
     if(guestNameEl && guestNameEl.hasAttribute('required') && !guestNameEl.value.trim()){
-      alert('กรุณากรอกชื่อผู้เข้าพัก');
+      try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.booking.guestNameRequired') : alert('Please enter guest name'); }catch(_){ }
       guestNameEl.focus();
       return false;
     }

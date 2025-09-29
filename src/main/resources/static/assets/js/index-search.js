@@ -61,7 +61,7 @@
       btn.addEventListener('click', function(ev){
         if(!isValid()){
           ev.preventDefault();
-          alert('กรุณาเลือก เช็คอิน, เช็คเอาท์, จำนวนผู้เข้าพัก และ จำนวนห้อง ให้ครบ');
+          try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.search.required') : alert('Please fill required fields'); }catch(_){ }
           return;
         }
         // Save to localStorage and navigate with query params

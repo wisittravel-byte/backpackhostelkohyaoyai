@@ -23,11 +23,11 @@
     // Special Requests logic removed
 
     function mustAgree(){
-      if(!agree.checked){ alert('กรุณายอมรับข้อกำหนดและนโยบายก่อนทำรายการ'); return false; }
+      if(!agree.checked){ try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.mustAgree') : alert('Please accept the terms'); }catch(_){ } return false; }
       return true;
     }
   bookBtn.addEventListener('click', (e)=>{ e.preventDefault(); if(!mustAgree()) return; window.location.href = 'payment.html'; });
-  reviewBtn.addEventListener('click', (e)=>{ e.preventDefault(); alert('Reviewing your booking…'); });
+  reviewBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.reviewing') : alert('Reviewing your booking…'); }catch(_){ } });
   }
 
   function loadDraft(){
