@@ -37,6 +37,21 @@ jobs:
               exit 1
             fi
           done
+      - name: Write on-site file listing for debug
+        run: |
+          echo "Creating FILES.txt and CHECK.html for published site debug"
+          echo "Files under static (recursive):" > src/main/resources/static/FILES.txt
+          find src/main/resources/static -type f | sort >> src/main/resources/static/FILES.txt
+          cat > src/main/resources/static/CHECK.html <<'HTML'
+          <!doctype html><html><head><meta charset="utf-8"><title>CHECK</title></head>
+          <body><h1>Deployed file list</h1><p>See <a href="FILES.txt">FILES.txt</a></p>
+          <ul>
+            <li><a href="index.html">index.html</a></li>
+            <li><a href="booking.html">booking.html</a></li>
+            <li><a href="checkout.html">checkout.html</a></li>
+            <li><a href="404.html">404.html</a></li>
+          </ul></body></html>
+          HTML
       - name: Generate responsive images
         run: |
           sudo apt-get update -y
