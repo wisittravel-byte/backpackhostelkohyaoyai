@@ -79,7 +79,21 @@ window.I18N = {
     "booking.bookerName.placeholder":"ถ้าไม่ใช่ผู้เข้าพัก",
     "booking.notes":"หมายเหตุเพิ่มเติม",
     "booking.notes.placeholder":"เช่น เวลาเช็คอินประมาณ ...",
-    "booking.save":"บันทึกและไปชำระเงิน"
+    "booking.save":"บันทึกและไปชำระเงิน",
+    "confirmed.title":"การจองสำเร็จ — Backpack Hostel Kohyaoyai",
+    "confirmed.heading":"การจองสำเร็จแล้ว",
+    "confirmed.lead":"ขอบคุณที่จองกับเรา อีเมลยืนยันจะถูกส่งถึงคุณ",
+    "confirmed.guest":"ข้อมูลผู้เข้าพัก",
+    "confirmed.booking":"รายละเอียดการจอง",
+    "confirmed.payment":"การชำระเงิน",
+    "confirmed.name":"ชื่อผู้เข้าพัก:",
+    "confirmed.email":"อีเมล:",
+    "confirmed.mobile":"มือถือ:",
+    "confirmed.nights":"จำนวนคืน",
+    "confirmed.guests":"ผู้เข้าพัก",
+    "confirmed.total":"ยอดชำระ",
+    "confirmed.ref":"รหัสการจอง",
+    "confirmed.backHome":"กลับไปหน้าแรก"
   },
   en: {
     "header.title":"Backpack Hostel Kohyaoyai",
@@ -160,7 +174,21 @@ window.I18N = {
     "booking.bookerName.placeholder":"If not the guest",
     "booking.notes":"Notes",
     "booking.notes.placeholder":"e.g. approximate check-in time...",
-    "booking.save":"Save & Pay"
+    "booking.save":"Save & Pay",
+    "confirmed.title":"Booking Confirmed — Backpack Hostel Kohyaoyai",
+    "confirmed.heading":"Booking Confirmed",
+    "confirmed.lead":"Thank you for your booking. A confirmation email will be sent to you.",
+    "confirmed.guest":"Guest Information",
+    "confirmed.booking":"Booking Details",
+    "confirmed.payment":"Payment",
+    "confirmed.name":"Guest Name:",
+    "confirmed.email":"Email:",
+    "confirmed.mobile":"Mobile:",
+    "confirmed.nights":"Nights",
+    "confirmed.guests":"Guests",
+    "confirmed.total":"Total Paid",
+    "confirmed.ref":"Booking Reference",
+    "confirmed.backHome":"Back to Home"
   }
 };
 

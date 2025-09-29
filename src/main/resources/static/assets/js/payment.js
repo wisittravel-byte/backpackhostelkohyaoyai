@@ -28,7 +28,8 @@
       if(formatExp(exp.value).length !== 5) errs.push('exp');
       if(onlyDigits(cvv.value).length < 3) errs.push('cvv');
   if(errs.length){ try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.payment.required') : alert('Please complete all required fields.'); }catch(_){ } return; }
-  try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.payment.submitted') : alert('Payment submitted (demo).'); }catch(_){ }
+  // Simulate success and redirect to confirmation
+  window.location.href = 'booking-confirmed.html';
     }); }
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
