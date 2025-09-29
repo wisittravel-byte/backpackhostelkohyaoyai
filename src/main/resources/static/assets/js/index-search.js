@@ -37,17 +37,24 @@
   }
 
   function init(){
-    const btn = qs('#searchForm .actions a.btn');
-    const form = document.getElementById('searchForm');
-    // Always reset form to clear any preserved values on reload (F5)
-    if(form && typeof form.reset === 'function') form.reset();
-    // Explicitly clear date fields to override browser form restoration
+    // Determine page context and target form/button
+    const indexForm = document.getElementById('searchForm');
+    const bookingForm = document.getElementById('searchBar');
+    const form = indexForm || bookingForm || null;
+    const btn = form ? form.querySelector('.actions a.btn') : qs('#searchForm .actions a.btn, #searchBar .actions a.btn');
+
+    // Only clear values on the index page (requirement: F5 clears on index)
+    if(indexForm && typeof indexForm.reset === 'function'){
+      indexForm.reset();
+      const {ci, co} = getVals();
+      if(ci) ci.value = '';
+      if(co) co.value = '';
+    }
+
     const {ci, co} = getVals();
-    if(ci) ci.value = '';
-    if(co) co.value = '';
     try{ if(window.wireDateConstraints) window.wireDateConstraints(ci, co); }catch(_){ }
 
-    // Do not prefill from localStorage on index page (see requirement)
+    // Do not prefill from localStorage on index page; Booking prefill is handled by booking.js
     updateBtnState(btn);
 
     ['#checkin','#checkout','#guests','#rooms'].forEach(sel=>{
