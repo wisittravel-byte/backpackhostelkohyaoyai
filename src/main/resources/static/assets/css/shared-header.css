@@ -75,7 +75,7 @@
 .mt-8{margin-top:8px}
 .mt-12{margin-top:12px}
 
-/* Room row grid layout (moved from inline styles in Booking.html) */
+/* Room row grid layout (moved from inline styles in booking.html) */
 .room-row.grid{display:grid;grid-template-columns:2fr 2fr 1fr;gap:12px;align-items:start}
 .room-row .col{padding:12px}
 

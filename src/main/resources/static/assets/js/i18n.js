@@ -259,7 +259,7 @@ window.I18N = {
 })();
 
 (function(){
-  // keys used in Checkout.html added from user-provided Thai strings
+  // keys used in checkout.html added from user-provided Thai strings
   const th = window.I18N.th;
   const en = window.I18N.en;
   th['checkout.phone.placeholder'] = 'หมายเลขโทรศัพท์';
