@@ -2,7 +2,7 @@
   "@context": "https://schema.org",
   "@type": "LodgingBusiness",
   "name": "Backpack Hostel Kohyaoyai",
-  "url": "https://backpackhostel.example/",
+  "url": "https://wisittravel-byte.github.io/backpackhostelkohyaoyai/",
   "description": "Hostel for backpackers in central Koh Yao Yai",
   "address": {
     "@type": "PostalAddress",
@@ -12,6 +12,6 @@
     "addressCountry": "TH"
   },
   "image": [
-    "https://backpackhostel.example/assets/image/Hostel3.jpg"
+    "https://wisittravel-byte.github.io/backpackhostelkohyaoyai/assets/image/Hostel3.jpg"
   ]
 }

@@ -57,6 +57,11 @@ textarea{min-height:84px;resize:vertical}
 .row{display:grid;gap:10px}
 @media(min-width:760px){ .row.cols-2{grid-template-columns:1fr 1fr} .row.cols-3{grid-template-columns:1fr 1fr 1fr} }
 .inline{display:flex;gap:8px;align-items:center}
+/* utilities replacing inline styles in Checkout.html */
+.gap-10{gap:10px}
+.opacity-70{opacity:.7}
+.inline-flex{display:inline-flex}
+.items-center{align-items:center}
 .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--brand);border:1px solid rgba(3,50,59,.1)}
 .btn.ghost{background:transparent;border:1px dashed rgba(3,50,59,.25);color:var(--text)}
