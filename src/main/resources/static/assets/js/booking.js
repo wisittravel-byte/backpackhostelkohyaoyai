@@ -72,7 +72,7 @@
           const draft = getDraftFromForm(room);
           localStorage.setItem('booking_draft', JSON.stringify(draft));
         }catch(err){ /* ignore */ }
-        const href = btn.getAttribute('href') || 'Checkout.html';
+  const href = btn.getAttribute('href') || 'checkout.html';
         window.location.href = href;
       });
     });
@@ -84,7 +84,7 @@
         const payload = getDraftFromForm();
         payload.roomPrice = payload.pricePerNight;
         localStorage.setItem('booking_draft', JSON.stringify(payload));
-        window.location.href = 'Checkout.html';
+  window.location.href = 'checkout.html';
       });
     }
   }

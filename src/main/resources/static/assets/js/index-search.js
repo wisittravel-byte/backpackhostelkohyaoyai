@@ -80,7 +80,7 @@
           draft.guests   = Number(v.gVal||2);
           draft.rooms    = Number(v.rVal||1);
           localStorage.setItem('booking_draft', JSON.stringify(draft));
-          const url = `Booking.html?ci=${encodeURIComponent(v.ciVal)}&co=${encodeURIComponent(v.coVal)}&g=${encodeURIComponent(v.gVal)}&r=${encodeURIComponent(v.rVal)}`;
+          const url = `booking.html?ci=${encodeURIComponent(v.ciVal)}&co=${encodeURIComponent(v.coVal)}&g=${encodeURIComponent(v.gVal)}&r=${encodeURIComponent(v.rVal)}`;
           ev.preventDefault();
           window.location.href = url;
         }catch(_){ /* navigate anyway */ }

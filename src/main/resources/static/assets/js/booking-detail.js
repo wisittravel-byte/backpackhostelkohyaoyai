@@ -64,7 +64,7 @@
     if(!draft){ renderEmpty(); }
     else { render(draft); }
 
-    document.getElementById('backBtn').addEventListener('click', ()=>{ window.location.href='Booking.html'; });
+  document.getElementById('backBtn').addEventListener('click', ()=>{ window.location.href='booking.html'; });
     // continue / pay
     const payBtn = document.getElementById('payBtn') || document.getElementById('saveBtn');
     if(payBtn){
@@ -138,7 +138,7 @@
             localStorage.removeItem(DRAFT_KEY);
             setMessage('Payment succeeded: ' + response.id, false);
             setLoading(false);
-            setTimeout(()=> window.location.href = 'Booking.html', 900);
+            setTimeout(()=> window.location.href = 'booking.html', 900);
           } else {
             setMessage('Payment failed: ' + (response && response.error || 'unknown'), true);
             setLoading(false);
@@ -148,7 +148,7 @@
     }
 
     const addRoom = document.getElementById('addRoom');
-    if(addRoom) addRoom.addEventListener('click', ()=> window.location.href = 'Booking.html');
+  if(addRoom) addRoom.addEventListener('click', ()=> window.location.href = 'booking.html');
 
     // input masks: format card number and expiry as user types
     const cardEl = document.getElementById('cardNumber');

@@ -2,7 +2,7 @@ param(
   [string]$BaseUrl = 'http://127.0.0.1:8080/'
 )
 
-$pages = @('/', '/index.html', '/Booking.html', '/Checkout.html')
+$pages = @('/', '/index.html', '/booking.html', '/checkout.html')
 $bad = @()
 
 foreach($p in $pages){
