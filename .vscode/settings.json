@@ -1,0 +1,40 @@
+{
+  "editor.minimap.enabled": false,
+  "editor.semanticHighlighting.enabled": false,
+
+  // Reduce Explorer/render load
+  "files.exclude": {
+    "**/target/": true
+  },
+
+  // Cut down file system watchers (big impact on Windows)
+  "files.watcherExclude": {
+    "**/target/**": true,
+    "**/.git/**": true,
+    "**/node_modules/**": true,
+    "src/main/resources/static/assets/image/**": true,
+    "src/main/resources/static/assets/image/gallery/**": true,
+    "**/*.jpg": true,
+    "**/*.png": true,
+    "**/*.jpeg": true
+  },
+
+  // Keep searches/snippets snappy
+  "search.exclude": {
+    "**/target/**": true,
+    "src/main/resources/static/assets/image/**": true,
+    "src/main/resources/static/assets/image/gallery/**": true
+  },
+
+  // Java-specific: avoid background work when just editing HTML/CSS/JS
+  "java.autobuild.enabled": false,
+  "java.referencesCodeLens.enabled": false,
+  "java.implementationsCodeLens.enabled": false,
+  "java.project.importOnFirstTimeStartup": "disabled",
+  "java.progressReports.enabled": false,
+  "java.maven.downloadSources": false,
+  "java.test.report.showAfterExecution": "onFailure",
+
+  // Misc
+  "redhat.telemetry.enabled": false
+}
