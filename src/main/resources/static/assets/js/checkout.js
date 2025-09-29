@@ -15,26 +15,10 @@
     const agree = document.getElementById('agree');
     const bookBtn = document.getElementById('bookBtn');
     const reviewBtn = document.getElementById('reviewBtn');
-  const promo = document.getElementById('promo');
-  const apply = document.getElementById('apply');
   // Special Requests section removed from UI; keep variables undefined
   const toggleRequests = null;
   const requestsWrap = null;
 
-    apply.addEventListener('click', ()=>{
-      const code = (promo.value||'').trim().toUpperCase();
-      let baseSub = 401.87, baseTax = 28.13, sub = baseSub, tax = baseTax;
-      if(code === 'KOYAO100'){
-        const total = sub + tax - 100;
-        if(total < 0){ alert('Discount exceeds total'); return; }
-        const newSub = Math.max(0, total / 1.07);
-        sub = newSub; tax = total - newSub;
-      }
-      if(code === 'SEA10'){
-        sub = sub * 0.9; tax = sub * 0.07;
-      }
-      setTotals(sub, tax);
-    });
 
     // Special Requests logic removed
 
