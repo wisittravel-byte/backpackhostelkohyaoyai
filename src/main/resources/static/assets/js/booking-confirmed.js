@@ -30,9 +30,13 @@
   }
 
   function genRef(){
-    const ts = Date.now().toString(36).toUpperCase();
+    // Format: BKG-YYYYMMDD-XXXX
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
     const rnd = Math.random().toString(36).slice(2,6).toUpperCase();
-    return 'BKG-'+ts+'-'+rnd;
+    return `BKG-${y}${m}${day}-${rnd}`;
   }
 
   function populate(){
@@ -59,10 +63,34 @@
 
     // Optionally persist reference for lookup
     try{ localStorage.setItem('booking_ref', ref); }catch(_){ }
+    // Clear booking_draft for security after showing
+    try{ localStorage.removeItem('booking_draft'); }catch(_){ }
   }
 
   function init(){
     populate();
+    // Wire Email and PDF buttons
+    try{
+      const emailBtn = document.getElementById('emailBtn');
+      const pdfBtn = document.getElementById('pdfBtn');
+      const ref = document.getElementById('cRef');
+      if(emailBtn){
+        emailBtn.addEventListener('click', ()=>{
+          const subject = encodeURIComponent(t('confirmed.heading'));
+          const body = encodeURIComponent(
+            t('confirmed.ref')+': '+(ref?ref.textContent:'-')+"\n"+
+            t('form.checkin')+': '+(document.getElementById('cCheckIn').textContent||'-')+"\n"+
+            t('form.checkout')+': '+(document.getElementById('cCheckOut').textContent||'-')+"\n"+
+            t('rooms.title')+': '+(document.getElementById('cRoom').textContent||'-')+"\n"+
+            t('confirmed.total')+': THB '+(document.getElementById('cTotal').textContent||'-')
+          );
+          window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        });
+      }
+      if(pdfBtn){
+        pdfBtn.addEventListener('click', ()=>{ window.print(); });
+      }
+    }catch(_){ }
     window.addEventListener('load', ()=>{ try{ if(window.applyLang) window.applyLang(window.currentLang); }catch(e){} });
   }
 

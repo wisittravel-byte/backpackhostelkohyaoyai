@@ -93,7 +93,9 @@ window.I18N = {
     "confirmed.guests":"ผู้เข้าพัก",
     "confirmed.total":"ยอดชำระ",
     "confirmed.ref":"รหัสการจอง",
-    "confirmed.backHome":"กลับไปหน้าแรก"
+    "confirmed.backHome":"กลับไปหน้าแรก",
+    "confirmed.emailBtn":"ส่งอีเมลยืนยัน",
+    "confirmed.downloadBtn":"ดาวน์โหลดใบยืนยัน (PDF)"
   },
   en: {
     "header.title":"Backpack Hostel Kohyaoyai",
@@ -188,7 +190,9 @@ window.I18N = {
     "confirmed.guests":"Guests",
     "confirmed.total":"Total Paid",
     "confirmed.ref":"Booking Reference",
-    "confirmed.backHome":"Back to Home"
+    "confirmed.backHome":"Back to Home",
+    "confirmed.emailBtn":"Send confirmation email",
+    "confirmed.downloadBtn":"Download confirmation (PDF)"
   }
 };
 
