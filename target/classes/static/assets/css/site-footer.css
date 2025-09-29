@@ -1,0 +1,14 @@
+/* Shared footer styles moved out of inline pages */
+:root{
+  --brand: #2aa6b8;
+  --radius: 12px;
+}
+footer{
+  margin-top:26px;
+  padding:18px;
+  border-radius:var(--radius);
+  background:linear-gradient(180deg, rgba(42,166,184,0.06), rgba(42,166,184,0.03));
+}
+.footer-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.footer-grid{grid-template-columns:2fr 1fr 1fr}}
+.muted{color:var(--muted)}

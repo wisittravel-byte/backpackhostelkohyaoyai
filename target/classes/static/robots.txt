@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wisittravel-byte.github.io/backpackhostelkohyaoyai/sitemap.xml

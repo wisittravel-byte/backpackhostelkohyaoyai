@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Security & SEO -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self';">
+  <meta property="og:title" content="Booking Confirmed — Backpack Hostel Kohyaoyai" />
+  <meta property="og:description" content="การจองของคุณเสร็จสมบูรณ์ ขอบคุณที่จองกับเรา" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/booking-confirmed.html" />
+  <link rel="canonical" href="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/booking-confirmed.html" />
+  <title data-i18n="confirmed.title">Booking Confirmed — Backpack Hostel Kohyaoyai</title>
+  <meta name="description" content="แสดงรายละเอียดการจองหลังชำระเงินสำเร็จ">
+  <link rel="stylesheet" href="assets/css/shared-header.css">
+  <link rel="stylesheet" href="assets/css/site-base.css">
+  <link rel="stylesheet" href="assets/css/spacing.css">
+  <link rel="stylesheet" href="assets/css/index.css">
+  <link rel="stylesheet" href="assets/css/site-footer.css">
+</head>
+<body>
+  <div class="site-header header-sticky"></div>
+  <div class="wrap header-gap compact">
+    <main>
+      <section class="hero" id="confirmed">
+        <div class="left">
+          <h2 class="color-brand" data-i18n="confirmed.heading">การจองสำเร็จแล้ว</h2>
+          <p class="muted" data-i18n="confirmed.lead">ขอบคุณที่จองกับเรา อีเมลยืนยันจะถูกส่งถึงคุณ</p>
+        </div>
+      </section>
+
+      <section class="card grid mt-12" id="summary">
+        <div>
+          <h3 data-i18n="confirmed.guest">ข้อมูลผู้เข้าพัก</h3>
+          <div class="mt-6">
+            <div><strong data-i18n="confirmed.name">ชื่อผู้เข้าพัก:</strong> <span id="cName">-</span></div>
+            <div class="mt-2"><strong data-i18n="confirmed.email">อีเมล:</strong> <span id="cEmail">-</span></div>
+            <div class="mt-2"><strong data-i18n="confirmed.mobile">มือถือ:</strong> <span id="cMobile">-</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 data-i18n="confirmed.booking">รายละเอียดการจอง</h3>
+          <div class="mt-6">
+            <div><strong data-i18n="form.checkin">เช็คอิน</strong>: <span id="cCheckIn">-</span></div>
+            <div class="mt-2"><strong data-i18n="form.checkout">เช็คเอาท์</strong>: <span id="cCheckOut">-</span></div>
+            <div class="mt-2"><strong data-i18n="rooms.title">ประเภทห้องพัก</strong>: <span id="cRoom">-</span></div>
+            <div class="mt-2"><strong data-i18n="rooms.rateLabel">อัตรา (THB)</strong>: <span id="cPrice">-</span></div>
+            <div class="mt-2"><strong data-i18n="confirmed.nights">จำนวนคืน</strong>: <span id="cNights">-</span></div>
+            <div class="mt-2"><strong data-i18n="confirmed.guests">ผู้เข้าพัก</strong>: <span id="cGuests">-</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 data-i18n="confirmed.payment">การชำระเงิน</h3>
+          <div class="mt-6">
+            <div class="line"><span data-i18n="checkout.price.totalRoom">รวมค่าห้อง</span>: THB <span id="cSub">-</span></div>
+            <div class="line"><span data-i18n="checkout.price.totalTaxes">รวมภาษี</span>: THB <span id="cTax">-</span></div>
+            <div class="line"><strong data-i18n="confirmed.total">ยอดชำระ</strong>: THB <strong id="cTotal">-</strong></div>
+            <div class="mt-6"><strong data-i18n="confirmed.ref">รหัสการจอง</strong>: <span id="cRef">-</span></div>
+          </div>
+          <div class="mt-12 inline gap-10">
+            <button id="emailBtn" class="btn secondary" type="button" data-i18n="confirmed.emailBtn">ส่งอีเมลยืนยัน</button>
+            <button id="pdfBtn" class="btn secondary" type="button" data-i18n="confirmed.downloadBtn">ดาวน์โหลดใบยืนยัน (PDF)</button>
+            <a class="btn" href="index.html" data-i18n="confirmed.backHome">กลับไปหน้าแรก</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="site-footer"></div>
+    </main>
+  </div>
+
+  <script src="assets/js/i18n.js" defer></script>
+  <script src="assets/js/header-content.js" defer></script>
+  <script src="assets/js/load-shared-header.js" defer></script>
+  <script src="assets/js/header-menu.js" defer></script>
+  <script src="assets/js/lang-fix.js" defer></script>
+  <script src="assets/js/footer-content.js" defer></script>
+  <script src="assets/js/load-shared-footer.js" defer></script>
+  <script src="assets/js/booking-confirmed.js" defer></script>
+</body>
+</html>

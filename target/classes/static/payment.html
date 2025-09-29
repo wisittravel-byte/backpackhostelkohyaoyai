@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Security & SEO -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self';">
+  <meta property="og:title" content="Payment — Backpack Hostel Kohyaoyai" />
+  <meta property="og:description" content="ชำระเงินออนไลน์อย่างปลอดภัยด้วยบัตรเครดิต/เดบิต" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/payment.html" />
+  <link rel="canonical" href="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/payment.html" />
+  <title data-i18n="payment.title">Payment — Online</title>
+  <meta name="description" content="Secure online card payment for your booking" />
+  <link rel="stylesheet" href="assets/css/shared-header.css">
+  <link rel="stylesheet" href="assets/css/site-base.css">
+  <link rel="stylesheet" href="assets/css/spacing.css">
+  <link rel="stylesheet" href="assets/css/index.css">
+  <link rel="stylesheet" href="assets/css/payment.css">
+  <link rel="stylesheet" href="assets/css/site-footer.css">
+  <script src="assets/js/messages.js" defer></script>
+  <script src="assets/js/i18n.js" defer></script>
+  <script src="assets/js/header-content.js" defer></script>
+  <script src="assets/js/load-shared-header.js" defer></script>
+  <script src="assets/js/header-menu.js" defer></script>
+  <script src="assets/js/lang-fix.js" defer></script>
+  <script src="assets/js/payment.js" defer></script>
+</head>
+<body>
+  <div class="site-header header-sticky"></div>
+  <div class="wrap header-gap compact">
+
+    <main>
+       <section class="hero" id="payment">
+        <div class="right">
+          <div class="card">
+            <form id="cardForm" novalidate>
+
+              <label class="span-all" for="method"><span data-i18n="payment.method.choose">เลือกวิธีชำระเงิน</span> <span class="text-danger">*</span></label>
+              <select id="method" class="form-control minw-160">
+                <option value="card" data-i18n="payment.method.card">Visa / Mastercard / Amex / JCB</option>
+              </select>
+
+              <div class="notice success" data-i18n="payment.notice.fill">กรอกข้อมูลเพื่อจองห้องพัก</div>
+
+              <div class="grid gap-8">
+                <label class="span-all" for="cardName"><span data-i18n="payment.card.name">ชื่อบนบัตร</span> <span class="text-danger">*</span></label>
+                <input id="cardName" class="form-control" data-i18n-placeholder="payment.card.name.ph" placeholder="ชื่อบนบัตร">
+
+                <label class="span-all" for="cardNumber"><span data-i18n="payment.card.number">หมายเลขบัตรเครดิต/เดบิต</span> <span class="text-danger">*</span></label>
+                <div class="inline span-all">
+                  <span class="icon" aria-hidden="true">💳</span>
+                  <input id="cardNumber" class="form-control flex-1" inputmode="numeric" autocomplete="cc-number" maxlength="19" data-i18n-placeholder="payment.card.number.ph" placeholder="หมายเลขบัตร">
+                  <span class="icon" aria-hidden="true">🔒</span>
+                </div>
+
+                <div class="row cols-2 span-all">
+                  <div>
+                    <label for="exp" data-i18n="payment.card.exp">วันหมดอายุ</label>
+                    <input id="exp" class="form-control" inputmode="numeric" autocomplete="cc-exp" maxlength="5" data-i18n-placeholder="payment.card.exp.ph" placeholder="ดด/ปป">
+                  </div>
+                  <div>
+                    <label for="cvv">CVC/CVV</label>
+                    <input id="cvv" class="form-control" inputmode="numeric" autocomplete="cc-csc" maxlength="4" data-i18n-placeholder="payment.card.cvv.ph" placeholder="รหัส CVC/CVV">
+                  </div>
+                </div>
+
+                <div class="inline items-center muted span-all" style="gap:8px">
+                  <span aria-hidden="true">🛡️</span>
+                  <small data-i18n="payment.secure">ข้อมูลบัตรทั้งหมดจะถูกเข้ารหัสและรักษาความปลอดภัยอย่างสมบูรณ์</small>
+                </div>
+
+                <div class="btn-group justify-between span-all">
+                  <button type="button" class="btn secondary" id="cancelBtn" data-i18n="payment.cancel">ยกเลิก</button>
+                  <button type="submit" class="btn" id="payBtn" data-i18n="payment.pay">ชำระเงิน</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <div class="site-footer"></div>
+    </main>
+  </div>
+
+  <script src="assets/js/footer-content.js" defer></script>
+  <script src="assets/js/load-shared-footer.js" defer></script>
+</body>
+</html>

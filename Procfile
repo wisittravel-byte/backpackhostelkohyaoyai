@@ -1,0 +1,1 @@
+web: java -Xmx512m -Dserver.port=${PORT:-8081} -jar target/*.jar
