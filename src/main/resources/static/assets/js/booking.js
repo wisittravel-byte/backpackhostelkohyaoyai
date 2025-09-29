@@ -104,6 +104,27 @@
       // Use shared constraints
       try{ if(window.wireDateConstraints) window.wireDateConstraints(ci, co); }catch(_){ }
 
+      // Prefill from URL params if present
+      try{
+        const usp = new URLSearchParams(window.location.search||'');
+        const ciQ = usp.get('ci');
+        const coQ = usp.get('co');
+        const gQ  = usp.get('g');
+        const rQ  = usp.get('r');
+        if(ci && ciQ) ci.value = ciQ;
+        if(co && coQ) co.value = coQ;
+        if(g && gQ) g.value = String(gQ);
+        if(r && rQ) r.value = String(rQ);
+        // Merge into draft
+        const draftRaw = localStorage.getItem('booking_draft');
+        const draft = draftRaw ? JSON.parse(draftRaw) : {};
+        if(ciQ) draft.checkIn = ciQ;
+        if(coQ) draft.checkOut = coQ;
+        if(gQ)  draft.guests = Number(gQ);
+        if(rQ)  draft.rooms = Number(rQ);
+        localStorage.setItem('booking_draft', JSON.stringify(draft));
+      }catch(_){ }
+
       if(searchBtn){
         searchBtn.addEventListener('click', (e)=>{
           // Save selection then navigate to rooms section (default anchor behavior)
