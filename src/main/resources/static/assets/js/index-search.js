@@ -31,24 +31,23 @@
   }
 
   function prefillFromDraft(){
-    try{
-      const raw = localStorage.getItem('booking_draft');
-      if(!raw) return;
-      const d = JSON.parse(raw);
-      const {ci, co, g, r} = getVals();
-      if(ci && !ci.value && d.checkIn) ci.value = d.checkIn;
-      if(co && !co.value && d.checkOut) co.value = d.checkOut;
-      if(g && d.guests) g.value = String(d.guests);
-      if(r && d.rooms) r.value = String(d.rooms);
-    }catch(_){}
+    // Intentionally disabled: index page must NOT prefill from localStorage.
+    // Requirement: On F5 (reload), the page should clear previously entered values.
+    return;
   }
 
   function init(){
     const btn = qs('#searchForm .actions a.btn');
+    const form = document.getElementById('searchForm');
+    // Always reset form to clear any preserved values on reload (F5)
+    if(form && typeof form.reset === 'function') form.reset();
+    // Explicitly clear date fields to override browser form restoration
     const {ci, co} = getVals();
+    if(ci) ci.value = '';
+    if(co) co.value = '';
     try{ if(window.wireDateConstraints) window.wireDateConstraints(ci, co); }catch(_){ }
 
-    prefillFromDraft();
+    // Do not prefill from localStorage on index page (see requirement)
     updateBtnState(btn);
 
     ['#checkin','#checkout','#guests','#rooms'].forEach(sel=>{
