@@ -49,6 +49,17 @@
       const {ci, co} = getVals();
       if(ci) ci.value = '';
       if(co) co.value = '';
+      // set fresh defaults: today & tomorrow
+      try{
+        const now = new Date();
+        const base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const next = new Date(base.getFullYear(), base.getMonth(), base.getDate()+1);
+        const fmt = d => [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
+        if(ci) ci.value = fmt(base);
+        if(co) co.value = fmt(next);
+        if(ci) ci.dispatchEvent(new Event('change', { bubbles:true }));
+        if(co) co.dispatchEvent(new Event('change', { bubbles:true }));
+      }catch(_){ }
     }
 
     const {ci, co} = getVals();

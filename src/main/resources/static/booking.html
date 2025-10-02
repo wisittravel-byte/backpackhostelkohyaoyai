@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <!-- Security & SEO -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' http://localhost:8081 http://127.0.0.1:8081; font-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https:; font-src 'self';">
   <meta property="og:title" content="Booking — Backpack Hostel Kohyaoyai" />
   <meta property="og:description" content="จองห้องพักที่ Backpack Hostel Kohyaoyai ได้อย่างรวดเร็วและง่ายดาย" />
   <meta property="og:type" content="website" />
@@ -18,6 +18,8 @@
   <link rel="stylesheet" href="assets/css/site-footer.css">
   <link rel="stylesheet" href="assets/css/site-base.css">
   <link rel="stylesheet" href="assets/css/spacing.css">
+  <!-- Litepicker (CSS) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css">
   <script src="assets/js/messages.js" defer></script>
 </head>
 <body>
@@ -28,13 +30,11 @@
       <!-- Horizontal search bar -->
       <section class="card search-sticky">
         <form id="searchBar" class="grid search-grid">
-            <div>
-              <label for="checkin" data-i18n="form.checkin">เช็คอิน</label>
-              <input id="checkin" type="date" required class="form-control" />
-            </div>
-            <div>
-              <label for="checkout" data-i18n="form.checkout">เช็คเอาท์</label>
-              <input id="checkout" type="date" required class="form-control" />
+            <div class="dates">
+              <label for="daterange" data-i18n="form.dates">วันที่</label>
+              <input id="daterange" type="text" required class="form-control" readonly />
+              <input id="checkin" type="hidden" />
+              <input id="checkout" type="hidden" />
             </div>
             <div>
               <label for="guests" data-i18n="form.guests">จำนวนผู้เข้าพัก</label>
@@ -54,84 +54,93 @@
         <h3 data-i18n="rooms.title">ประเภทห้องพัก</h3>
         <p class="muted" data-i18n="rooms.lead">เลือกห้องที่เหมาะกับสไตล์การเดินทางของคุณ</p>
 
-        <div class="room-row grid mt-12" data-room-row="dorm">
-          <!-- room type column -->
-          <div class="p-12 bdr-e">
-            <div class="mb-12">
+        <!-- Dorm card -->
+        <article class="room-card mt-12" data-room-row="dorm">
+          <div class="room-media">
+            <img src="assets/image/Hostel3.jpg" alt="dorm" loading="lazy" decoding="async"/>
+            <a href="#" class="room-link" data-i18n="rooms.details">ดูรายละเอียดห้องพัก</a>
+          </div>
+          <div class="room-body">
+            <header class="room-header">
               <strong data-i18n="rooms.dorm.name">หอพักรวม</strong>
               <div class="muted" data-i18n="rooms.dorm.desc">เตียงแยก ใกล้พื้นที่ส่วนกลาง</div>
+            </header>
+            <div class="rate-table">
+              <div class="rate-row">
+                <div class="rate-name fw-600" data-i18n="rooms.dorm.promo">ฟรี เครดิตรีสอร์ท THB 1,000 ต่อคืน</div>
+                <div class="rate-info muted" data-i18n="rooms.dorm.promoDesc">ไม่คืนเงิน • รวมสิทธิพิเศษรายวัน</div>
+                <div class="rate-cta">
+                  <div class="price">THB 1,999</div>
+                  <a href="checkout.html" class="btn select-room" data-room="dorm"><span data-i18n="rooms.select">เลือก</span></a>
+                </div>
+              </div>
+              <div class="rate-row">
+                <div class="rate-name" data-i18n="rooms.dorm.flex">ยืดหยุ่นได้</div>
+                <div class="rate-info muted" data-i18n="rooms.dorm.flexDesc">ยกเลิกได้ถึง 3 วันก่อนเช็คอิน</div>
+                <div class="rate-cta">
+                  <div class="price">THB 2,199</div>
+                  <a href="checkout.html" class="btn select-room" data-room="dorm"><span data-i18n="rooms.select">เลือก</span></a>
+                </div>
+              </div>
             </div>
-            <img src="assets/image/Hostel3.jpg" alt="dorm" class="w-100 h-120 object-cover rounded-8" loading="lazy" decoding="async"/>
           </div>
+        </article>
 
-          <!-- options column -->
-          <div class="p-12 bdr-e">
-            <div class="fw-700 color-brand mb-8" data-i18n="rooms.dorm.promo">FREE THB 1,000 Net Resort Credit per night</div>
-            <div class="muted" data-i18n="rooms.dorm.promoDesc">Non-refundable available<br/>Privileges Included: Daily breakfast, THB 1,000 resort credit per night</div>
-            <div class="mt-12">
-              <label class="inline"><input type="radio" name="roomType" value="dorm" checked /> <span data-i18n="rooms.dorm.choose">เลือกหอพักรวม</span></label>
-            </div>
+        <!-- Private card -->
+        <article class="room-card mt-12" data-room-row="private">
+          <div class="room-media">
+            <img src="assets/image/Hostel2.jpg" alt="private" loading="lazy" decoding="async"/>
+            <a href="#" class="room-link" data-i18n="rooms.details">ดูรายละเอียดห้องพัก</a>
           </div>
-
-          <!-- price column -->
-          <div class="p-12 flex flex-col justify-center items-center">
-            <div class="muted" data-i18n="rooms.rateLabel">Rate (THB)</div>
-            <div class="bg-white p-12 rounded-8 minw-160 text-center mt-8">
-              <div class="fs-20 fw-700">THB 1,999</div>
-              <div class="mt-8"><a href="checkout.html" class="btn select-room" data-room="dorm"><span data-i18n="rooms.select">Select</span></a></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Private room card -->
-        <div class="room-row grid mt-12" data-room-row="private">
-          <div class="p-12 bdr-e">
-            <div class="mb-12">
+          <div class="room-body">
+            <header class="room-header">
               <strong data-i18n="rooms.private.name">ห้องส่วนตัว</strong>
               <div class="muted" data-i18n="rooms.private.desc">ห้องสะอาด เงียบ สวีทสำหรับสองคน</div>
+            </header>
+            <div class="rate-table">
+              <div class="rate-row">
+                <div class="rate-name" data-i18n="rooms.private.offer">รวมอาหารเช้า</div>
+                <div class="rate-info muted">2 ผู้เข้าพัก</div>
+                <div class="rate-cta">
+                  <div class="price">THB 2,999</div>
+                  <a href="checkout.html" class="btn select-room" data-room="private"><span data-i18n="rooms.select">เลือก</span></a>
+                </div>
+              </div>
+              <div class="rate-row">
+                <div class="rate-name" data-i18n="rooms.private.roomOnly">ไม่รวมอาหารเช้า</div>
+                <div class="rate-info muted">ยืดหยุ่นได้</div>
+                <div class="rate-cta">
+                  <div class="price">THB 2,499</div>
+                  <a href="checkout.html" class="btn select-room" data-room="private"><span data-i18n="rooms.select">เลือก</span></a>
+                </div>
+              </div>
             </div>
-            <img src="assets/image/Hostel2.jpg" alt="private" class="w-100 h-120 object-cover rounded-8" loading="lazy" decoding="async"/>
           </div>
-          <div class="p-12 bdr-e">
-            <div class="fw-700 color-brand mb-8" data-i18n="rooms.private.offer">Breakfast included</div>
-            <div class="muted" data-i18n="rooms.private.desc">Comfortable private room suitable for couples</div>
-            <div class="mt-12">
-              <label class="inline"><input type="radio" name="roomType" value="private" /> <span data-i18n="rooms.private.choose">เลือกห้องส่วนตัว</span></label>
-            </div>
-          </div>
-          <div class="p-12 flex flex-col justify-center items-center">
-            <div class="muted">Rate (THB)</div>
-            <div class="bg-white p-12 rounded-8 minw-160 text-center mt-8">
-              <div class="fs-20 fw-700">THB 2,999</div>
-              <div class="mt-8"><a href="checkout.html" class="btn select-room" data-room="private"><span data-i18n="rooms.select">Select</span></a></div>
-            </div>
-          </div>
-        </div>
+        </article>
 
-        <!-- Family room card -->
-        <div class="room-row grid mt-12" data-room-row="family">
-          <div class="p-12 bdr-e">
-            <div class="mb-12">
+        <!-- Family card -->
+        <article class="room-card mt-12" data-room-row="family">
+          <div class="room-media">
+            <img src="assets/image/Hostel2.jpg" alt="family" loading="lazy" decoding="async"/>
+            <a href="#" class="room-link" data-i18n="rooms.details">ดูรายละเอียดห้องพัก</a>
+          </div>
+          <div class="room-body">
+            <header class="room-header">
               <strong data-i18n="rooms.family.name">ห้องสำหรับครอบครัว</strong>
               <div class="muted" data-i18n="rooms.family.desc">กว้างสำหรับครอบครัว/กลุ่มเพื่อน</div>
-            </div>
-            <img src="assets/image/Hostel2.jpg" alt="family" class="w-100 h-120 object-cover rounded-8" loading="lazy" decoding="async"/>
-          </div>
-          <div class="p-12 bdr-e">
-            <div class="fw-700 color-brand mb-8" data-i18n="rooms.family.offer">Family friendly package</div>
-            <div class="muted" data-i18n="rooms.family.extraDesc">Spacious rooms with extra beds available</div>
-            <div class="mt-12">
-              <label class="inline"><input type="radio" name="roomType" value="family" /> <span data-i18n="rooms.family.choose">เลือกห้องสำหรับครอบครัว</span></label>
-            </div>
-          </div>
-          <div class="p-12 flex flex-col justify-center items-center">
-            <div class="muted">Rate (THB)</div>
-            <div class="bg-white p-12 rounded-8 minw-160 text-center mt-8">
-              <div class="fs-20 fw-700">THB 3,499</div>
-              <div class="mt-8"><a href="checkout.html" class="btn select-room" data-room="family"><span data-i18n="rooms.select">Select</span></a></div>
+            </header>
+            <div class="rate-table">
+              <div class="rate-row">
+                <div class="rate-name" data-i18n="rooms.family.offer">แพ็คเกจครอบครัว</div>
+                <div class="rate-info muted" data-i18n="rooms.family.extraDesc">เตียงเสริมมีให้บริการ</div>
+                <div class="rate-cta">
+                  <div class="price">THB 3,499</div>
+                  <a href="checkout.html" class="btn select-room" data-room="family"><span data-i18n="rooms.select">เลือก</span></a>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </article>
       
       </section>
     </main>
@@ -139,7 +148,6 @@
   </div>
 
   <script src="assets/js/booking.js" defer></script>
-  <script src="assets/js/date-constraints.js" defer></script>
   <script src="assets/js/index-search.js" defer></script>
 
   <script src="assets/js/i18n.js" defer></script>
@@ -149,6 +157,10 @@
   <script src="assets/js/footer-content.js" defer></script>
   <script src="assets/js/date-hint-fallback.js" defer></script>
   <script src="assets/js/load-shared-footer.js" defer></script>
+
+  <!-- Litepicker (JS) and single input binding -->
+  <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/bundle.min.js"></script>
+  <script src="assets/js/date-range-single.js"></script>
 
 </body>
 </html>

@@ -58,3 +58,25 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 @media(max-width:980px){
   .bdr-e{border-right:none}
 }
+
+/* New room card layout */
+.room-card{display:grid;grid-template-columns:280px 1fr;gap:12px;padding:12px;border:1px solid #e6f6f7;border-radius:12px;background:#fff;transition:box-shadow 180ms, transform 120ms}
+.room-card:hover{box-shadow:0 10px 22px rgba(3,50,59,0.06)}
+.room-card.selected, .room-card.room-selected{box-shadow:0 14px 30px rgba(3,50,59,0.08);transform:translateY(-2px)}
+.room-media img{width:100%;height:180px;object-fit:cover;border-radius:10px;display:block}
+.room-media .room-link{display:inline-block;margin-top:8px;color:var(--brand);font-weight:600;font-size:13px}
+.room-body{display:flex;flex-direction:column;gap:8px}
+.room-header strong{font-size:18px}
+.room-header .muted{margin-top:4px}
+.rate-table{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.rate-row{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #e6f6f7;border-radius:10px;background:rgba(42,166,184,0.03)}
+.rate-name{font-weight:600}
+.rate-cta{display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:150px}
+.price{font-weight:700}
+
+@media(max-width:800px){
+  .room-card{grid-template-columns:1fr}
+  .room-media img{height:200px}
+  .rate-row{grid-template-columns:1fr;align-items:flex-start}
+  .rate-cta{flex-direction:row;align-items:center;justify-content:space-between;width:100%}
+}

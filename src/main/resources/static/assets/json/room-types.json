@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "propertyId": 1,
+    "code": "STD-DBL",
+    "name": "Standard Double Room",
+    "description": "ห้องมาตรฐาน เตียงคู่ เหมาะสำหรับคู่รักหรือเพื่อน 2 คน",
+    "imageUrl": "assets/image/Hostel3.jpg"
+  },
+  {
+    "id": 2,
+    "propertyId": 1,
+    "code": "DLX-TWN",
+    "name": "Deluxe Twin Room",
+    "description": "ห้องดีลักซ์ เตียงแยก 2 เตียง พื้นที่กว้างขึ้น",
+    "imageUrl": "assets/image/Hostel2.jpg"
+  },
+  {
+    "id": 3,
+    "propertyId": 1,
+    "code": "FAM-TRP",
+    "name": "Family Triple Room",
+    "description": "ห้องสำหรับครอบครัว พักได้ 3 คน สะดวกสบาย",
+    "imageUrl": "assets/image/Hostel2.jpg"
+  }
+]

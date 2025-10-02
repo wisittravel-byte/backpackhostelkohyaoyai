@@ -9,7 +9,6 @@
 
   // Cut down file system watchers (big impact on Windows)
   "files.watcherExclude": {
-    "**/target/**": true,
     "**/.git/**": true,
     "**/node_modules/**": true,
     "src/main/resources/static/assets/image/**": true,
@@ -36,5 +35,10 @@
   "java.test.report.showAfterExecution": "onFailure",
 
   // Misc
-  "redhat.telemetry.enabled": false
+  "redhat.telemetry.enabled": false,
+
+  // Terminal/PowerShell: prevent PowerShell extension/terminal from auto-start in this workspace
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "powershell.startAutomatically": false,
+  "powershell.integratedConsole.showOnStartup": false
 }

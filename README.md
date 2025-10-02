@@ -25,6 +25,15 @@ Pick one of the options below:
 4. The provided workflow `.github/workflows/deploy-pages.yml` uploads `src/main/resources/static`.
 5. After the Action runs, your site will be available at `https://<your-user>.github.io/<repo>/`.
 
+Local test with backend:
+- Run Spring Boot on port 8081 (`mvn spring-boot:run`)
+- Open http://localhost:8081/index.html — the page will call the backend via same-origin
+
+Split Hosting Strategy (recommended):
+- Frontend (static) → GitHub Pages
+- Backend (Java/Spring) → any app host (Render/Railway/Fly/etc.)
+- In production, set `window.CONFIG.apiBase` in `assets/js/config.js` to the backend URL
+
 ### Option B: Netlify (drag & drop or connect repo)
 1. Create a Netlify account and connect this repo, or drag the folder `src/main/resources/static` into Netlify.
 2. Publish directory: `src/main/resources/static`

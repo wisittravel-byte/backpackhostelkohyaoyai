@@ -72,3 +72,18 @@ th{background:rgba(42,166,184,0.06);font-weight:700}
 
 /* accessibility focus */
 button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outline-offset:2px}
+.litepicker { z-index: 10000; }
+.calendar-inline-container { margin-top: 8px; grid-column: 1 / -1; }
+
+/* ปุ่มค้นหาด้านขวา */
+.hero .card .search-grid .actions {
+  justify-self: end;
+  align-self: end;
+}
+.hero .card .search-grid .actions .btn { width: auto; }
+
+/* มือถือให้เต็มแถวเหมือนเดิม */
+@media (max-width: 640px) {
+  .hero .card .search-grid .actions { grid-column: 1 / -1; justify-self: stretch; }
+  .hero .card .search-grid .actions .btn { width: 100%; }
+}

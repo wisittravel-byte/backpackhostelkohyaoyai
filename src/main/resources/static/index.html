@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Security & SEO -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https:; font-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 https:; font-src 'self';">
   <meta property="og:title" content="Backpack Hostel Kohyaoyai" />
   <meta property="og:description" content="ที่พักสำหรับสายแบ็คแพ็ค ใจกลางเกาะยาวใหญ่. จองที่พัก, โปรโมชั่น และตารางเดินเรือ" />
   <meta property="og:type" content="website" />
@@ -32,6 +32,8 @@
   <script src="assets/js/index-search.js" defer></script>
   <script src="assets/js/api.js?v=20250930" defer></script>
   <script src="assets/js/index-roomtypes.js?v=20250930" defer></script>
+  <!-- Litepicker (CSS) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css">
 </head>
 <body>
   <div class="site-header header-sticky"></div>
@@ -53,13 +55,12 @@
         </div>
         <div class="card mt-12">
           <form id="searchForm" class="grid search-grid">
-              <div>
-                <label for="checkin" data-i18n="form.checkin">เช็คอิน</label>
-                <input id="checkin" type="date" required class="form-control" />
-              </div>
-              <div>
-                <label for="checkout" data-i18n="form.checkout">เช็คเอาท์</label>
-                <input id="checkout" type="date" required class="form-control" />
+              <div class="dates">
+                <label for="daterange" data-i18n="form.dates">วันที่</label>
+                <input id="daterange" type="text" required class="form-control" readonly />
+                <!-- keep hidden fields for internal logic / query building -->
+                <input id="checkin" type="hidden" />
+                <input id="checkout" type="hidden" />
               </div>
               <div>
                 <label for="guests" data-i18n="form.guests">จำนวนผู้เข้าพัก</label>
@@ -69,8 +70,9 @@
                 <label for="rooms" data-i18n="form.rooms">จำนวนห้อง</label>
                 <select id="rooms" class="form-control rooms-count"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
               </div>
+              <!-- ปุ่มค้นหา ด้านขวา -->
               <div class="actions">
-                <a class="btn block" href="booking.html" data-i18n="form.search">ค้นหา</a>
+                <a id="btnSearch" class="btn" href="booking.html" data-i18n="form.search">ค้นหา</a>
               </div>
           </form>
         </div>
@@ -170,9 +172,8 @@
     </main>
   </div>
 
-  <script src="assets/js/footer-content.js" defer></script>
-  <script src="assets/js/load-shared-footer.js" defer></script>
-  <script src="assets/js/date-constraints.js" defer></script>
-  <script src="assets/js/date-hint-fallback.js" defer></script>
+  <!-- วางก่อนปิด body -->
+  <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/bundle.min.js"></script>
+  <script src="assets/js/date-range-single.js"></script>
 </body>
 </html>

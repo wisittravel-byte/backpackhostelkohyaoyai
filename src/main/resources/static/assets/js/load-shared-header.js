@@ -30,6 +30,8 @@
       for(const url of candidates){
         const html = await tryFetch(url);
         if(html){
+          // Note: Seeing 404s for earlier candidates during dev is expected
+          // when the current server root doesn't contain that path.
           console.info('load-shared-header: loaded header from', url);
           container.innerHTML = html;
           // signal that header is ready for page scripts on next macrotask so other deferred scripts can bind
@@ -49,6 +51,7 @@
           }, 0);
           return;
         } else {
+          // downgrade noise to debug; 404s for non-rooted paths are normal in local servers
           console.debug('load-shared-header: fetch failed for', url);
         }
       }

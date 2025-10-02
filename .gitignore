@@ -1,0 +1,19 @@
+# Maven
+/target/
+
+# IDE
+/.idea/
+/.project
+/.classpath
+/.settings/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node/Frontend (if any future tooling)
+node_modules/

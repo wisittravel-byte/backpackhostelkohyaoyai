@@ -7,8 +7,8 @@
 (function(){
   window.CONFIG = window.CONFIG || {};
   if(!window.CONFIG.apiBase){
-    window.CONFIG.apiBase = (location.hostname.endsWith('github.io') || location.hostname.endsWith('.vercel.app') || location.hostname.endsWith('.netlify.app'))
-      ? 'https://YOUR-PROD-BACKEND'
-      : 'http://localhost:8081';
+    const hosted = (location.hostname.endsWith('github.io') || location.hostname.endsWith('.vercel.app') || location.hostname.endsWith('.netlify.app'));
+    // If served by backend (e.g., http://localhost:8081/index.html), prefer same-origin
+    window.CONFIG.apiBase = hosted ? 'https://YOUR-PROD-BACKEND' : (location.origin);
   }
 })();
