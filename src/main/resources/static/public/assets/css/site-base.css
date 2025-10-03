@@ -20,6 +20,7 @@ img{ max-width: 100%; height: auto; }
 .span-all{grid-column:1 / -1}
 .inline{display:flex;gap:8px;align-items:center}
 .inline svg{display:inline-block;vertical-align:middle}
+.icon-gplus{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:#fff;border:1px solid rgba(42,166,184,.3);color:var(--brand,#2aa6b8);font-weight:800;font-size:11px;line-height:1;margin-right:6px}
 .gap-8{gap:8px}
 .sticky{position:sticky;top:14px}
 
