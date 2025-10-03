@@ -8,11 +8,11 @@ window.__SHARED_FOOTER_HTML = `
     </div>
     <div>
       <strong data-i18n=\"footer.contact\">ติดต่อเรา</strong>
-      <div class="muted">Email: info@example.com<br/>Phone: +66 83 550 6600<br/>Map: <a href="https://maps.app.goo.gl/4oHdGbBGN7k8wrBp9" target="_blank" rel="noopener">Google Maps</a></div>
+      <div class="muted">Email: info@example.com<br/>Phone: +66 83 550 6600<br/>Map: <a href="https://maps.app.goo.gl/jT25nBHhT7DcMFha8" target="_blank" rel="noopener">Google Maps</a></div>
     </div>
     <div>
       <strong>Google Review</strong>
-      <div class="muted"><a href="https://maps.app.goo.gl/Kq5hgBwkzBCvDQkB9" target="_blank" rel="noopener">Open reviews on Google</a></div>
+      <div class="muted"><a href="https://search.google.com/local/reviews?placeid=ChIJQehIjW62UTARlgqzW32zuBo" target="_blank" rel="noopener">Open reviews on Google</a></div>
     </div>
   </div>
   <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">2025 Backpack Hostel Kohyaoya - All Rights Reserved.</div>
