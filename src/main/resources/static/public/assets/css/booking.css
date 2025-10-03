@@ -11,7 +11,8 @@
 *{box-sizing:border-box}
 body{margin:0;font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", Arial; background:var(--bg); color:var(--text);} 
 a{color:inherit;text-decoration:none}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;background:linear-gradient(90deg, rgba(42,166,184,0.12), rgba(42,166,184,0.06));border-radius:var(--radius)}
+/* Page-level header (avoid styling all <header> tags globally) */
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;background:linear-gradient(90deg, rgba(42,166,184,0.12), rgba(42,166,184,0.06));border-radius:var(--radius)}
 .brand{display:flex;align-items:center;gap:12px}
 .brand .logo{width:56px;height:56px;border-radius:8px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px}
 .brand h1{margin:0;font-size:18px}
@@ -71,7 +72,8 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .badge-size{background:rgba(42,166,184,0.95)}
 .room-media .room-link{display:inline-block;margin-top:8px;color:var(--brand);font-weight:600;font-size:13px}
 .room-body{display:flex;flex-direction:column;gap:8px}
-.room-header strong{font-size:18px}
+.room-header{background:none;padding:0;border-radius:0}
+.room-header strong{font-size:18px;display:block}
 .room-header .muted{margin-top:4px}
 .rate-table{display:flex;flex-direction:column;gap:10px;margin-top:8px}
 .rate-header{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px 10px;border-bottom:2px solid #e0f1f3;color:#2e6f79;font-weight:700}
