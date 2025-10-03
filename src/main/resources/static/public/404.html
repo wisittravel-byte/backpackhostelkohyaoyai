@@ -15,7 +15,7 @@
     a.btn{display:inline-block;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:700}
     .muted{color:#5aa6ad}
   </style>
-  <link rel="canonical" href="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/public/404.html">
+  <link rel="canonical" href="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/404.html">
 </head>
 <body>
   <div class="wrap">
@@ -23,12 +23,29 @@
       <h1>404 – ไม่พบหน้า (Page Not Found)</h1>
       <p class="muted">ลิงก์ที่คุณเปิดอาจไม่ถูกต้อง หรือมีการเปลี่ยนชื่อไฟล์เป็นตัวพิมพ์เล็กทั้งหมด (lowercase) เช่น <code>booking.html</code>, <code>checkout.html</code>.</p>
       <p>
-        • หน้าแรก: <a href="index.html">index.html</a><br>
-        • จองที่พัก: <a href="booking.html">booking.html</a><br>
-        • ชำระเงิน: <a href="checkout.html">checkout.html</a>
+        • หน้าแรก: <a href="/backpackhostelkohyaoyai/index.html">index.html</a><br>
+        • จองที่พัก: <a href="/backpackhostelkohyaoyai/booking.html">booking.html</a><br>
+        • ชำระเงิน: <a href="/backpackhostelkohyaoyai/checkout.html">checkout.html</a>
       </p>
-      <p><a class="btn" href="index.html">กลับหน้าแรก</a></p>
+      <p><a class="btn" href="/backpackhostelkohyaoyai/index.html">กลับหน้าแรก</a></p>
     </div>
   </div>
+  <script>
+    // If user landed on a non-existent /public/* path, redirect to the correct path without /public
+    (function(){
+      try{
+        var p = location.pathname;
+        if(p.indexOf('/public/') !== -1){
+          var fixed = p.replace('/public/','/');
+          // Ensure project pages base path remains
+          if(fixed.indexOf('/backpackhostelkohyaoyai/') === -1){
+            fixed = '/backpackhostelkohyaoyai' + fixed;
+          }
+          var url = fixed + location.search + location.hash;
+          location.replace(url);
+        }
+      }catch(e){}
+    })();
+  </script>
 </body>
 </html>
