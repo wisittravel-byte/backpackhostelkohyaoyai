@@ -64,12 +64,20 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .room-card:hover{box-shadow:0 10px 22px rgba(3,50,59,0.06)}
 .room-card.selected, .room-card.room-selected{box-shadow:0 14px 30px rgba(3,50,59,0.08);transform:translateY(-2px)}
 .room-media img{width:100%;height:180px;object-fit:cover;border-radius:10px;display:block}
+.room-media{position:relative}
+.room-badges{position:absolute;left:10px;top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;z-index:1}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(8,50,59,0.85);color:#fff;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,0.15)}
+.badge-roomname{background:rgba(8,50,59,0.92)}
+.badge-size{background:rgba(42,166,184,0.95)}
 .room-media .room-link{display:inline-block;margin-top:8px;color:var(--brand);font-weight:600;font-size:13px}
 .room-body{display:flex;flex-direction:column;gap:8px}
 .room-header strong{font-size:18px}
 .room-header .muted{margin-top:4px}
 .rate-table{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.rate-header{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px 10px;border-bottom:2px solid #e0f1f3;color:#2e6f79;font-weight:700}
+.rate-header .th:not(:last-child){border-right:1px solid #e6f6f7;padding-right:10px}
 .rate-row{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #e6f6f7;border-radius:10px;background:rgba(42,166,184,0.03)}
+.rate-row > :not(:last-child){border-right:1px solid #eaf6f7;padding-right:10px}
 .rate-name{font-weight:600}
 .rate-cta{display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:150px}
 .price{font-weight:700}
@@ -77,6 +85,11 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 @media(max-width:800px){
   .room-card{grid-template-columns:1fr}
   .room-media img{height:200px}
+  .room-badges{left:8px;top:8px}
+  .badge{font-size:11px;padding:5px 8px}
   .rate-row{grid-template-columns:1fr;align-items:flex-start}
+  .rate-header{grid-template-columns:1fr;}
+  .rate-header .th{border-right:none;padding-right:0}
+  .rate-row > :not(:last-child){border-right:none;padding-right:0}
   .rate-cta{flex-direction:row;align-items:center;justify-content:space-between;width:100%}
 }
