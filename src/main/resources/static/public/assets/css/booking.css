@@ -66,8 +66,10 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .room-card.selected, .room-card.room-selected{box-shadow:0 14px 30px rgba(3,50,59,0.08);transform:translateY(-2px)}
 .room-media img{width:100%;height:180px;object-fit:cover;border-radius:10px;display:block}
 .room-media{position:relative}
-.room-badges{position:absolute;left:10px;top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;z-index:1}
-.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(8,50,59,0.85);color:#fff;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,0.15)}
+/* Move badges above the image (non-overlay) */
+.room-badges{position:static;left:auto;top:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;z-index:auto}
+/* Keep base badge style but lighten when used above the image */
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(8,50,59,0.08);color:var(--text);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;box-shadow:none}
 .badge-roomname{background:rgba(8,50,59,0.92)}
 .badge-size{background:rgba(42,166,184,0.95)}
 .room-media .room-link{display:inline-block;margin-top:8px;color:var(--brand);font-weight:600;font-size:13px}
@@ -76,12 +78,15 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .room-header strong{font-size:18px;display:block}
 .room-header .muted{margin-top:4px}
 .rate-table{display:flex;flex-direction:column;gap:10px;margin-top:8px}
-.rate-header{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:0;border-bottom:2px solid #e0f1f3;color:var(--text);font-weight:600;background:transparent;font-size:18px;line-height:1.4}
+/* Column dividers like Traveloka: remove grid gaps and rely on cell padding so lines are continuous */
+.rate-header{display:grid;grid-template-columns:1.2fr 1fr auto;gap:0;align-items:center;padding:0;border-bottom:2px solid #e0f1f3;color:var(--text);font-weight:600;background:transparent;font-size:18px;line-height:1.4}
 .rate-header .th{display:flex;align-items:center;background:rgba(42,166,184,0.06);padding:0 10px}
 .rate-header .th strong{color:inherit;font-weight:600;font-size:inherit;line-height:inherit}
-.rate-header .th:not(:last-child){border-right:1px solid #e6f6f7;padding-right:10px}
-.rate-row{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #e6f6f7;border-radius:10px;background:rgba(42,166,184,0.03)}
-.rate-row > :not(:last-child){border-right:1px solid #eaf6f7;padding-right:10px}
+.rate-header .th:not(:last-child){border-right:1px solid #e6f6f7}
+/* Rows with continuous column dividers */
+.rate-row{display:grid;grid-template-columns:1.2fr 1fr auto;gap:0;align-items:center;padding:0;border:1px solid #e6f6f7;border-radius:10px;background:rgba(42,166,184,0.03)}
+.rate-row > *{padding:10px}
+.rate-row > :not(:last-child){border-right:1px solid #e6f6f7}
 .rate-name{font-weight:600}
 .rate-cta{display:flex;flex-direction:column;gap:8px;align-items:flex-end;min-width:150px}
 .price{font-weight:700}
