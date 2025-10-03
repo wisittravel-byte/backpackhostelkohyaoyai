@@ -76,8 +76,8 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .room-header strong{font-size:18px;display:block}
 .room-header .muted{margin-top:4px}
 .rate-table{display:flex;flex-direction:column;gap:10px;margin-top:8px}
-.rate-header{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px 10px;border-bottom:2px solid #e0f1f3;color:var(--text);font-weight:600;background:transparent;font-size:18px;line-height:1.4}
-.rate-header .th{display:flex;align-items:center}
+.rate-header{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:0;border-bottom:2px solid #e0f1f3;color:var(--text);font-weight:600;background:transparent;font-size:18px;line-height:1.4}
+.rate-header .th{display:flex;align-items:center;background:rgba(42,166,184,0.06);padding:0 10px}
 .rate-header .th strong{color:inherit;font-weight:600;font-size:inherit;line-height:inherit}
 .rate-header .th:not(:last-child){border-right:1px solid #e6f6f7;padding-right:10px}
 .rate-row{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #e6f6f7;border-radius:10px;background:rgba(42,166,184,0.03)}
@@ -100,5 +100,5 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 
 /* Ensure the header labels sit in the vertical middle of the header band on wider screens */
 @media(min-width:801px){
-  .rate-header{height:48px;padding:0 10px}
+  .rate-header{height:48px}
 }
