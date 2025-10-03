@@ -76,7 +76,7 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .room-header strong{font-size:18px;display:block}
 .room-header .muted{margin-top:4px}
 .rate-table{display:flex;flex-direction:column;gap:10px;margin-top:8px}
-.rate-header{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px 10px;border-bottom:2px solid #e0f1f3;color:#2e6f79;font-weight:700}
+.rate-header{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px 10px;border-bottom:2px solid #e0f1f3;color:#2e6f79;font-weight:700;background:transparent}
 .rate-header .th:not(:last-child){border-right:1px solid #e6f6f7;padding-right:10px}
 .rate-row{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #e6f6f7;border-radius:10px;background:rgba(42,166,184,0.03)}
 .rate-row > :not(:last-child){border-right:1px solid #eaf6f7;padding-right:10px}
