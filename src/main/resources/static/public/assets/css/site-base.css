@@ -19,6 +19,7 @@ img{ max-width: 100%; height: auto; }
 @media(min-width:760px){.cols-2{grid-template-columns:1fr 1fr}.cols-3{grid-template-columns:1fr 1fr 1fr}}
 .span-all{grid-column:1 / -1}
 .inline{display:flex;gap:8px;align-items:center}
+.inline svg{display:inline-block;vertical-align:middle}
 .gap-8{gap:8px}
 .sticky{position:sticky;top:14px}
 
