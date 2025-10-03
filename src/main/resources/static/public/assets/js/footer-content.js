@@ -12,10 +12,7 @@ window.__SHARED_FOOTER_HTML = `
     </div>
     <div>
       <strong>Google Review</strong>
-      <div class="muted"><a class="inline" href="https://search.google.com/local/reviews?placeid=ChIJQehIjW62UTARlgqzW32zuBo" target="_blank" rel="noopener">
-        <span class="icon-gplus" aria-hidden="true">G+</span>
-        <span>Open reviews on Google</span>
-      </a></div>
+      <div class="muted"><a href="https://search.google.com/local/reviews?placeid=ChIJQehIjW62UTARlgqzW32zuBo" target="_blank" rel="noopener">Open reviews on Google</a></div>
     </div>
   </div>
   <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">2025 Backpack Hostel Kohyaoya - All Rights Reserved.</div>
