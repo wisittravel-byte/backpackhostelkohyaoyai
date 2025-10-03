@@ -1,7 +1,7 @@
 param(
     [int]$Port = 8080,
     [string]$Root = (Split-Path -Parent $MyInvocation.MyCommand.Definition),
-    [string]$Bind = '0.0.0.0' # Default bind all interfaces for LAN access
+    [string]$Bind = '127.0.0.1' # Default bind loopback to avoid admin URL ACL
 )
 
 Write-Host "Starting static server" -ForegroundColor Green
@@ -44,6 +44,7 @@ try {
     if ($prefix -like 'http://+*') {
         Write-Host "Hint: Binding to all interfaces may require an URL ACL. Run as Administrator and execute:" -ForegroundColor Yellow
         Write-Host "  netsh http add urlacl url=$prefix user=Everyone" -ForegroundColor Yellow
+        Write-Host "Or rerun this script with -Bind 127.0.0.1 to avoid needing an URL ACL." -ForegroundColor Yellow
     }
     exit 1
 }

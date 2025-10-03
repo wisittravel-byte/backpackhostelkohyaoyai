@@ -21,6 +21,6 @@ jobs:
 
       - name: Run CSP checker
         shell: powershell
-        working-directory: ./src/main/resources/static
+        working-directory: .
         run: |
-          powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/check-csp.ps1 -BaseUrl 'http://127.0.0.1:8080/'
+          powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/website-checks/check-csp.ps1 -BaseUrl 'http://127.0.0.1:8080/'

@@ -32,17 +32,17 @@ jobs:
       - name: Verify required pages exist
         run: |
           for f in index.html booking.html checkout.html 404.html; do
-            if [ ! -f "src/main/resources/static/$f" ]; then
-              echo "ERROR: Missing required page: $f" >&2
+            if [ ! -f "src/main/resources/static/public/$f" ]; then
+              echo "ERROR: Missing required public page: $f" >&2
               exit 1
             fi
           done
       - name: Write on-site file listing for debug
         run: |
           echo "Creating FILES.txt and CHECK.html for published site debug"
-          echo "Files under static (recursive):" > src/main/resources/static/FILES.txt
-          find src/main/resources/static -type f | sort >> src/main/resources/static/FILES.txt
-          cat > src/main/resources/static/CHECK.html <<'HTML'
+          echo "Files under static/public (recursive):" > src/main/resources/static/public/FILES.txt
+          find src/main/resources/static/public -type f | sort >> src/main/resources/static/public/FILES.txt
+          cat > src/main/resources/static/public/CHECK.html <<'HTML'
           <!doctype html><html><head><meta charset="utf-8"><title>CHECK</title></head>
           <body><h1>Deployed file list</h1><p>See <a href="FILES.txt">FILES.txt</a></p>
           <ul>
@@ -56,7 +56,7 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y imagemagick
-          cd src/main/resources/static/assets/image
+          cd src/main/resources/static/public/assets/image
           if [ -f Beach4.jpg ]; then
             convert Beach4.jpg -resize 480x -quality 82 Beach4-480.jpg
             convert Beach4.jpg -resize 768x -quality 85 Beach4-768.jpg
@@ -66,7 +66,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: src/main/resources/static
+          path: src/main/resources/static/public
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
