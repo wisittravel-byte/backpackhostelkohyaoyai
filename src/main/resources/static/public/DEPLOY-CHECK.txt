@@ -1,0 +1,3 @@
+Deployed via GitHub Actions from src/main/resources/static/public
+Timestamp (UTC): ${GITHUB_RUN_ID:-local}This file exists to trigger a GitHub Pages deploy via Actions.
+Timestamp: 2025-10-03T00:00:00Z
