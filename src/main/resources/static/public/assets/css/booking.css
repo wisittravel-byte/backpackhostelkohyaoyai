@@ -68,10 +68,10 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .room-media{position:relative}
 /* Move badges above the image (non-overlay) */
 .room-badges{position:static;left:auto;top:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;z-index:auto}
-/* Keep base badge style but lighten when used above the image */
-.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(8,50,59,0.08);color:var(--text);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;box-shadow:none}
-.badge-roomname{background:rgba(8,50,59,0.92)}
-.badge-size{background:rgba(42,166,184,0.95)}
+/* Theme-aligned badge styles (chips) */
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(42,166,184,0.06);color:var(--text);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid rgba(42,166,184,0.15);box-shadow:none}
+.badge-roomname{background:#fff;border-color:rgba(42,166,184,0.28);color:var(--text);font-weight:700;font-size:16px}
+.badge-size{background:rgba(42,166,184,0.10);border-color:rgba(42,166,184,0.22);color:var(--brand);font-weight:700}
 .room-media .room-link{display:inline-block;margin-top:8px;color:var(--brand);font-weight:600;font-size:13px}
 .room-body{display:flex;flex-direction:column;gap:8px}
 .room-header{background:none;padding:0;border-radius:0}
