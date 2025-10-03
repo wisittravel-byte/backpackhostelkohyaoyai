@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Backoffice — Hotel Admin</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self';">
+  <link rel="stylesheet" href="./assets/css/admin.css" />
+</head>
+<body>
+  <aside>
+    <div class="brand">
+      <div class="logo">BK</div>
+      <div>
+        <h1>Hotel Backoffice</h1>
+        <div class="muted">Sea‑Blue Theme</div>
+      </div>
+    </div>
+    <nav id="sidenav">
+      <a href="#" data-goto="dashboard" class="active">Dashboard</a>
+      <a href="#" data-goto="calendar">Booking Calendar</a>
+      <a href="#" data-goto="rooms">Rooms</a>
+      <a href="#" data-goto="bookings">Bookings</a>
+      <a href="#" data-goto="check">Check‑in / Check‑out</a>
+      <a href="#" data-goto="housekeeping">Housekeeping</a>
+      <a href="#" data-goto="guests">Guests</a>
+      <a href="#" data-goto="pricing">Pricing</a>
+      <a href="#" data-goto="payments">Payments</a>
+      <a href="#" data-goto="reports">Reports</a>
+      <a href="#" data-goto="users">Users & Roles</a>
+      <a href="#" data-goto="settings">Settings</a>
+    </nav>
+  </aside>
+
+  <div>
+    <header>
+      <div>
+        <strong id="pageTitle">Dashboard</strong>
+        <span class="badge" id="dateRangeBadge"></span>
+      </div>
+      <div class="toolbar">
+        <input id="globalSearch" placeholder="Search bookings/guests/rooms…"/>
+        <button class="btn outline" id="newBookingBtn">+ New Booking</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- DASHBOARD -->
+      <section class="grid cols-3" data-section="dashboard">
+        <div class="card">
+          <div class="head"><strong>Occupancy Today</strong><span class="tag">Rooms filled</span></div>
+          <div class="body kpi"><div class="val" id="kpiOcc">—%</div><div class="muted">of total</div></div>
+        </div>
+        <div class="card">
+          <div class="head"><strong>Revenue (7d)</strong><span class="tag">Gross</span></div>
+          <div class="body kpi"><div class="val" id="kpiRev">฿—</div><div class="muted">last 7 days</div></div>
+        </div>
+        <div class="card">
+          <div class="head"><strong>Avg. Rate</strong><span class="tag">per night</span></div>
+          <div class="body kpi"><div class="val" id="kpiAdr">฿—</div><div class="muted">ADR</div></div>
+        </div>
+
+        <div class="card" style="grid-column:1/-1">
+          <div class="head"><strong>Today</strong><div class="toolbar"><span class="badge" id="todayBadge"></span></div></div>
+          <div class="body grid cols-2">
+            <div>
+              <h3 style="margin:0 0 8px">Check‑ins</h3>
+              <table class="table" id="tblTodayIn"><thead><tr><th>Time</th><th>Guest</th><th>Room</th><th>Nights</th><th></th></tr></thead><tbody></tbody></table>
+            </div>
+            <div>
+              <h3 style="margin:0 0 8px">Check‑outs</h3>
+              <table class="table" id="tblTodayOut"><thead><tr><th>Time</th><th>Guest</th><th>Room</th><th>Balance</th><th></th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CALENDAR -->
+      <section data-section="calendar">
+        <div class="card">
+          <div class="head"><strong>Booking Calendar</strong>
+            <div class="toolbar">
+              <button class="btn outline" id="prevMonth">◀</button>
+              <div class="badge" id="calTitle">Month YYYY</div>
+              <button class="btn outline" id="nextMonth">▶</button>
+            </div>
+          </div>
+          <div class="body">
+            <div class="calendar" id="calendarGrid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ROOMS -->
+      <section data-section="rooms">
+        <div class="card">
+          <div class="head"><strong>Rooms</strong>
+            <div class="toolbar">
+              <select id="roomTypeFilter"><option value="">All types</option><option>Standard</option><option>Deluxe</option><option>Dorm</option><option>Family</option></select>
+              <button class="btn" id="btnAddRoom">+ Add Room</button>
+            </div>
+          </div>
+          <div class="body">
+            <table class="table" id="tblRooms"><thead><tr><th>Room</th><th>Type</th><th>Capacity</th><th>Status</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+
+        <div class="card" id="roomFormCard" style="margin-top:16px; display:none">
+          <div class="head"><strong id="roomFormTitle">New Room</strong><button class="btn ghost" id="roomFormClose">✕</button></div>
+          <div class="body grid cols-3">
+            <div class="field"><label>Room No.</label><input id="fRoomNo" placeholder="101"/></div>
+            <div class="field"><label>Type</label><select id="fRoomType"><option>Standard</option><option>Deluxe</option><option>Dorm</option><option>Family</option></select></div>
+            <div class="field"><label>Capacity</label><input id="fRoomCap" type="number" min="1" value="2"/></div>
+            <div class="field" style="grid-column:1/-1"><label>Amenities</label><input id="fRoomAmen" placeholder="Wi‑Fi, AC, TV"/></div>
+            <div class="field" style="grid-column:1/-1"><label>Notes</label><textarea id="fRoomNotes" rows="2"></textarea></div>
+            <div><button class="btn" id="roomFormSave">Save Room</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOOKINGS -->
+      <section data-section="bookings">
+        <div class="card">
+          <div class="head"><strong>Bookings</strong>
+            <div class="toolbar">
+              <input id="bookingSearch" placeholder="Search by guest/room"/>
+              <select id="bookingStatus"><option value="">All</option><option>Pending</option><option>Confirmed</option><option>Checked‑in</option><option>Checked‑out</option></select>
+              <button class="btn" id="btnAddBooking">+ New Booking</button>
+            </div>
+          </div>
+          <div class="body">
+            <table class="table" id="tblBookings"><thead><tr><th>#</th><th>Guest</th><th>Room</th><th>Dates</th><th>Nights</th><th>Status</th><th>Total</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHECK-IN/OUT -->
+      <section data-section="check">
+        <div class="card">
+          <div class="head"><strong>Check‑in / Check‑out</strong>
+            <div class="toolbar"><span class="badge" id="checkToday"></span></div>
+          </div>
+          <div class="body grid cols-2">
+            <div>
+              <h3 style="margin:0 0 8px">Due Check‑in</h3>
+              <table class="table" id="tblDueIn"><thead><tr><th>Time</th><th>Guest</th><th>Room</th><th></th></tr></thead><tbody></tbody></table>
+            </div>
+            <div>
+              <h3 style="margin:0 0 8px">Due Check‑out</h3>
+              <table class="table" id="tblDueOut"><thead><tr><th>Time</th><th>Guest</th><th>Room</th><th></th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOUSEKEEPING -->
+      <section data-section="housekeeping">
+        <div class="card">
+          <div class="head"><strong>Housekeeping</strong>
+            <div class="toolbar"><select id="hkFilter"><option value="">All</option><option value="dirty">Need Cleaning</option><option value="clean">Clean</option><option value="in">Occupied</option></select></div>
+          </div>
+          <div class="body">
+            <table class="table" id="tblHK"><thead><tr><th>Room</th><th>Status</th><th>Assigned</th><th>Last Cleaned</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- GUESTS -->
+      <section data-section="guests">
+        <div class="card">
+          <div class="head"><strong>Guests</strong><div class="toolbar"><input id="guestSearch" placeholder="Search guest"/></div></div>
+          <div class="body">
+            <table class="table" id="tblGuests"><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>History</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRICING -->
+      <section data-section="pricing">
+        <div class="card">
+          <div class="head"><strong>Pricing Rules</strong><div class="toolbar"><button class="btn" id="btnAddRule">+ Add Rule</button></div></div>
+          <div class="body">
+            <table class="table" id="tblPricing"><thead><tr><th>Rule</th><th>Dates</th><th>Room Type</th><th>Rate (฿)</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAYMENTS -->
+      <section data-section="payments">
+        <div class="card">
+          <div class="head"><strong>Payments</strong><div class="toolbar"><select id="payFilter"><option value="">All</option><option value="paid">Paid</option><option value="due">Due</option></select></div></div>
+          <div class="body">
+            <table class="table" id="tblPayments"><thead><tr><th>Invoice</th><th>Guest</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section data-section="reports">
+        <div class="card">
+          <div class="head"><strong>Reports</strong><div class="toolbar"><input id="reportRange" type="month"/></div></div>
+          <div class="body grid cols-3">
+            <div class="card"><div class="body kpi"><div><div class="tag">Occupancy</div><div class="val" id="rOcc">—%</div></div></div></div>
+            <div class="card"><div class="body kpi"><div><div class="tag">ADR</div><div class="val" id="rAdr">฿—</div></div></div></div>
+            <div class="card"><div class="body kpi"><div><div class="tag">RevPAR</div><div class="val" id="rRevpar">฿—</div></div></div></div>
+            <div class="card" style="grid-column:1/-1"><div class="head"><strong>Top Room Types</strong></div><div class="body" id="rTopRoomTypes">—</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- USERS & ROLES -->
+      <section data-section="users">
+        <div class="card">
+          <div class="head"><strong>Users & Roles</strong><div class="toolbar"><button class="btn" id="btnAddUser">+ Add User</button></div></div>
+          <div class="body">
+            <table class="table" id="tblUsers"><thead><tr><th>Name</th><th>Role</th><th>Login</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section data-section="settings">
+        <div class="card">
+          <div class="head"><strong>Property Settings</strong></div>
+          <div class="body grid cols-3">
+            <div class="field"><label>Property Name</label><input id="pName" placeholder="Backpack Hostel Kohyaoyai"/></div>
+            <div class="field"><label>Timezone</label><select id="pTz"><option>Asia/Bangkok</option><option>UTC</option></select></div>
+            <div class="field"><label>Currency</label><select id="pCur"><option>THB</option><option>USD</option></select></div>
+            <div class="field" style="grid-column:1/-1"><label>Contact</label><input id="pContact" placeholder="061‑224‑7891 / hello@example.com"/></div>
+            <div><button class="btn" id="btnSaveSettings">Save</button></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="./assets/js/admin.js"></script>
+</body>
+</html>

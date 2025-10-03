@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login — Hotel Admin</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self';">
+  <link rel="stylesheet" href="./assets/css/admin.css" />
+  <style>
+    /* Minimal auth layout using existing theme variables */
+    body{display:grid;grid-template-columns:1fr;place-items:center;min-height:100vh;background:var(--bg)}
+    .auth{width:min(420px,92vw);background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .auth h1{margin:0 0 4px}
+    .muted{color:var(--muted)}
+    .field{display:grid;gap:6px;margin:12px 0}
+    .field input{padding:10px 12px;border-radius:10px;border:1px solid var(--border);font:inherit;background:#fff}
+    .btn{width:100%;display:inline-flex;justify-content:center}
+  </style>
+</head>
+<body>
+  <main class="auth">
+    <h1>Owner Console</h1>
+    <div class="muted">Sign in to manage your property</div>
+    <form id="loginForm" autocomplete="off">
+      <div class="field"><label>Email</label><input id="email" type="email" required /></div>
+      <div class="field"><label>Password</label><input id="password" type="password" required /></div>
+      <div class="field"><label><input id="remember" type="checkbox"/> Remember me</label></div>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+  </main>
+  <script src="./assets/js/login.js"></script>
+</body>
+</html>
