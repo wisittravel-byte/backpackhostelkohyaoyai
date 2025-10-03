@@ -1,6 +1,20 @@
 (function(){
   function qs(sel){ return document.querySelector(sel); }
   function qsa(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+  function setDetailsToggleLabel(link, key){
+    try{
+      // Update data-i18n so future language switches stay in sync
+      if(link) link.setAttribute('data-i18n', key);
+      const lang = window.currentLang || (document.documentElement.lang || 'th');
+      const dict = (window.I18N && window.I18N[lang]) ? window.I18N[lang] : null;
+      if(dict && dict[key]){
+        link.textContent = dict[key];
+      } else {
+        // Fallback texts
+        link.textContent = (key === 'rooms.detailsHide') ? 'ซ่อนรายละเอียดห้องพัก' : 'ดูรายละเอียดห้องพัก';
+      }
+    }catch(_){ /* noop */ }
+  }
 
   const ROOM_RATES = { dorm:1999, private:2999, family:3499 };
 
@@ -75,6 +89,84 @@
   const href = btn.getAttribute('href') || 'checkout.html';
         window.location.href = href;
       });
+    });
+
+    // Modal popup for room details
+    const modal = qs('#roomModal');
+    const modalOverlay = modal ? modal.querySelector('.modal-overlay') : null;
+    const modalClose = modal ? modal.querySelector('.modal-close') : null;
+    const modalGallery = modal ? modal.querySelector('.modal-gallery') : null;
+    const modalTitle = modal ? modal.querySelector('#roomModalTitle') : null;
+    const modalMeta = modal ? modal.querySelector('.modal-meta') : null;
+    const modalAmenities = modal ? modal.querySelector('.modal-amenities') : null;
+    const modalSelect = modal ? modal.querySelector('.modal-select') : null;
+
+    function openModalFromCard(card){
+      if(!modal) return;
+      // Title and meta
+      const title = (card.querySelector('.badge-roomname')||{}).textContent || '';
+      const size = (card.querySelector('.badge-size')||{}).textContent || '';
+      if(modalTitle) modalTitle.textContent = title || 'Room details';
+      if(modalMeta) modalMeta.textContent = size;
+      // Gallery: collect main image + possibly related gallery (reuse same image multiples for now)
+      if(modalGallery){
+        modalGallery.innerHTML = '';
+        const img = card.querySelector('.room-media img');
+        if(img){
+          // Put a few repeats to simulate gallery; in future, map to real gallery sources
+          for(let i=0;i<6;i++){
+            const clone = img.cloneNode(true);
+            clone.removeAttribute('loading');
+            clone.removeAttribute('decoding');
+            modalGallery.appendChild(clone);
+          }
+        }
+      }
+      // Amenities: copy the list
+      if(modalAmenities){
+        const details = card.querySelector('.room-details');
+        if(details){
+          modalAmenities.innerHTML = '';
+          const list = details.querySelector('ul');
+          if(list){
+            const ul = document.createElement('ul');
+            ul.className = 'amenities-grid';
+            ul.innerHTML = list.innerHTML;
+            modalAmenities.appendChild(ul);
+          }
+        }
+      }
+      // CTA: wire room select
+      if(modalSelect){
+        const selectBtn = card.querySelector('.select-room');
+        const room = selectBtn ? selectBtn.getAttribute('data-room') : (card.getAttribute('data-room-row')||'');
+        modalSelect.setAttribute('data-room', room);
+        modalSelect.setAttribute('href', selectBtn ? (selectBtn.getAttribute('href')||'./checkout.html') : './checkout.html');
+      }
+
+      modal.removeAttribute('hidden');
+      modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(){
+      if(!modal) return;
+      modal.setAttribute('hidden','');
+      modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    if(modalOverlay) modalOverlay.addEventListener('click', closeModal);
+    if(modalClose) modalClose.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape') closeModal(); });
+
+    qsa('.room-card').forEach((card)=>{
+      const link = card.querySelector('.room-link');
+      if(!link) return;
+      // Accessible props
+      link.setAttribute('role','button');
+      link.setAttribute('aria-haspopup','dialog');
+      link.addEventListener('click', (e)=>{ if(e && e.preventDefault) e.preventDefault(); openModalFromCard(card); });
     });
 
     const saveBtn = qs('#saveBtn');

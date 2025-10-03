@@ -49,8 +49,8 @@
       if(href === 'index.html' || href === '#home' || /index\.html#home(\?|$)/.test(href)){
         if(smoothTo('home', 'home')) return;
       }
-      if(href === '#ferry' || /index\.html#ferry(\?|$)/.test(href)){
-        if(smoothTo('ferry', 'ferry')) return;
+      if(href === '#attractions' || /index\.html#attractions(\?|$)/.test(href)){
+        if(smoothTo('attractions', 'attractions')) return;
       }
       if(href === '#promo' || /index\.html#promo(\?|$)/.test(href)){
         if(smoothTo('promo', 'promo')) return;
@@ -118,11 +118,11 @@
               try{ history.replaceState(null, '', '#home'); }catch(_){ }
               return;
             }
-            if(href === '#ferry' || /index\.html#ferry(\?|$)/.test(href)){
+            if(href === '#attractions' || /index\.html#attractions(\?|$)/.test(href)){
               if(e && e.preventDefault) e.preventDefault();
-              var fer = document.getElementById('ferry');
-              if(fer) fer.scrollIntoView({behavior:'smooth', block:'start'});
-              try{ history.replaceState(null, '', '#ferry'); }catch(_){ }
+              var attr = document.getElementById('attractions');
+              if(attr) attr.scrollIntoView({behavior:'smooth', block:'start'});
+              try{ history.replaceState(null, '', '#attractions'); }catch(_){ }
               return;
             }
             if(href === '#promo' || /index\.html#promo(\?|$)/.test(href)){

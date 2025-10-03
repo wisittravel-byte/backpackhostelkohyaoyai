@@ -87,3 +87,16 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
   .hero .card .search-grid .actions { grid-column: 1 / -1; justify-self: stretch; }
   .hero .card .search-grid .actions .btn { width: 100%; }
 }
+
+/* Facilities and Reviews section */
+.facilities{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.facilities{grid-template-columns:1fr 1fr}}
+.facility{display:flex;gap:12px;align-items:flex-start;padding:8px;border:1px solid #e6f6f7;border-radius:10px;background:#fff}
+.facility svg{width:28px;height:28px;fill:var(--brand)}
+.facility .name{font-weight:700}
+.facility .desc{color:var(--muted)}
+.reviews-card{background:#fff;border:1px solid #e6f6f7;border-radius:10px;padding:12px;box-shadow:0 8px 20px rgba(3,50,59,0.04)}
+.reviews-card .stars{display:flex;gap:6px;align-items:center}
+.reviews-card .stars svg{width:20px;height:20px;fill:#f5a623}
+.reviews-card .stars .badge{background:rgba(42,166,184,0.06);border:1px solid rgba(42,166,184,0.15);padding:4px 8px;border-radius:999px;font-weight:700;color:var(--text)}
+.btn.outline{background:#fff;color:var(--text);border:1px solid #e6f6f7}
