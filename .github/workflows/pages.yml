@@ -27,7 +27,8 @@ jobs:
       - name: Upload static artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: src/main/resources/static
+          # Publish the public directory as the site root
+          path: src/main/resources/static/public
 
   deploy:
     environment:
