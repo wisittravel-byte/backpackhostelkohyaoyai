@@ -35,7 +35,7 @@
             <form id="guestForm">
               <!-- Header row: title + OR + Sign In button -->
               <div class="inline justify-between items-center">
-                <h2 class="mb-0 color-brand" data-i18n="checkout.guestInfo">Guest Information</h2>
+                <h2 class="mb-0 color-brand" data-i18n="checkout.guestInfo">ข้อมูลติดต่อในการจอง</h2>
                 <div class="inline items-center gap-10">
                   <span class="muted" data-i18n="checkout.or">- OR -</span>
                   <button type="button" class="btn secondary" id="signInBtn">🔒 <span data-i18n="checkout.signInFast">Sign In To Book Faster</span></button>
@@ -75,9 +75,30 @@
                   <input id="email" type="email" class="form-control flex-1" data-i18n-placeholder="checkout.placeholder.email" placeholder="you@example.com">
                 </div>
 
+                <!-- 1. Add checkbox for booking for self -->
+                <div class="divider span-all"></div>
+                <div class="checkbox-row span-all">
+                  <input type="checkbox" id="isBookingForSelf" checked>
+                  <label for="isBookingForSelf" class="mb-0"><span data-i18n="checkout.isBookingForSelf">ฉันจองให้กับตัวเอง</span></label>
+                </div>
+
+                <!-- 2. Add Guest Details Section (hidden by default) -->
+                <div id="otherGuestDetails" class="hidden span-all grid gap-8">
+                  <h3 class="span-all color-brand" data-i18n="checkout.otherGuest.title">รายละเอียดผู้เข้าพัก</h3>
+                  <label class="span-all"><span data-i18n="checkout.otherGuest.label.guestName">ชื่อ-นามสกุล ผู้เข้าพัก</span> <span class="text-danger">*</span></label>
+                  <div class="row cols-2">
+                    <input id="otherGuestFirstName" class="form-control" data-i18n-placeholder="checkout.placeholder.firstName" placeholder="First Name">
+                    <input id="otherGuestLastName" class="form-control" data-i18n-placeholder="checkout.placeholder.lastName" placeholder="Last Name">
+                  </div>
+                  <small class="span-all muted" data-i18n="checkout.otherGuest.note">โดยไม่มีคำนำหน้า</small>
+                </div>
+
                 <!-- Removed Online Payment section; keep a divider for visual separation -->
                 <div class="divider span-all"></div>
-                <label class="inline mb-0 span-all"><input type="checkbox" id="agree"> <span data-i18n="checkout.agree">I acknowledge and accept the Terms of all Policy.</span></label>
+                <div class="checkbox-row span-all">
+                  <input type="checkbox" id="agree">
+                  <label for="agree" class="mb-0"><span data-i18n="checkout.agree">I acknowledge and accept the Terms of all Policy.</span></label>
+                </div>
 
                 <div class="btn-group span-all justify-between">
                   <div></div>
