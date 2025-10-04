@@ -1,9 +1,7 @@
 name: Check 404s
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   check-404:
