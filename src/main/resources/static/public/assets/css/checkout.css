@@ -8,9 +8,9 @@
   margin: 0; /* remove default margin to avoid extra indent */
 }
 /* New: explicit row container for input + label as siblings */
-.checkbox-row{display:flex;align-items:center;gap:8px}
+.checkbox-row{display:inline-flex;align-items:center;gap:6px}
 .checkbox-row input[type="checkbox"]{margin:0;flex:0 0 auto}
-.checkbox-row label{margin:0;line-height:1.4}
+.checkbox-row label{margin:0;line-height:1.4;display:inline-flex;align-items:center;writing-mode:horizontal-tb;white-space:normal}
 /* Extracted page styles for checkout.html to comply with CSP */
 :root{
   --brand:#2aa6b8; /* sea-blue */
@@ -70,6 +70,8 @@ textarea{min-height:84px;resize:vertical}
 .row{display:grid;gap:10px}
 @media(min-width:760px){ .row.cols-2{grid-template-columns:1fr 1fr} .row.cols-3{grid-template-columns:1fr 1fr 1fr} }
 .inline{display:flex;gap:8px;align-items:center}
+/* Avoid full-width stretching for checkbox rows placed inside grid */
+.span-all.checkbox-row{grid-column:auto}
 /* Ensure checkbox + text sit flush-left with no unintended spacing */
 label.inline{align-items:flex-start}
 label.inline input[type="checkbox"]{margin:2px 6px 0 0;flex:0 0 auto}
