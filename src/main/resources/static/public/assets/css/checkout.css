@@ -10,26 +10,25 @@
 .checkbox-tight input[type="checkbox"] {
   margin: 0; /* remove default margin to avoid extra indent */
 }
-/* New: proper checkbox wrapper to prevent vertical text wrapping */
+/* Simple checkbox wrapper - prevent any vertical text issues */
 .checkbox-wrapper {
   display: flex;
-  align-items: center;      /* จัดให้อยู่กลางแนวตั้ง */
-  justify-content: flex-start; /* ชิดซ้าย */
-  gap: 8px;                 /* ระยะห่างระหว่าง checkbox กับข้อความ */
-  white-space: normal;      /* ให้ตัดบรรทัดตามคำปกติ */
+  align-items: flex-start;
+  gap: 8px;
+  margin: 6px 0;
 }
 
 .checkbox-wrapper input[type="checkbox"] {
   margin: 0;
-  flex: 0 0 auto;
+  margin-top: 2px; /* align with first line of text */
+  flex-shrink: 0;
 }
 
 .checkbox-wrapper label {
-  display: inline-block;
-  max-width: 400px;         /* ป้องกันข้อความยาวเกินไป */
-  line-height: 1.5;         /* อ่านง่ายขึ้น */
   margin: 0;
-  white-space: normal;      /* ให้ข้อความตัดบรรทัดตามปกติ */
+  line-height: 1.4;
+  word-wrap: break-word;
+  max-width: none;
 }
 /* Extracted page styles for checkout.html to comply with CSP */
 :root{
