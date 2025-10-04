@@ -84,4 +84,19 @@
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+  document.addEventListener('DOMContentLoaded', function() {
+    // New logic for "booking for self" checkbox
+    const isBookingForSelfCheckbox = document.getElementById('isBookingForSelf');
+    const otherGuestDetailsSection = document.getElementById('otherGuestDetails');
+
+    if (isBookingForSelfCheckbox && otherGuestDetailsSection) {
+      isBookingForSelfCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          otherGuestDetailsSection.classList.add('hidden');
+        } else {
+          otherGuestDetailsSection.classList.remove('hidden');
+        }
+      });
+    }
+  });
 })();

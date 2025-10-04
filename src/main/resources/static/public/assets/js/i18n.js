@@ -258,7 +258,7 @@ window.I18N = {
 
 // Additional checkout-specific translations
 (function(){
-  window.I18N.th['checkout.guestInfo'] = 'ข้อมูลผู้เข้าพัก';
+  window.I18N.th['checkout.guestInfo'] = 'ข้อมูลติดต่อในการจอง';
   window.I18N.th['checkout.summaryTitle'] = 'สรุปการจองของคุณ';
   window.I18N.th['checkout.changeDates'] = 'เปลี่ยนวันที่';
   window.I18N.th['checkout.roomsRates'] = 'ห้องและอัตรา (ราคา 1 คืน)';
