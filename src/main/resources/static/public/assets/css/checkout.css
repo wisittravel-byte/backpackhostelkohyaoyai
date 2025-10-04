@@ -1,3 +1,6 @@
+.checkbox-wrapper{display:flex;align-items:center;justify-content:flex-start;gap:8px;white-space:normal}
+.checkbox-wrapper input[type="checkbox"]{flex:0 0 auto;margin:0}
+.checkbox-wrapper label{display:inline-block;max-width:480px;line-height:1.5;margin:0;writing-mode:horizontal-tb;word-break:normal}
 /* Tight left-aligned checkbox label layout */
 .checkbox-tight {
   display: inline-flex;
@@ -7,10 +10,27 @@
 .checkbox-tight input[type="checkbox"] {
   margin: 0; /* remove default margin to avoid extra indent */
 }
-/* New: explicit row container for input + label as siblings */
-.checkbox-row{display:inline-flex;align-items:center;gap:6px}
-.checkbox-row input[type="checkbox"]{margin:0;flex:0 0 auto}
-.checkbox-row label{margin:0;line-height:1.4;display:inline-flex;align-items:center;writing-mode:horizontal-tb;white-space:normal}
+/* New: proper checkbox wrapper to prevent vertical text wrapping */
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;      /* จัดให้อยู่กลางแนวตั้ง */
+  justify-content: flex-start; /* ชิดซ้าย */
+  gap: 8px;                 /* ระยะห่างระหว่าง checkbox กับข้อความ */
+  white-space: normal;      /* ให้ตัดบรรทัดตามคำปกติ */
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.checkbox-wrapper label {
+  display: inline-block;
+  max-width: 400px;         /* ป้องกันข้อความยาวเกินไป */
+  line-height: 1.5;         /* อ่านง่ายขึ้น */
+  margin: 0;
+  white-space: normal;      /* ให้ข้อความตัดบรรทัดตามปกติ */
+}
 /* Extracted page styles for checkout.html to comply with CSP */
 :root{
   --brand:#2aa6b8; /* sea-blue */
@@ -71,7 +91,7 @@ textarea{min-height:84px;resize:vertical}
 @media(min-width:760px){ .row.cols-2{grid-template-columns:1fr 1fr} .row.cols-3{grid-template-columns:1fr 1fr 1fr} }
 .inline{display:flex;gap:8px;align-items:center}
 /* Avoid full-width stretching for checkbox rows placed inside grid */
-.span-all.checkbox-row{grid-column:auto}
+.span-all.checkbox-wrapper{grid-column:auto}
 /* Ensure checkbox + text sit flush-left with no unintended spacing */
 label.inline{align-items:flex-start}
 label.inline input[type="checkbox"]{margin:2px 6px 0 0;flex:0 0 auto}
