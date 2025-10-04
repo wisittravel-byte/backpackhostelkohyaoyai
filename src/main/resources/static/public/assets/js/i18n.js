@@ -99,7 +99,33 @@ window.I18N = {
     "confirmed.ref":"รหัสการจอง",
     "confirmed.backHome":"กลับไปหน้าแรก",
     "confirmed.emailBtn":"ส่งอีเมลยืนยัน",
-    "confirmed.downloadBtn":"ดาวน์โหลดใบยืนยัน (PDF)"
+    "confirmed.downloadBtn":"ดาวน์โหลดใบยืนยัน (PDF)",
+    
+    // Attractions page translations
+    "attractions.title":"แหล่งท่องเที่ยว — Backpack Hostel Kohyaoyai",
+    "attractions.hero.title":"แหล่งท่องเที่ยวและกิจกรรม",
+    "attractions.hero.subtitle":"สำรวจสถานที่น่าสนใจและกิจกรรมเด็ดรอบ ๆ โฮสเทลของเรา",
+    "attractions.categories.activity.title":"Adventure / Activity",
+    "attractions.categories.activity.items.divingG":"ดำน้ำจุด G",
+    "attractions.categories.activity.items.kayakH":"พายเรือคายัค H", 
+    "attractions.categories.activity.items.cycleI":"เส้นทางปั่น I",
+    "attractions.categories.foodshop.title":"กิน-ช้อป",
+    "attractions.categories.foodshop.items.restaurantJ":"ร้านอาหาร J",
+    "attractions.categories.foodshop.items.cafeK":"คาเฟ่ K",
+    "attractions.categories.foodshop.items.marketL":"ตลาดสด L",
+    "attractions.categories.nature.title":"ธรรมชาติ / ชายหาด",
+    "attractions.categories.nature.items.beachM":"หาดพระอาทิตย์ตก M",
+    "attractions.categories.nature.items.mangroveN":"ป่าชายเลน N",
+    "attractions.categories.nature.items.viewpointO":"จุดชมวิว O",
+    "attractions.meta.distance6m":"ห่าง 6 นาที",
+    "attractions.meta.distance7m":"ห่าง 7 นาที",
+    "attractions.meta.distance9m":"ห่าง 9 นาที",
+    "attractions.meta.distance15m":"ห่าง 15 นาที",
+    "attractions.meta.distance18m":"ห่าง 18 นาที",
+    "attractions.meta.distance25m":"ห่าง 25 นาที",
+    "attractions.meta.distance35m":"ห่าง 35 นาที",
+    "attractions.meta.distance40m":"ห่าง 40 นาที",
+    "attractions.meta.distance50m":"ห่าง 50 นาที"
   },
   en: {
     "header.title":"Backpack Hostel Kohyaoyai",
@@ -200,7 +226,33 @@ window.I18N = {
     "confirmed.ref":"Booking Reference",
     "confirmed.backHome":"Back to Home",
     "confirmed.emailBtn":"Send confirmation email",
-    "confirmed.downloadBtn":"Download confirmation (PDF)"
+    "confirmed.downloadBtn":"Download confirmation (PDF)",
+    
+    // Attractions page translations
+    "attractions.title":"Attractions — Backpack Hostel Kohyaoyai",
+    "attractions.hero.title":"Attractions & Activities",
+    "attractions.hero.subtitle":"Discover interesting places and exciting activities around our hostel",
+    "attractions.categories.activity.title":"Adventure / Activity",
+    "attractions.categories.activity.items.divingG":"Diving Spot G",
+    "attractions.categories.activity.items.kayakH":"Kayak Pier H", 
+    "attractions.categories.activity.items.cycleI":"Cycle Route I",
+    "attractions.categories.foodshop.title":"Food & Shopping",
+    "attractions.categories.foodshop.items.restaurantJ":"Restaurant J",
+    "attractions.categories.foodshop.items.cafeK":"Cafe K",
+    "attractions.categories.foodshop.items.marketL":"Fresh Market L",
+    "attractions.categories.nature.title":"Nature / Beach",
+    "attractions.categories.nature.items.beachM":"Sunset Beach M",
+    "attractions.categories.nature.items.mangroveN":"Mangrove Forest N",
+    "attractions.categories.nature.items.viewpointO":"Viewpoint O",
+    "attractions.meta.distance6m":"6 min away",
+    "attractions.meta.distance7m":"7 min away",
+    "attractions.meta.distance9m":"9 min away",
+    "attractions.meta.distance15m":"15 min away",
+    "attractions.meta.distance18m":"18 min away",
+    "attractions.meta.distance25m":"25 min away",
+    "attractions.meta.distance35m":"35 min away",
+    "attractions.meta.distance40m":"40 min away",
+    "attractions.meta.distance50m":"50 min away"
   }
 };
 

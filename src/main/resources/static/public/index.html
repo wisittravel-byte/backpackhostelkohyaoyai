@@ -8,6 +8,8 @@
   <meta property="og:title" content="Backpack Hostel Kohyaoyai" />
   <meta property="og:description" content="ที่พักสำหรับสายแบ็คแพ็ค ใจกลางเกาะยาวใหญ่. จองที่พัก, โปรโมชั่น และตารางเดินเรือ" />
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Backpack Hostel Kohyaoyai" />
+  <meta property="og:locale" content="th_TH" />
   <meta property="og:url" content="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/" />
   <meta property="og:image" content="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/assets/image/Hostel3.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -18,8 +20,30 @@
   <meta name="description" content="Backpack Hostel Kohyaoyai — ที่พักสำหรับสายแบ็คแพ็ค ใจกลางเกาะยาวใหญ่. จองที่พัก, โปรโมชั่น และตารางเดินเรือ" />
   <meta name="keywords" content="Backpack Hostel, Kohyaoyai, เกาะยาวใหญ่, ที่พัก, โฮสเทล, Backpack, booking" />
   <link rel="canonical" href="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/" />
-  <!-- JSON-LD (served as a static file) -->
-  <script type="application/ld+json" src="assets/json/site.jsonld"></script>
+  <!-- hreflang for SEO multi-language -->
+  <link rel="alternate" hreflang="th" href="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/" />
+  <link rel="alternate" hreflang="en" href="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/?lang=en" />
+  <link rel="alternate" hreflang="x-default" href="https://wisittravel-byte.github.io/backpackhostelkohyaoyai/" />
+  <!-- JSON-LD (inline for SEO parsers) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    "name": "Backpack Hostel Kohyaoyai",
+    "url": "https://wisittravel-byte.github.io/backpackhostelkohyaoyai/",
+    "description": "Hostel for backpackers in central Koh Yao Yai",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Koh Yao Yai",
+      "addressRegion": "Phang Nga",
+      "postalCode": "82160",
+      "addressCountry": "TH"
+    },
+    "image": [
+      "https://wisittravel-byte.github.io/backpackhostelkohyaoyai/assets/image/Hostel3.jpg"
+    ]
+  }
+  </script>
   <link rel="stylesheet" href="assets/css/shared-header.css">
   <link rel="stylesheet" href="assets/css/site-base.css">
   <link rel="stylesheet" href="assets/css/spacing.css">
@@ -90,7 +114,7 @@
         <div class="booking-card" id="roomsList">
           <!-- 3 room cards -->
           <article class="room" data-room="dorm" data-room-type-id="1">
-            <img src="assets/image/Hostel3.jpg" alt="Dormitory room" loading="lazy" decoding="async">
+            <img src="assets/image/Hostel3.jpg" alt="Dormitory room" loading="lazy" decoding="async" width="800" height="600">
             <div>
               <div class="meta"><strong data-i18n="rooms.dorm.name">หอพักรวม</strong></div>
               <div class="muted" data-i18n="rooms.dorm.desc">เตียงแยก ใกล้พื้นที่ส่วนกลาง</div>
@@ -102,7 +126,7 @@
           </article>
 
           <article class="room" data-room="private" data-room-type-id="2">
-            <img src="assets/image/Hostel2.jpg" alt="Private room" loading="lazy" decoding="async">
+            <img src="assets/image/Hostel2.jpg" alt="Private room" loading="lazy" decoding="async" width="800" height="600">
             <div>
               <div class="meta"><strong data-i18n="rooms.private.name">ห้องส่วนตัว</strong></div>
               <div class="muted" data-i18n="rooms.private.desc">ห้องสะอาด เงียบ สวีทสำหรับสองคน</div>
@@ -114,7 +138,7 @@
           </article>
 
           <article class="room" data-room="family" data-room-type-id="3">
-            <img src="assets/image/Hostel2.jpg" alt="Family room" loading="lazy" decoding="async">
+            <img src="assets/image/Hostel2.jpg" alt="Family room" loading="lazy" decoding="async" width="800" height="600">
             <div>
               <div class="meta"><strong data-i18n="rooms.family.name">ห้องสำหรับครอบครัว</strong></div>
               <div class="muted" data-i18n="rooms.family.desc">กว้างสำหรับครอบครัว/กลุ่มเพื่อน</div>
@@ -203,7 +227,7 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.35 11.1h-9.17v2.98h5.28c-.23 1.5-1.6 4.4-5.28 4.4-3.18 0-5.78-2.63-5.78-5.87s2.6-5.87 5.78-5.87c1.8 0 3 0.76 3.69 1.42l2.52-2.43C17.16 3.8 15.1 3 12.18 3 6.99 3 2.75 7.24 2.75 12.43S6.99 21.86 12.18 21.86c6.32 0 8.73-4.43 8.73-8.53 0-.58-.06-1.02-.15-1.23z"/></svg>
                 ดูรีวิวทั้งหมดบน Google
               </a>
-              <a class="btn outline" href="#" target="_blank" rel="noopener noreferrer" aria-label="ดูรีวิวทั้งหมดบน Tripadvisor">
+              <a class="btn outline" href="#" target="https://www.tripadvisor.com/Hotel_Review-g676354-d13320012-Reviews-Backpack_Guest_House_Kohyaoyai-Ko_Yao_Yai_Phang_Nga_Province.html" rel="noopener noreferrer" aria-label="ดูรีวิวทั้งหมดบน Tripadvisor">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7c-4.9 0-9 2.6-9 5.8 0 2.1 1.7 3.9 4.1 4.9-.2-.6-.3-1.2-.3-1.9 0-3.1 2.4-5.6 5.2-5.6s5.2 2.5 5.2 5.6c0 .7-.1 1.3-.3 1.9 2.4-1 4.1-2.8 4.1-4.9C21 9.6 16.9 7 12 7zm-3.2 9.4a2.2 2.2 0 110-4.4 2.2 2.2 0 010 4.4zm6.4 0a2.2 2.2 0 110-4.4 2.2 2.2 0 010 4.4z"/></svg>
                 รีวิวบน Tripadvisor
               </a>
