@@ -16,8 +16,11 @@ jobs:
         shell: powershell
         working-directory: ./src/main/resources/static
         run: |
-          powershell -NoProfile -ExecutionPolicy Bypass -File ./ps-static-server-v2.ps1 -Port 8080 &
-          Start-Sleep -Seconds 2
+          $job = Start-Job -ScriptBlock { 
+            powershell -NoProfile -ExecutionPolicy Bypass -File "ps-static-server-v2.ps1" -Port 8080 
+          }
+          Start-Sleep -Seconds 5
+          Write-Host "Static server job started with ID: $($job.Id)"
 
       - name: Run 404 checker
         shell: powershell
