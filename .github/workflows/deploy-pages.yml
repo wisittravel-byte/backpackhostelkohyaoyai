@@ -1,6 +1,11 @@
-name: Deploy static site to GitHub Pages
+name: Deploy GitHub Pages
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/main/resources/static/public/**'
+      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -21,12 +26,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Debug list static files
         run: |
           echo "Listing static directory contents"
           ls -al src/main/resources/static || true
-          echo "HTML files under static:" || true
-          find src/main/resources/static -maxdepth 1 -type f -name "*.html" -print | sort || true
+          echo "HTML files under static/public:" || true
+          find src/main/resources/static/public -maxdepth 1 -type f -name "*.html" -print | sort || true
+
       - name: Verify required pages exist
         run: |
           for f in index.html booking.html checkout.html 404.html; do
@@ -35,6 +42,7 @@ jobs:
               exit 1
             fi
           done
+
       - name: Write on-site file listing for debug
         run: |
           echo "Creating FILES.txt and CHECK.html for published site debug"
@@ -50,21 +58,15 @@ jobs:
             <li><a href="404.html">404.html</a></li>
           </ul></body></html>
           HTML
-      - name: Generate responsive images
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y imagemagick
-          cd src/main/resources/static/public/assets/image
-          if [ -f Beach4.jpg ]; then
-            convert Beach4.jpg -resize 480x -quality 82 Beach4-480.jpg
-            convert Beach4.jpg -resize 768x -quality 85 Beach4-768.jpg
-          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: src/main/resources/static/public
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
