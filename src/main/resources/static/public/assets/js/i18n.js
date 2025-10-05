@@ -365,6 +365,31 @@ window.I18N = {
 
   th['checkout.agree'] = 'ฉันยอมรับและเห็นชอบข้อกำหนดและนโยบายทั้งหมด';
   en['checkout.agree'] = 'I acknowledge and accept the Terms of all Policy.';
+  // Terms modal (Thai/English)
+  th['checkout.terms.title'] = 'ข้อกำหนดและนโยบายทั้งหมด';
+  en['checkout.terms.title'] = 'Terms and Policies';
+  th['checkout.terms.lead'] = 'โปรดอ่านข้อกำหนดและนโยบายโดยสรุปด้านล่าง (ข้อมูลจำลอง)';
+  en['checkout.terms.lead'] = 'Please review the summary of our terms and policies below (mock data).';
+  th['checkout.terms.section.booking'] = 'การจอง';
+  en['checkout.terms.section.booking'] = 'Booking';
+  th['checkout.terms.section.checkin'] = 'เช็คอิน/เช็คเอาท์';
+  en['checkout.terms.section.checkin'] = 'Check-in/Check-out';
+  th['checkout.terms.section.policy'] = 'นโยบาย';
+  en['checkout.terms.section.policy'] = 'Policy';
+  th['checkout.terms.section.privacy'] = 'ความเป็นส่วนตัว';
+  en['checkout.terms.section.privacy'] = 'Privacy';
+  th['checkout.terms.mock.booking'] = 'การจองทั้งหมดขึ้นกับความพร้อมให้บริการ และอาจมีเงื่อนไขไม่คืนเงิน';
+  en['checkout.terms.mock.booking'] = 'All bookings are subject to availability and may be non-refundable.';
+  th['checkout.terms.mock.checkin'] = 'เช็คอินหลัง 15:00 น. และเช็คเอาท์ก่อน 11:00 น.';
+  en['checkout.terms.mock.checkin'] = 'Check-in after 15:00 and check-out before 11:00.';
+  th['checkout.terms.mock.policy'] = 'ห้ามสูบบุหรี่ในห้องพัก ค่าปรับอาจถูกเรียกเก็บ';
+  en['checkout.terms.mock.policy'] = 'Smoking is prohibited in rooms; cleaning fees may apply.';
+  th['checkout.terms.mock.privacy'] = 'เราเก็บและใช้ข้อมูลตามวัตถุประสงค์ของการให้บริการเท่านั้น';
+  en['checkout.terms.mock.privacy'] = 'We collect and use data only for providing our services.';
+  th['checkout.terms.ok'] = 'เข้าใจแล้ว';
+  en['checkout.terms.ok'] = 'Got it';
+  th['checkout.terms.close'] = 'ปิด';
+  en['checkout.terms.close'] = 'Close';
 
   th['checkout.address'] = '55 Koh Yao Yai Rd, Phang Nga 82160, Thailand';
   en['checkout.address'] = '55 Koh Yao Yai Rd, Phang Nga 82160, Thailand';

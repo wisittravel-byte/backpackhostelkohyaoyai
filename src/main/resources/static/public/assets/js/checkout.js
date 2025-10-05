@@ -20,7 +20,24 @@
   const requestsWrap = null;
 
 
-    // Special Requests logic removed
+    // Wire Terms modal
+    const termsModal = document.getElementById('termsModal');
+    const termsOkBtn = document.getElementById('termsOkBtn');
+    const termsCloseBtn = document.getElementById('termsCloseBtn');
+    function openTerms(){ if(termsModal) termsModal.classList.remove('hidden'); }
+    function closeTerms(){ if(termsModal) termsModal.classList.add('hidden'); }
+    if(agree){
+      agree.addEventListener('change', (e)=>{
+        // Only open when user is trying to check it
+        if(agree.checked){
+          // pause and show modal; uncheck until confirmed
+          agree.checked = false;
+          openTerms();
+        }
+      });
+    }
+    if(termsOkBtn){ termsOkBtn.addEventListener('click', ()=>{ if(agree) agree.checked = true; closeTerms(); }); }
+    if(termsCloseBtn){ termsCloseBtn.addEventListener('click', ()=>{ closeTerms(); }); }
 
     function mustAgree(){
       if(!agree.checked){ try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.mustAgree') : alert('Please accept the terms'); }catch(_){ } return false; }
