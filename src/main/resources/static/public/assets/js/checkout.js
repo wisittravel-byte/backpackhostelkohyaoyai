@@ -84,14 +84,44 @@
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
-  // Toggle red required star for other guest details based on self-booking checkbox
+  // Toggle visibility and star based on radio selection (self vs other)
   document.addEventListener('DOMContentLoaded', function(){
-    const selfCb = document.getElementById('isBookingForSelf');
+    const selfRadio = document.getElementById('bookingForSelf');
+    const otherRadio = document.getElementById('bookingForOther');
+  const otherLabel = document.querySelector('label[for="bookingForOther"]');
+  const otherWrap = document.getElementById('bookingForOtherWrap');
+    const otherDetails = document.getElementById('otherGuestDetails');
     const stars = document.querySelectorAll('#otherGuestDetails .req-star');
-    if(!selfCb || !stars.length) return;
-    const apply = ()=>{ stars.forEach(s=> s.classList.toggle('hidden', !!selfCb.checked)); };
+    if(!selfRadio || !otherRadio || !otherDetails) return;
+
+    // Initial state per requirement:
+    // - Default select self
+    // - Hide other guest details
+    // - Disable the "other" option initially
+  // Disable "other" at first render to match requested flow
+  try{ otherRadio.disabled = true; }catch(_){}
+
+    const apply = ()=>{
+      const isOther = otherRadio.checked;
+      otherDetails.classList.toggle('hidden', !isOther);
+      stars.forEach(s=> s.classList.toggle('hidden', !isOther));
+    };
     apply();
-    selfCb.addEventListener('change', apply);
+
+    // When user clicks the other option, enable it and show the section
+    otherRadio.addEventListener('click', ()=>{ 
+      if(otherRadio.disabled){ otherRadio.disabled = false; otherRadio.checked = true; }
+      apply();
+    });
+    const activateOther = (e)=>{
+      if(otherRadio.disabled){ if(e) e.preventDefault(); otherRadio.disabled = false; otherRadio.checked = true; apply(); }
+    };
+    if(otherLabel){ otherLabel.addEventListener('click', activateOther); }
+    if(otherWrap){ otherWrap.addEventListener('click', (e)=>{
+      // If click originated on the input itself, let its handler run; else activate
+      if(e.target !== otherRadio) activateOther(e);
+    }); }
+    selfRadio.addEventListener('click', ()=>{ apply(); });
   });
   // Guest details are always visible now; removed checkbox toggle logic.
 })();

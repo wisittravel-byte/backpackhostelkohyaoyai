@@ -267,6 +267,12 @@ window.I18N = {
   window.I18N.th['checkout.signInFast'] = 'เข้าสู่ระบบเพื่อจองได้เร็วขึ้น';
   window.I18N.th['checkout.countryCode'] = 'รหัสประเทศ';
   window.I18N.th['checkout.label.guestName'] = 'ชื่อผู้เข้าพัก';
+  // new: booking-for radio labels
+  window.I18N.th['checkout.selfBooking'] = 'ฉันเป็นผู้เข้าพัก';
+  window.I18N.th['checkout.otherBooking'] = 'ฉันจองสำหรับผู้อื่น';
+  window.I18N.th['checkout.otherGuest.title'] = 'รายละเอียดผู้เข้าพัก';
+  window.I18N.th['checkout.otherGuest.label.guestName'] = 'ชื่อ-นามสกุล ผู้เข้าพัก';
+  window.I18N.th['checkout.otherGuest.note'] = 'โดยไม่มีคำนำหน้า';
     // removed: Special Requests toggle labels
 
   window.I18N.en['checkout.guestInfo'] = 'Guest Information';
@@ -278,6 +284,12 @@ window.I18N = {
   window.I18N.en['checkout.signInFast'] = 'Sign In To Book Faster';
   window.I18N.en['checkout.countryCode'] = 'Country Code';
   window.I18N.en['checkout.label.guestName'] = 'Guest Name';
+  // new: booking-for radio labels
+  window.I18N.en['checkout.selfBooking'] = 'I am the guest';
+  window.I18N.en['checkout.otherBooking'] = 'I am booking for someone else';
+  window.I18N.en['checkout.otherGuest.title'] = 'Other guest details';
+  window.I18N.en['checkout.otherGuest.label.guestName'] = 'Guest first/last name';
+  window.I18N.en['checkout.otherGuest.note'] = 'No title required';
     // removed: Special Requests toggle labels
 })();
 
