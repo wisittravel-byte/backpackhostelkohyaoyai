@@ -24,6 +24,8 @@
   display: block;
   white-space: normal;
 }
+/* When the label itself is used as the checkbox wrapper, ensure it is not bold */
+label.checkbox-wrapper{ font-weight: normal; }
 /* Place the two options on one line */
 .booking-for{ display:flex; gap:24px; align-items:center }
 .booking-for .checkbox-wrapper{ width:auto; margin:0 }
@@ -132,3 +134,27 @@ th,td{padding:8px;border:1px solid var(--border);text-align:left}
 
 /* focus */
 button:focus, a:focus, input:focus, select:focus, textarea:focus{outline:3px solid rgba(42,166,184,.18);outline-offset:2px}
+
+/* Special Requests */
+#specialRequests .checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+#specialRequests .checkbox-wrapper input[type="checkbox"],
+#specialRequests .checkbox-wrapper input[type="radio"]{
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand);
+}
+#specialRequests .mb-4 { margin-bottom: 4px; }
+#specialRequests .mt-6 { margin-top: 6px; }
+#specialRequests .row { align-items: start; }
+#specialRequests .row.cols-2 > * { align-self: start; }
+#specialRequests .req-sub{ margin: 8px 0 0 28px; }
+#specialRequests input[type="time"]{ max-width: 200px; }
+@media (max-width: 600px){
+  #specialRequests input[type="time"]{ max-width: 100%; }
+}
+/* Bed type radios: keep each option on a single line and avoid stretching full width */
+#reqBedOptions .checkbox-wrapper{ width:auto; }
+#reqBedOptions .checkbox-wrapper span{ white-space: nowrap; }

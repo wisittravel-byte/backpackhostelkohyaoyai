@@ -125,3 +125,87 @@
   });
   // Guest details are always visible now; removed checkbox toggle logic.
 })();
+
+// Add Special Requests toggles
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function show(el, yes){ if(!el) return; el.classList.toggle('hidden', !yes); }
+  document.addEventListener('DOMContentLoaded', function(){
+    const ckIn = byId('reqCheckinTime');
+    const ckInInput = byId('reqCheckinInput');
+    const ckOut = byId('reqCheckoutTime');
+    const ckOutInput = byId('reqCheckoutInput');
+    const other = byId('reqOther');
+    const otherText = byId('reqOtherText');
+    const otherNote = byId('reqOtherNote');
+    const inWrap = byId('reqCheckinWrap');
+    const outWrap = byId('reqCheckoutWrap');
+    const otherWrap = byId('reqOtherWrap');
+
+    function apply(){
+      show(ckInInput, !!ckIn && ckIn.checked);
+      show(ckOutInput, !!ckOut && ckOut.checked);
+      const o = !!other && other.checked;
+      show(otherText, o);
+      show(otherNote, o);
+    }
+
+    // default: all unchecked/hidden
+    apply();
+
+    if(ckIn) ckIn.addEventListener('change', apply);
+    if(ckOut) ckOut.addEventListener('change', apply);
+    if(other) other.addEventListener('change', apply);
+
+    // Clicking the label/wrapper should toggle like the checkbox
+    function wireWrapToggle(wrapEl, inputEl){
+      if(!wrapEl || !inputEl) return;
+      wrapEl.addEventListener('click', function(e){
+        // Avoid double toggling if the click is on the input itself
+        if(e.target === inputEl) return;
+        inputEl.checked = !inputEl.checked;
+        inputEl.dispatchEvent(new Event('change'));
+      });
+    }
+    wireWrapToggle(inWrap, ckIn);
+    wireWrapToggle(outWrap, ckOut);
+    wireWrapToggle(otherWrap, other);
+  });
+})();
+
+// Enhance Special Requests toggles: bed type and time boxes positioning
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function show(el, yes){ if(!el) return; el.classList.toggle('hidden', !yes); }
+  document.addEventListener('DOMContentLoaded', function(){
+    const bedToggle = byId('reqBedToggle');
+    const bedOpts = byId('reqBedOptions');
+    const bedWrap = byId('reqBedWrap');
+    function applyBed(){ show(bedOpts, !!bedToggle && bedToggle.checked); }
+    applyBed();
+    if(bedToggle) bedToggle.addEventListener('change', applyBed);
+    if(bedWrap) bedWrap.addEventListener('click', function(e){
+      // If the click is on any of the radio inputs, do not toggle the checkbox (keeps it open)
+      if(e.target && (e.target.id === 'reqBedTwin' || e.target.id === 'reqBedKing')){
+        return;
+      }
+      if(e.target === bedToggle) return;
+      if(!bedToggle) return;
+      bedToggle.checked = !bedToggle.checked;
+      bedToggle.dispatchEvent(new Event('change'));
+    });
+
+    // Times
+    const inCk = byId('reqCheckinTime');
+    const inBox = byId('reqCheckinBox');
+    const outCk = byId('reqCheckoutTime');
+    const outBox = byId('reqCheckoutBox');
+    function applyTimes(){
+      show(inBox, !!inCk && inCk.checked);
+      show(outBox, !!outCk && outCk.checked);
+    }
+    applyTimes();
+    if(inCk) inCk.addEventListener('change', applyTimes);
+    if(outCk) outCk.addEventListener('change', applyTimes);
+  });
+})();

@@ -500,3 +500,40 @@ window.I18N = {
     document.addEventListener('DOMContentLoaded', ()=>{ try{ window.applyLang(window.currentLang); }catch(e){}; try{ window.wireLangButtons(); }catch(e){}; });
   }
 })();
+
+(function(){
+  const th = window.I18N.th; const en = window.I18N.en;
+  // Special Requests
+  th['checkout.requests.title'] = 'แจ้งให้เราทราบหากคุณมีคำขอใด ๆ';
+  en['checkout.requests.title'] = 'Let us know if you have any requests';
+  th['checkout.requests.lead'] = 'คุณสามารถระบุคำขอบางอย่าง เช่น ห้องปลอดบุหรี่ ประเภทเตียง หรือเวลาเช็คอิน/เช็คเอาท์';
+  en['checkout.requests.lead'] = 'You may specify requests such as non-smoking room, bed type, or check-in/out time.';
+  th['checkout.requests.noSmoking'] = 'ห้องพักปลอดบุหรี่';
+  en['checkout.requests.noSmoking'] = 'Non-smoking room';
+  th['checkout.requests.connecting'] = 'ห้องพักแบบเชื่อมถึงกัน';
+  en['checkout.requests.connecting'] = 'Connecting rooms';
+  th['checkout.requests.highFloor'] = 'ห้องพักที่อยู่ชั้นสูง';
+  en['checkout.requests.highFloor'] = 'High floor';
+  th['checkout.requests.bedType'] = 'ประเภทเตียง';
+  en['checkout.requests.bedType'] = 'Bed type';
+  th['checkout.requests.bed.twin'] = 'เตียงเดี่ยว 2 เตียง';
+  en['checkout.requests.bed.twin'] = 'Two single beds';
+  th['checkout.requests.bed.king'] = 'เตียงใหญ่';
+  en['checkout.requests.bed.king'] = 'King bed';
+  th['checkout.requests.checkin'] = 'เวลาเช็คอิน';
+  en['checkout.requests.checkin'] = 'Check-in time';
+  th['checkout.requests.checkout'] = 'เวลาเช็คเอาท์';
+  en['checkout.requests.checkout'] = 'Check-out time';
+  th['checkout.requests.other'] = 'อื่นๆ';
+  en['checkout.requests.other'] = 'Other';
+  th['checkout.requests.other.placeholder'] = 'โปรดระบุ...';
+  en['checkout.requests.other.placeholder'] = 'Please specify...';
+  th['checkout.requests.other.required'] = 'ต้องกรอกข้อมูลในช่องนี้';
+  en['checkout.requests.other.required'] = 'This field is required';
+})();
+
+(function(){
+  const th = window.I18N.th; const en = window.I18N.en;
+  th['checkout.requests.time.localNote'] = 'เวลาท้องถิ่นของโรงแรม';
+  en['checkout.requests.time.localNote'] = 'Hotel local time';
+})();
