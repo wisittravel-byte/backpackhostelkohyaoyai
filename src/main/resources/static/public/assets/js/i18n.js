@@ -32,6 +32,12 @@ window.I18N = {
     "rooms.family.name":"ห้องสำหรับครอบครัว",
     "rooms.family.desc":"กว้างสำหรับครอบครัว/กลุ่มเพื่อน",
     "rooms.book":"จองเลย",
+    "rooms.tab.private":"ห้องพัก",
+  "rooms.tab.dorm":"เตียง Dorm",
+    "rooms.dorm4.name":"ห้องรวม 4 เตียง",
+    "rooms.dorm6.name":"ห้องรวม 6 เตียง",
+    "rooms.dorm8.name":"ห้องรวม 8 เตียง",
+    "rooms.dorm.sharedDesc":"เตียงในห้องรวม ห้องน้ำรวม",
   "rooms.night":"1 คืน",
   "reviews.sample":"\"บริการดี ใกล้ท่าเรือ\" — สมชาย",
   "rooms.dorm.promo":"ฟรี เครดิตรีสอร์ท THB 1,000 ต่อคืน",
@@ -174,6 +180,12 @@ window.I18N = {
   "rooms.family.choose":"Choose Family Room",
   "rooms.details":"View room details",
   "rooms.detailsHide":"Hide room details",
+  "rooms.tab.private":"Rooms",
+  "rooms.tab.dorm":"Dorm Beds",
+  "rooms.dorm4.name":"Dorm 4-Bed",
+  "rooms.dorm6.name":"Dorm 6-Bed",
+  "rooms.dorm8.name":"Dorm 8-Bed",
+  "rooms.dorm.sharedDesc":"Bed in shared dorm, shared bathroom",
     "promo.title":"Promotions",
     "promo.off1.title":"Stay 3 nights, get 1 free",
     "promo.off1.desc":"Off-season only. Book at least 14 days in advance",
@@ -561,4 +573,67 @@ window.I18N = {
   const th = window.I18N.th; const en = window.I18N.en;
   th['checkout.requests.time.localNote'] = 'เวลาท้องถิ่นของโรงแรม';
   en['checkout.requests.time.localNote'] = 'Hotel local time';
+})();
+
+(function(){
+  // Demo Room/Dorm page
+  const th = window.I18N.th; const en = window.I18N.en;
+  th['demoDorm.title'] = 'เดโม — ห้อง & เตียง (Dorm)';
+  en['demoDorm.title'] = 'Demo — Room & Dorm';
+  th['demoDorm.heading'] = 'เลือกห้องพัก (Private) หรือ เตียง (Dorm)';
+  en['demoDorm.heading'] = 'Choose Private Room or Dorm Bed';
+  th['demoDorm.tab.private'] = 'Private';
+  en['demoDorm.tab.private'] = 'Private';
+  th['demoDorm.tab.dorm'] = 'Dorm';
+  en['demoDorm.tab.dorm'] = 'Dorm';
+  th['demoDorm.label.checkin'] = 'เช็คอิน';
+  en['demoDorm.label.checkin'] = 'Check-in';
+  th['demoDorm.label.checkout'] = 'เช็คเอาท์';
+  en['demoDorm.label.checkout'] = 'Check-out';
+  th['demoDorm.label.nights'] = 'จำนวนคืน';
+  en['demoDorm.label.nights'] = 'Nights';
+  th['demoDorm.label.rooms'] = 'จำนวนห้อง';
+  en['demoDorm.label.rooms'] = 'Rooms';
+  th['demoDorm.label.pricePerRoom'] = 'ราคา/ห้อง/คืน (THB)';
+  en['demoDorm.label.pricePerRoom'] = 'Price/room/night (THB)';
+  th['demoDorm.label.total'] = 'รวมโดยประมาณ';
+  en['demoDorm.label.total'] = 'Estimated Total';
+  th['demoDorm.btn.proceed'] = 'ดำเนินการไป Checkout';
+  en['demoDorm.btn.proceed'] = 'Proceed to Checkout';
+  th['demoDorm.label.beds'] = 'จำนวนเตียง';
+  en['demoDorm.label.beds'] = 'Beds';
+  th['demoDorm.label.gender'] = 'เพศ (ถ้ามี)';
+  en['demoDorm.label.gender'] = 'Gender (if applicable)';
+  th['demoDorm.gender.mixed'] = 'รวม';
+  en['demoDorm.gender.mixed'] = 'Mixed';
+  th['demoDorm.gender.female'] = 'หญิง';
+  en['demoDorm.gender.female'] = 'Female';
+  th['demoDorm.gender.male'] = 'ชาย';
+  en['demoDorm.gender.male'] = 'Male';
+  th['demoDorm.label.pricePerBed'] = 'ราคา/เตียง/คืน (THB)';
+  en['demoDorm.label.pricePerBed'] = 'Price/bed/night (THB)';
+  th['demoDorm.label.preferences'] = 'ความต้องการ (ไม่การันตี)';
+  en['demoDorm.label.preferences'] = 'Preferences (not guaranteed)';
+  th['demoDorm.pref.lower'] = 'เตียงล่าง';
+  en['demoDorm.pref.lower'] = 'Lower bunk';
+  th['demoDorm.pref.upper'] = 'เตียงบน';
+  en['demoDorm.pref.upper'] = 'Upper bunk';
+  th['demoDorm.pref.window'] = 'ใกล้หน้าต่าง';
+  en['demoDorm.pref.window'] = 'Near window';
+  th['demoDorm.pref.outlet'] = 'ใกล้ปลั๊กไฟ';
+  en['demoDorm.pref.outlet'] = 'Near power outlet';
+  th['demoDorm.pref.note'] = 'เป็นเพียงความต้องการ โรงแรมจะพยายามจัดให้ตามความเหมาะสม';
+  en['demoDorm.pref.note'] = 'Preferences only; we will try our best.';
+  th['demoDorm.label.avail'] = 'คงเหลือ (เตียง)';
+  en['demoDorm.label.avail'] = 'Available (beds)';
+  th['demoDorm.notice.title'] = 'ข้อควรทราบสำหรับ Dorm';
+  en['demoDorm.notice.title'] = 'Dorm Notes';
+  th['demoDorm.notice.age'] = 'อายุขั้นต่ำ 12+ หรือ 18+ ตามนโยบาย';
+  en['demoDorm.notice.age'] = 'Minimum age 12+ or 18+ as per policy';
+  th['demoDorm.notice.locker'] = 'มีล๊อคเกอร์ (กรุณานำกุญแจมาเอง หรือสอบถามที่พัก)';
+  en['demoDorm.notice.locker'] = 'Lockers available (bring your own lock or ask reception)';
+  th['demoDorm.notice.quiet'] = 'โปรดเคารพช่วงเวลางดเสียง';
+  en['demoDorm.notice.quiet'] = 'Please respect quiet hours';
+  th['demoDorm.notice.bath'] = 'ห้องน้ำรวม/ส่วนตัว ขึ้นกับประเภทห้อง';
+  en['demoDorm.notice.bath'] = 'Shared or private bathrooms depending on room type';
 })();

@@ -100,3 +100,9 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .reviews-card .stars svg{width:20px;height:20px;fill:#f5a623}
 .reviews-card .stars .badge{background:rgba(42,166,184,0.06);border:1px solid rgba(42,166,184,0.15);padding:4px 8px;border-radius:999px;font-weight:700;color:var(--text)}
 .btn.outline{background:#fff;color:var(--text);border:1px solid #e6f6f7}
+
+/* Tabs under Rooms section */
+.tabs{display:flex;gap:6px;border-bottom:1px solid #e6f6f7}
+.tabs .tab{background:#fff;border:1px solid #e6f6f7;border-bottom:none;padding:8px 12px;border-top-left-radius:10px;border-top-right-radius:10px;color:var(--text);cursor:pointer}
+.tabs .tab.active{background:rgba(42,166,184,0.06);color:var(--text);font-weight:700;border-color:rgba(42,166,184,0.25)}
+.tab-panel{padding-top:10px}
