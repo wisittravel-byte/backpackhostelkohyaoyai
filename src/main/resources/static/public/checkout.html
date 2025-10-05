@@ -14,7 +14,7 @@
   <meta name="description" content="Checkout sample styled like reference UI, with original theme colors">
   <!-- Shared/base styles -->
   <link rel="stylesheet" href="assets/css/shared-header.css?v=20250929">
-  <link rel="stylesheet" href="assets/css/site-base.css?v=20250929">
+  <link rel="stylesheet" href="assets/css/site-base.css?v=20251005">
   <link rel="stylesheet" href="assets/css/spacing.css?v=20250929">
   <!-- Reuse index form/hero styles for consistent sizing -->
   <link rel="stylesheet" href="assets/css/index.css?v=20250929">
@@ -82,10 +82,10 @@
                   <label for="isBookingForSelf">ฉันจองให้กับตัวเอง</label>
                 </div>
 
-                <!-- 2. Add Guest Details Section (hidden by default) -->
-                <div id="otherGuestDetails" class="hidden span-all grid gap-8">
+                <!-- 2. Guest Details Section (always visible) -->
+                <div id="otherGuestDetails" class="span-all grid gap-8">
                   <h3 class="span-all color-brand" data-i18n="checkout.otherGuest.title">รายละเอียดผู้เข้าพัก</h3>
-                  <label class="span-all"><span data-i18n="checkout.otherGuest.label.guestName">ชื่อ-นามสกุล ผู้เข้าพัก</span> <span class="text-danger">*</span></label>
+                  <label class="span-all"><span data-i18n="checkout.otherGuest.label.guestName">ชื่อ-นามสกุล ผู้เข้าพัก</span> <span class="text-danger req-star hidden">*</span></label>
                   <div class="row cols-2">
                     <input id="otherGuestFirstName" class="form-control" data-i18n-placeholder="checkout.placeholder.firstName" placeholder="First Name">
                     <input id="otherGuestLastName" class="form-control" data-i18n-placeholder="checkout.placeholder.lastName" placeholder="Last Name">
@@ -181,7 +181,7 @@
 
   <script src="assets/js/messages.js?v=20250929" defer></script>
   <script src="assets/js/api.js?v=20250929" defer></script>
-  <script src="assets/js/checkout.js?v=20250929" defer></script>
+  <script src="assets/js/checkout.js?v=20251005a" defer></script>
   <script src="assets/js/i18n.js?v=20250929" defer></script>
   <script src="assets/js/header-content.js?v=20250929" defer></script>
   <script src="assets/js/load-shared-header.js?v=20250929" defer></script>

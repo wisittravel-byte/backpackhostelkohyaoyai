@@ -44,6 +44,9 @@ textarea.form-control{height:auto;min-height:100px}
 /* Accessibility */
 button:focus, a:focus, input:focus, select:focus, textarea:focus{outline:3px solid rgba(42,166,184,.18);outline-offset:2px}
 .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+/* Visibility utilities */
+.hidden{display:none !important}
+[hidden]{display:none !important}
 
 /* Spacing utilities */
 .mt-0{margin-top:0}

@@ -84,19 +84,14 @@
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
-  document.addEventListener('DOMContentLoaded', function() {
-    // New logic for "booking for self" checkbox
-    const isBookingForSelfCheckbox = document.getElementById('isBookingForSelf');
-    const otherGuestDetailsSection = document.getElementById('otherGuestDetails');
-
-    if (isBookingForSelfCheckbox && otherGuestDetailsSection) {
-      isBookingForSelfCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-          otherGuestDetailsSection.classList.add('hidden');
-        } else {
-          otherGuestDetailsSection.classList.remove('hidden');
-        }
-      });
-    }
+  // Toggle red required star for other guest details based on self-booking checkbox
+  document.addEventListener('DOMContentLoaded', function(){
+    const selfCb = document.getElementById('isBookingForSelf');
+    const stars = document.querySelectorAll('#otherGuestDetails .req-star');
+    if(!selfCb || !stars.length) return;
+    const apply = ()=>{ stars.forEach(s=> s.classList.toggle('hidden', !!selfCb.checked)); };
+    apply();
+    selfCb.addEventListener('change', apply);
   });
+  // Guest details are always visible now; removed checkbox toggle logic.
 })();
