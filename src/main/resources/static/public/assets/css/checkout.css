@@ -130,7 +130,7 @@ th,td{padding:8px;border:1px solid var(--border);text-align:left}
 .opacity-80{opacity:.8}
 .fs-12{font-size:12px}
 .text-danger{color:#d33}
-.pay-total{font-size:20px;font-weight:800;color:var(--emph)}
+.pay-total{font-size:20px;font-weight:800;color:var(--emph);margin-left:auto;text-align:right}
 
 /* focus */
 button:focus, a:focus, input:focus, select:focus, textarea:focus{outline:3px solid rgba(42,166,184,.18);outline-offset:2px}

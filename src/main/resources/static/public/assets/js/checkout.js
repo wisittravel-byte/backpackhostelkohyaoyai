@@ -12,9 +12,9 @@
   }
 
   function wireActions(){
-    const agree = document.getElementById('agree');
-    const bookBtn = document.getElementById('bookBtn');
-    const reviewBtn = document.getElementById('reviewBtn');
+  const agree = document.getElementById('agree');
+  const bookBtn = document.getElementById('bookBtn');
+  const reviewBtn = document.getElementById('reviewBtn');
   // Special Requests section removed from UI; keep variables undefined
   const toggleRequests = null;
   const requestsWrap = null;
@@ -89,7 +89,9 @@
     }catch(err){ console.warn('Booking save failed:', err); }
     window.location.href = 'payment.html';
   });
-  reviewBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.reviewing') : alert('Reviewing your booking…'); }catch(_){ } });
+  if(reviewBtn){
+    reviewBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.reviewing') : alert('Reviewing your booking…'); }catch(_){ } });
+  }
   }
 
   function loadDraft(){
