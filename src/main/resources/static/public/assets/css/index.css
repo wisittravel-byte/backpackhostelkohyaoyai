@@ -38,6 +38,9 @@ nav a:hover{background:rgba(0,0,0,0.04)}
 @media(min-width:900px){ .hero h2{font-size:22px} }
 .hero p{margin:0;color:var(--muted)}
 
+/* Avoid anchor targets being hidden under the sticky header on first load (#home) and when navigating via hash */
+#home, #booking, #highlights, #promo, #attractions { scroll-margin-top: calc(var(--header-inner-height, 72px) + 10px); }
+
 /* Search form on hero card (match booking page breakpoints) */
 .hero .card .search-grid{grid-template-columns:1fr}
 @media(min-width:480px){

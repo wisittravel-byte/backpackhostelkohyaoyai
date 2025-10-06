@@ -42,7 +42,11 @@
         var el = document.getElementById(id);
         if(!el) return false;
         e && e.preventDefault && e.preventDefault();
-        el.scrollIntoView({behavior:'smooth', block:'start'});
+        // If we are already at the top and the hash is #home during initial load, avoid extra scroll jump
+        var isInitial = (window.performance && performance.getEntriesByType) ? (performance.getEntriesByType('navigation')[0]?.type === 'navigate') : false;
+        if(!(id === 'home' && isInitial && (window.scrollY || window.pageYOffset) < 4)){
+          el.scrollIntoView({behavior:'smooth', block:'start'});
+        }
         try{ history.replaceState(null, '', newHash ? ('#'+newHash) : 'index.html'); }catch(_){ }
         return true;
       }
