@@ -39,6 +39,29 @@
     if(termsOkBtn){ termsOkBtn.addEventListener('click', ()=>{ if(agree) agree.checked = true; closeTerms(); }); }
     if(termsCloseBtn){ termsCloseBtn.addEventListener('click', ()=>{ closeTerms(); }); }
 
+    // Change Dates -> go back to booking with preserved search
+    const changeBtn = document.getElementById('changeDatesBtn');
+    if(changeBtn){
+      changeBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        try{
+          const draftRaw = localStorage.getItem('booking_draft');
+          const draft = draftRaw ? JSON.parse(draftRaw) : {};
+          const ci = draft.checkIn || (document.getElementById('sumCheckIn')?.textContent||'').trim();
+          const co = draft.checkOut || (document.getElementById('sumCheckOut')?.textContent||'').trim();
+          const g  = (draft.guests!=null) ? Number(draft.guests) : undefined;
+          const r  = (draft.rooms!=null) ? Number(draft.rooms) : undefined;
+          const usp = new URLSearchParams();
+          if(ci) usp.set('ci', ci);
+          if(co) usp.set('co', co);
+          if(g)  usp.set('g', String(g));
+          if(r)  usp.set('r', String(r));
+          const url = 'booking.html' + (usp.toString() ? ('?' + usp.toString()) : '');
+          window.location.href = url;
+        }catch(_){ window.location.href = 'booking.html'; }
+      });
+    }
+
     function mustAgree(){
       if(!agree.checked){ try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.mustAgree') : alert('Please accept the terms'); }catch(_){ } return false; }
       return true;

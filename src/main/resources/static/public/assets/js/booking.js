@@ -218,6 +218,12 @@
         if(co && coQ) co.value = coQ;
         if(g && gQ) g.value = String(gQ);
         if(r && rQ) r.value = String(rQ);
+        // Update the visible combined date range box if both are present
+        if(box && (ciQ || coQ)){
+          const left = ci ? (ci.value||ciQ||'') : (ciQ||'');
+          const right = co ? (co.value||coQ||'') : (coQ||'');
+          if(left && right) box.value = `${left} – ${right}`;
+        }
         // Merge into draft
         const draftRaw = localStorage.getItem('booking_draft');
         const draft = draftRaw ? JSON.parse(draftRaw) : {};
