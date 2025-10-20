@@ -113,12 +113,12 @@ public class RoomTypesDao {
         RoomTypeRow r = new RoomTypeRow();
         // id may be INT/BIGINT/DECIMAL -> use Number
         Object idObj = rs.getObject("id");
-        if(idObj instanceof Number) r.id = ((Number)idObj).longValue();
+        if(idObj instanceof Number number) r.id = number.longValue();
         else if(idObj == null) r.id = null; else r.id = Long.valueOf(idObj.toString());
 
         // property_id may be returned as BigInteger/Long/etc.
         Object pidObj = rs.getObject("property_id");
-        if(pidObj instanceof Number) r.propertyId = ((Number)pidObj).intValue();
+        if(pidObj instanceof Number number) r.propertyId = number.intValue();
         else if(pidObj == null) r.propertyId = null; else r.propertyId = Integer.valueOf(pidObj.toString());
         r.code = rs.getString("code");
         r.name = rs.getString("name");

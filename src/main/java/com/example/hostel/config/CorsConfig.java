@@ -18,7 +18,7 @@ public class CorsConfig {
     private String allowedOriginsCsv;
 
     @Bean
-    public CorsFilter corsFilter(){
+    CorsFilter corsFilter(){
         CorsConfiguration config = new CorsConfiguration();
         List<String> origins = Arrays.stream(allowedOriginsCsv.split(","))
                 .map(String::trim)
