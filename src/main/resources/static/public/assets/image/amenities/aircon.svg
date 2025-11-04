@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="#5aa6ad" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- indoor unit -->
+  <rect x="3" y="5" width="18" height="6" rx="2" />
+  <path d="M6 11v1m4-1v1m4-1v1m4-1v1" />
+  <!-- cool air -->
+  <path d="M7 16c0 1 .8 2 2 2s2-1 2-2m2 0c0 1 .8 2 2 2s2-1 2-2" />
+</svg>

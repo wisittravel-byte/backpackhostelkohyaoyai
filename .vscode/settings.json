@@ -29,10 +29,16 @@
   "java.autobuild.enabled": false,
   "java.referencesCodeLens.enabled": false,
   "java.implementationsCodeLens.enabled": false,
+  "java.import.maven.enabled": false,
+  "java.import.gradle.enabled": false,
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.server.launchMode": "LightWeight",
   "java.project.importOnFirstTimeStartup": "disabled",
   "java.progressReports.enabled": false,
   "java.maven.downloadSources": false,
   "java.test.report.showAfterExecution": "onFailure",
+    "java.trace.server": "off",
+    "java.errors.incompleteClasspath.severity": "ignore",
 
   // Misc
   "redhat.telemetry.enabled": false,

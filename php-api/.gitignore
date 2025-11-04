@@ -1,0 +1,6 @@
+# Ignore local-only config overrides
+config.local.php
+
+# Ignore secrets file containing production credentials
+api-secrets.php
+secrets.php

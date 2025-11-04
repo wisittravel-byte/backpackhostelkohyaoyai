@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview Rate Table</title>
+<style>
+:root {
+  --brand: #2aa6b8;
+  --border: #e6f6f7;
+  --bg: #ffffff;
+  --text: #08323b;
+}
+
+/* กล่องรวมทั้งตาราง */
+.rate-table {
+  width: 100%;
+  max-width: 950px;
+  margin: 40px auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: "Segoe UI", "Noto Sans Thai", sans-serif;
+  background: var(--bg);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+/* แถวหัวตาราง */
+.rate-header {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr 0.9fr;
+  background: rgba(42,166,184,0.06);
+  border-bottom: 2px solid #e0f1f3;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.rate-header div {
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rate-header div:first-child { justify-content: flex-start; }
+.rate-header div:last-child { border-right: none; justify-content: flex-end; }
+
+/* แถวข้อมูล */
+.rate-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr 0.9fr;
+  border-bottom: 1px solid var(--border);
+  align-items: stretch;
+}
+.rate-row:last-child { border-bottom: none; }
+
+.rate-row > div {
+  padding: 16px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.rate-row > div:last-child { border-right: none; }
+
+/* เนื้อหาภายใน */
+.rate-name {
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.rate-desc {
+  color: #5aa6ad;
+  font-size: 14px;
+}
+.rate-guest {
+  text-align: center;
+  font-size: 14px;
+}
+.rate-price {
+  text-align: right;
+  color: var(--brand);
+  font-size: 20px;
+  font-weight: 800;
+}
+.rate-cta {
+  text-align: right;
+  margin-top: 8px;
+}
+.rate-cta button {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.rate-cta button:hover {
+  background: #2492a3;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .rate-header, .rate-row {
+    grid-template-columns: 1fr;
+  }
+  .rate-header div, .rate-row > div {
+    border-right: none;
+    text-align: left;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="rate-table">
+  <div class="rate-header">
+    <div>ตัวเลือกห้องพัก</div>
+    <div>ผู้เข้าพัก</div>
+    <div>ราคา / คืน</div>
+  </div>
+
+  <div class="rate-row">
+    <div>
+      <div class="rate-name">ห้องดีลักซ์ เตียงใหญ่</div>
+      <div class="rate-desc">ไม่รวมอาหารเช้า • ยกเลิกฟรีก่อนเช็คอิน</div>
+    </div>
+    <div class="rate-guest">👤 2 ผู้ใหญ่</div>
+    <div>
+      <div class="rate-price">฿1,250</div>
+      <div class="rate-cta"><button>เลือก</button></div>
+    </div>
+  </div>
+
+  <div class="rate-row">
+    <div>
+      <div class="rate-name">เตียงเดี่ยวในห้องรวมหญิง</div>
+      <div class="rate-desc">รวมอาหารเช้า • ยกเลิกฟรีภายใน 3 วัน</div>
+    </div>
+    <div class="rate-guest">👤 1 ผู้ใหญ่</div>
+    <div>
+      <div class="rate-price">฿550</div>
+      <div class="rate-cta"><button>เลือก</button></div>
+    </div>
+  </div>
+
+  <div class="rate-row">
+    <div>
+      <div class="rate-name">ห้องแฟมิลี่ 3 เตียง</div>
+      <div class="rate-desc">รวมอาหารเช้า • ไม่สามารถยกเลิกได้</div>
+    </div>
+    <div class="rate-guest">👤 3 ผู้ใหญ่</div>
+    <div>
+      <div class="rate-price">฿1,950</div>
+      <div class="rate-cta"><button>เลือก</button></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+# .htaccess สำหรับ php-api directory
+# ไฟล์นี้ต้องอยู่ใน C:/Learnning coding/php-api/.htaccess
+
+Options -Indexes
+
+# Keep rules minimal and compatible with PHP-FPM/CGI hosting.
+# Many shared hosts disallow php_flag/php_value in .htaccess and will return 500 if present.
+
+RewriteEngine On
+
+# Allow simple preflight handling at Apache level (optional).
+RewriteCond %{REQUEST_METHOD} =OPTIONS
+RewriteRule ^ - [R=204,L]
+
+<IfModule mod_headers.c>
+    # Basic CORS headers (your PHP also sets CORS; this is harmless fallback)
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Accept, Authorization, X-Requested-With"
+
+    # Security headers
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # No-cache for dynamic PHP responses
+    <FilesMatch "\.php$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
+# Deny direct access to sensitive files
+<FilesMatch "^(config\.php|api-secrets\.php|secrets\.php|schema\.sql|.*\.(md))$">
+    Require all denied
+</FilesMatch>

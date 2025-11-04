@@ -1,0 +1,45 @@
+/* Slide-in Booking Summary Drawer (scoped with bs- prefix) */
+:root{ --bs-brand: var(--brand, #2aa6b8); --bs-brand-dark:#0e93a6; --bs-text: var(--text, #08323b); --bs-muted:#5aa6ad; }
+
+/* Floating open button (fixed circle, top-right) */
+.bs-open{ position:fixed; top:calc(var(--header-inner-height,72px) + 16px); right:16px; width:52px; height:52px; border-radius:999px; background:var(--bs-brand); color:#fff; border:0; cursor:pointer; display:none; align-items:center; justify-content:center; box-shadow:0 8px 20px rgba(3,50,59,.18); z-index:999; transition:transform .12s ease, box-shadow .2s ease }
+.bs-has-items .bs-open{ display:flex }
+.bs-open:hover{ background:var(--bs-brand-dark); transform:translateY(-1px); box-shadow:0 10px 24px rgba(3,50,59,.22) }
+.bs-open .bs-ic{ font-size:22px; line-height:1 }
+.bs-open .bs-badge{ position:absolute; bottom:-2px; left:-2px; background:#fff; color:var(--bs-brand); border-radius:999px; padding:2px 6px; font-size:12px; font-weight:700; border:1px solid rgba(3,50,59,.06) }
+
+/* Backdrop + Drawer */
+.bs-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.45); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:1000; }
+.bs-drawer{ position:fixed; top:0; right:0; height:100dvh; width:100vw; max-width:420px; background:#fff; box-shadow:-8px 0 24px rgba(2,8,23,.25); transform:translateX(100%); transition:transform .25s ease; z-index:1001; display:flex; flex-direction:column; border-radius:12px 0 0 12px }
+.bs-drawer header{ padding:16px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between }
+.bs-drawer h3{ margin:0; font-size:16px; color:var(--bs-text) }
+.bs-close{ background:#e2e8f0; border:0; border-radius:8px; padding:6px 10px; cursor:pointer }
+.bs-close:hover{ background:#cbd5e1; }
+.bs-drawer main{ padding:4px 16px 16px; overflow:auto; flex:1; }
+/* Enforce tighter top spacing even if other CSS overrides */
+.bs-drawer > main{ padding-top:2px !important }
+.bs-summaryRow{ display:flex; justify-content:space-between; margin:6px 0; font-size:14px; color:var(--bs-text) }
+.bs-summaryRow small{ color:var(--bs-muted) }
+.bs-total{ font-weight:800; }
+.bs-cta{ padding:16x; border-top:1px solid #e2e8f0; }
+.bs-btnPrimary{ width:100%; background:var(--bs-brand); color:#fff; border:0; border-radius:10px; padding:12px 16px; font-weight:700; cursor:pointer }
+.bs-btnPrimary:hover{ background:var(--bs-brand-dark); }
+
+/* Item list inside the drawer */
+.bs-items{ list-style:none; padding:0; margin:0 0 12px 0 }
+.bs-drawer .bs-items{ margin-top:0 !important }
+.bs-item{ padding:4px 0; border-bottom:1px solid #eef2f7; }
+.bs-items > .bs-item:first-child{ padding-top:0 !important }
+.bs-item:last-child{ border-bottom:none }
+.bs-date{ font-size:12px; color:var(--bs-muted); margin-bottom:4px; display:flex; align-items:center; gap:6px }
+.bs-item .bs-item-top{ display:flex; justify-content:space-between; gap:8px; align-items:center; font-weight:600 }
+.bs-plan{ margin:6px 0 2px 0; font-size:13px; color:var(--bs-muted); display:flex; gap:6px; align-items:center }
+.bs-plan .tick{ color:#16a34a; font-weight:700 }
+.bs-item .bs-item-sub{ font-size:12px; color:var(--bs-muted); display:flex; gap:8px; margin-top:4px; justify-content:space-between }
+.bs-remove{ background:transparent; border:0; color:#dc2626; cursor:pointer; font-size:12px }
+
+/* Open state */
+.bs-is-open .bs-backdrop{ opacity:1; pointer-events:auto }
+.bs-is-open .bs-drawer{ transform:translateX(0) }
+
+@media (min-width: 992px){ .bs-drawer{ max-width:380px } }
