@@ -2,7 +2,7 @@
 window.__SHARED_HEADER_HTML = `
 <header>
     <div class="brand" aria-label="brand">
-    <div class="logo">BK</div>
+    <a href="index.html" class="logo" aria-label="กลับไปหน้าแรก">BK</a>
     <div>
       <h1 id="site-title" data-i18n="header.title">Backpack Hostel Kohyaoyai</h1>
       <div class="muted" id="site-sub" data-i18n="header.subtitle">ที่พักสำหรับสายแบ็คแพ็ค ใจกลางเกาะยาวใหญ่</div>
