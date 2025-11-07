@@ -3,7 +3,76 @@
   function round2(n){ return Math.round((Number(n)+Number.EPSILON)*100)/100; }
   // Resolve API base: localhost uses local endpoints via Apache; Production uses relative paths
   function getApiBase(){
-    try{ return (/localhost|127\.0\.0\.1/.test(location.hostname)) ? '' : ''; }catch(_){ return ''; }
+    // Local-first: use override from localStorage (api_base) if set; otherwise use relative path
+    try{ const v = localStorage.getItem('api_base'); return v ? v : ''; }catch(_){ return ''; }
+  }
+
+  // ---------- Helpers: Bulk Hold API (รองรับปล่อย hold_ids[] แบบ bulk) ----------
+  function getHoldIdsFromBookingData() {
+    try {
+      const raw = localStorage.getItem('booking_data');
+      if (!raw) return [];
+      const bd = JSON.parse(raw) || {};
+      // Priority 1: hold_ids array
+      if (Array.isArray(bd.hold_ids) && bd.hold_ids.length) return bd.hold_ids.slice();
+      // Priority 2: extract from holds_detail
+      if (Array.isArray(bd.holds_detail) && bd.holds_detail.length) {
+        return bd.holds_detail.map(h => h.hold_id).filter(Boolean);
+      }
+      // Priority 3: single hold_id (legacy)
+      if (bd.hold_id) return [bd.hold_id];
+      return [];
+    } catch (_) { return []; }
+  }
+
+  async function callHoldApiBulk(endpointPath, payloadObj) {
+    const apiBase = getApiBase();
+    const urls = [
+      `${apiBase}/api/v1/${endpointPath}`,
+      `${apiBase}/php-api/v1/${endpointPath}`
+    ];
+    const bodies = [
+      { ct: 'application/json',            body: JSON.stringify(payloadObj) },
+      { ct: 'text/plain;charset=UTF-8',    body: JSON.stringify(payloadObj) }
+    ];
+    for (const u of urls) {
+      for (const b of bodies) {
+        try {
+          const res = await fetch(u, {
+            method: 'POST',
+            headers: { 'Content-Type': b.ct },
+            credentials: 'omit',
+            mode: 'cors',
+            cache: 'no-cache',
+            body: b.body
+          });
+          if (res && res.ok) return true;
+        } catch (_) {}
+      }
+    }
+    return false;
+  }
+
+  function beaconHoldApiBulk(endpointPath, payloadObj) {
+    const apiBase = getApiBase();
+    const url = `${apiBase}/api/v1/${endpointPath}`;
+    try {
+      if (navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify(payloadObj)], { type: 'text/plain' });
+        return navigator.sendBeacon(url, blob);
+      }
+    } catch (_) {}
+    try {
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        credentials: 'omit',
+        mode: 'cors',
+        keepalive: true,
+        body: JSON.stringify(payloadObj)
+      });
+    } catch (_) {}
+    return false;
   }
   
   // คำนวณจำนวนคืนจากวันที่
@@ -120,6 +189,78 @@
   }
   }
 
+  // แสดงสรุปรายการที่เลือกในรูปแบบที่ผู้ใช้ร้องขอ
+  // รูปแบบ:
+  // ท่านเลือกห้อง:
+  // เตียง: <รายละเอียด rate plan>
+  // เตียง: <รายละเอียด rate plan>
+  // ... (ตามจำนวนรายการใน rooms_detail)
+  // 
+  // ผู้ใหญ่: <จำนวน> ท่าน  ← ส่วนนี้จะใช้บล็อค Guest Count เดิมด้านล่าง
+  function displayRoomSelection(bookingData) {
+    const listContainer = document.getElementById('roomSelectionList');
+    console.log('📍 displayRoomSelection called, listContainer:', listContainer);
+    if (!listContainer) {
+      console.warn('❌ roomSelectionList element not found!');
+      return;
+    }
+    
+    // ตั้งหัวข้อเป็น "ท่านเลือกห้อง:" และป้องกัน i18n เขียนทับ
+    try{
+      const header = document.querySelector('#roomSelectionSummary .muted');
+      if(header){ header.textContent = 'ท่านเลือกห้อง:'; header.removeAttribute('data-i18n'); }
+    }catch(_){ }
+
+    listContainer.innerHTML = ''; // Clear previous content
+
+    // Prefer cart[] (new model); fallback to rooms_detail (legacy adapter)
+    const items = (Array.isArray(bookingData.cart) && bookingData.cart.length)
+      ? bookingData.cart
+      : (Array.isArray(bookingData.rooms_detail) ? bookingData.rooms_detail : []);
+
+    const totalRooms = (Array.isArray(items) ? items.reduce((s,it)=> s + Number(it.qty||1), 0) : 0) || (bookingData.rooms||0);
+    const guests = Number(bookingData.adults || bookingData.guests || 0);
+    console.log('📊 Room data (cart preferred):', {items, totalRooms, guests});
+
+    // Summary line at the top
+    const summaryLine = document.createElement('div');
+    summaryLine.className = 'mb-2';
+    summaryLine.innerHTML = `<strong>${totalRooms} ห้อง สำหรับผู้ใหญ่ ${guests} ท่าน</strong>`;
+    listContainer.appendChild(summaryLine);
+
+    if (Array.isArray(items) && items.length > 0) {
+      const lang = (window.currentLang || document.documentElement.lang || 'th').toLowerCase();
+      items.forEach((it, idx) => {
+        const roomDiv = document.createElement('div');
+        roomDiv.className = 'ml-0 mb-2';
+        // Prefer explicit language-specific descriptions if available
+        const descTh = it.rate_plan_desc_th || it.description_th || '';
+        const descEn = it.rate_plan_desc_en || it.description_en || '';
+        const fallback = it.rate_plan_desc || it.plan_description || it.rate_plan_name || it.plan_name || it.name_th || it.name_en || '';
+        const chosenDesc = (lang==='en') ? (descEn || fallback) : (descTh || fallback);
+        const qty = Number(it.qty||1);
+        // Show bed icon first, then show API description verbatim (do not strip prefixes)
+        const line = `🛏️ ${chosenDesc}${qty>1?` × ${qty}`:''}`;
+        const descDiv = document.createElement('div');
+        descDiv.className = 'muted';
+        descDiv.textContent = line;
+        roomDiv.appendChild(descDiv);
+        listContainer.appendChild(roomDiv);
+        console.log(`✅ Added cart item ${idx+1}: ${line}`);
+      });
+    } else {
+      console.warn('⚠️ No items to display');
+    }
+  }
+
+  // Display guest count
+  function displayGuestCount(guests) {
+    const guestCountDisplay = document.getElementById('guestCountDisplay');
+    if (guestCountDisplay) {
+      guestCountDisplay.textContent = guests || '0';
+    }
+  }
+
   function loadDraft(){
     // ใช้ข้อมูลใหม่จาก booking_data แทน booking_draft
     loadBookingData();
@@ -127,14 +268,119 @@
   
   async function loadBookingData() {
     try {
-      const raw = localStorage.getItem('booking_data');
+      let raw = localStorage.getItem('booking_data');
+      // Fallback: if booking_data doesn't exist yet, try to build it from booking_session (cart)
+      if (!raw) {
+        try {
+          const sessionRaw = localStorage.getItem('booking_session');
+          if (sessionRaw) {
+            const session = JSON.parse(sessionRaw);
+            if (session && Array.isArray(session.cart) && session.cart.length > 0) {
+              const first = session.cart[0];
+              // Build minimal booking_data from session; HOLD will be created later by existing logic
+              const derived = {
+                check_in: session.check_in || null,
+                check_out: session.check_out || null,
+                nights: Number(session.nights || 0),
+                adults: Number(session.adults || 2),
+                children: Number(session.children || 0),
+                cart: session.cart.map(it => ({
+                  room_type_id: it.room_type_id,
+                  is_private: it.is_private,
+                  rate_plan_id: it.rate_plan_id,
+                  rate_plan_name: it.rate_plan_name,
+                  rate_plan_desc: it.rate_plan_desc,
+                  rate_plan_desc_th: it.rate_plan_desc_th,
+                  rate_plan_desc_en: it.rate_plan_desc_en,
+                  qty: Number(it.qty || 1),
+                  guests: Number(it.guests || session.adults || 2),
+                  nightly_prices: Array.isArray(it.nightly_prices) ? it.nightly_prices.slice() : []
+                })),
+                // Back-compat top-level fields
+                room_type_id: first.room_type_id,
+                is_private: first.is_private,
+                mode: first && (first.is_private ? 'PRIVATE' : 'DORM'),
+                rate_plan_id: first.rate_plan_id,
+                rate_plan_name: first.rate_plan_name,
+                rooms: session.cart.reduce((s, it) => s + Number(it.qty || 1), 0),
+                booking_timestamp: new Date().toISOString()
+              };
+              localStorage.setItem('booking_data', JSON.stringify(derived));
+              raw = JSON.stringify(derived);
+              console.log('🧩 Built booking_data from booking_session:', derived);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to build booking_data from booking_session:', e);
+        }
+      }
       if (!raw) {
         console.warn('⚠️ No booking_data found');
         return;
       }
       
-      const bookingData = JSON.parse(raw);
+      let bookingData = JSON.parse(raw);
       console.log('📦 Loaded booking data:', bookingData);
+
+      // NEW MULTI-RATE-PLAN CART COMPATIBILITY LAYER
+      // If cart[] exists (new format), convert to compatible structure for rest of checkout logic
+      if(Array.isArray(bookingData.cart) && bookingData.cart.length > 0){
+        console.log('🔄 Cart[] detected - normalizing for checkout calculations...');
+        
+        // Convert cart[] items to rooms_detail array format for display
+        bookingData.rooms_detail = bookingData.cart.map((cartItem, idx)=> ({
+          room_type_id: cartItem.room_type_id,
+          is_private: cartItem.is_private,
+          rate_plan_id: cartItem.rate_plan_id,
+          rate_plan_name: cartItem.rate_plan_name,
+          qty: cartItem.qty,
+          guests: cartItem.guests,
+          nightly_prices_minor: cartItem.nightly_prices || []  // Reuse nightly_prices array (already in minor units)
+        }));
+        
+        // For top-level backward compat, use first cart item
+        const primary = bookingData.cart[0];
+        bookingData.room_type_id = primary.room_type_id;
+        bookingData.is_private = primary.is_private;
+        bookingData.mode = primary.is_private ? 'PRIVATE' : 'DORM';
+        bookingData.rate_plan_id = primary.rate_plan_id;
+        bookingData.rate_plan_name = primary.rate_plan_name;
+        
+        // Update nightly_prices_minor to sum across all cart items per night
+        if(primary.nightly_prices && Array.isArray(primary.nightly_prices)){
+          // Each night price array has prices in minor units
+          const nightCount = primary.nightly_prices.length;
+          bookingData.nightly_prices_minor = [];
+          for(let night = 0; night < nightCount; night++){
+            let totalForNight = 0;
+            bookingData.cart.forEach(item=> {
+              if(Array.isArray(item.nightly_prices) && item.nightly_prices[night]){
+                totalForNight += (item.nightly_prices[night] * item.qty);
+              }
+            });
+            bookingData.nightly_prices_minor.push(totalForNight);
+          }
+          console.log('📊 Summed nightly_prices_minor across cart:', bookingData.nightly_prices_minor);
+        }
+        
+        // Set total rooms = sum of qty across cart
+        bookingData.rooms = bookingData.cart.reduce((sum, item)=> sum + item.qty, 0);
+      }
+
+      // Backward/forward compatibility: when booking_data uses rooms_detail array,
+      // derive top-level fields from the first room so downstream logic continues to work.
+      try{
+        if(Array.isArray(bookingData.rooms_detail) && bookingData.rooms_detail.length > 0){
+          const primary = bookingData.rooms_detail[0] || {};
+          // Only fill when missing to avoid overwriting explicit values
+          if(bookingData.room_name == null && primary.room_name != null) bookingData.room_name = primary.room_name;
+          if(bookingData.mode == null && primary.mode != null) bookingData.mode = primary.mode;
+          if(bookingData.is_private == null && primary.is_private != null) bookingData.is_private = primary.is_private;
+          if(!Array.isArray(bookingData.nightly_prices_minor) && Array.isArray(primary.nightly_prices_minor)) bookingData.nightly_prices_minor = primary.nightly_prices_minor.slice();
+          if(bookingData.rate_plan == null && primary.rate_plan != null) bookingData.rate_plan = primary.rate_plan;
+          if(bookingData.room_type_id == null && primary.room_type_id != null) bookingData.room_type_id = primary.room_type_id;
+        }
+      }catch(_){ /* non-fatal */ }
       
       // 1. แสดงวันที่เช็คอิน/เช็คเอ้าท์
       const checkIn = bookingData.check_in;
@@ -171,42 +417,62 @@
       }
       
       // 4. แสดงจำนวนผู้เข้าพัก
-      const guestsForDisplay = bookingData.guests || 0;
+      // Prefer adults, fallback to guests; normalize to number
+      const guestsForDisplay = Number((bookingData.adults != null ? bookingData.adults : bookingData.guests) || 0);
       const paxDetailsEl = document.getElementById('paxDetails');
       if (paxDetailsEl) {
-        paxDetailsEl.textContent = `ผู้ใหญ่ ${guestsForDisplay} คน`;
+        paxDetailsEl.textContent = `ผู้ใหญ่ ${guestsForDisplay} ท่าน`;
         // ลบ data-i18n เพื่อไม่ให้ i18n system มาทับ
         paxDetailsEl.removeAttribute('data-i18n');
       }
       
+      // 4.5 แสดงรายละเอียดห้องที่เลือก (ท่านเลือก: 3 ห้อง สำหรับผู้ใหญ่ 1 ท่าน)
+      displayRoomSelection(bookingData);
+      displayGuestCount(guestsForDisplay);
+      
       // 5. เตรียมข้อมูลการคำนวณตาม canonical spec (exclusive)
-      const rooms = Number(bookingData.rooms || 1);
-      const guests = Number(bookingData.guests || 1);
-      // Mode: derive from booking_data.mode; if empty, reconstruct from is_private when available
-      let mode = String(bookingData.mode||'').toUpperCase();
-      if(!mode){
-        const ip = bookingData.is_private;
-        if(ip===1 || ip==='1' || ip===true){ mode = 'PRIVATE'; }
-        else if(ip===0 || ip==='0' || ip===false){ mode = 'DORM'; }
-      }
-      const units = (mode === 'DORM') ? guests : rooms; // PRIVATE default
+      let rooms = Number(bookingData.rooms || 1);
+      let guests = Number(bookingData.adults || bookingData.guests || 1);
 
-      // nightly_prices_minor (per unit, per night, exclusive); fallback to plan.pricing_dates
-      let nightly = Array.isArray(bookingData.nightly_prices_minor) ? bookingData.nightly_prices_minor.slice() : null;
-      if(!nightly){
-        const pricingDates = Array.isArray(ratePlan.pricing_dates) ? ratePlan.pricing_dates : [];
-        nightly = pricingDates.map(d=> Number(d && d.price_minor || 0));
-      }
-      // Sum nightly for ONE UNIT, then multiply with units
-      const sumOneUnitMinor = nightly.reduce((s,v)=> s + Number(v||0), 0);
-      const roomPriceMinor = sumOneUnitMinor * (Number.isFinite(units)? units : 1);
-      const roomPriceInBaht = roomPriceMinor / 100;
+      // If cart[] exists, compute total room price by summing each cart item: sum(nightly_prices) * qty
+      let roomPriceInBaht = 0;
+      if (Array.isArray(bookingData.cart) && bookingData.cart.length > 0){
+        const totalMinor = bookingData.cart.reduce((acc, item)=>{
+          const nightly = Array.isArray(item.nightly_prices) ? item.nightly_prices : [];
+          const sumOne = nightly.reduce((s,v)=> s + Number(v || 0), 0);
+          return acc + (sumOne * Number(item.qty||1));
+        }, 0);
+        roomPriceInBaht = totalMinor / 100;
+        // Derive rooms as sum of qty if not set
+        if(!bookingData.rooms){ rooms = bookingData.cart.reduce((s,it)=> s + Number(it.qty||1), 0); }
+      } else {
+        // Legacy single-plan path
+        // Mode: derive from booking_data.mode; if empty, reconstruct from is_private when available
+        let mode = String(bookingData.mode||'').toUpperCase();
+        if(!mode){
+          const ip = bookingData.is_private;
+          if(ip===1 || ip==='1' || ip===true){ mode = 'PRIVATE'; }
+          else if(ip===0 || ip==='0' || ip===false){ mode = 'DORM'; }
+        }
+        const units = (mode === 'DORM') ? guests : rooms; // PRIVATE default
 
-      console.log('💰 Room price calculation (exclusive):', {
-        mode, units, nights,
-        nightly_prices_minor: nightly,
-        sum_one_unit_minor: sumOneUnitMinor,
-        room_price_minor: roomPriceMinor,
+        // nightly_prices_minor (per unit, per night, exclusive); fallback to plan.pricing_dates
+        let nightly = Array.isArray(bookingData.nightly_prices_minor) ? bookingData.nightly_prices_minor.slice() : null;
+        if(!nightly){
+          const pricingDates = Array.isArray(ratePlan.pricing_dates) ? ratePlan.pricing_dates : [];
+          nightly = pricingDates.map(d=> Number(d && d.price_minor || 0));
+        }
+        // Sum nightly for ONE UNIT, then multiply with units
+        const sumOneUnitMinor = nightly.reduce((s,v)=> s + Number(v||0), 0);
+        const roomPriceMinor = sumOneUnitMinor * (Number.isFinite(units)? units : 1);
+        roomPriceInBaht = roomPriceMinor / 100;
+        console.log('💰 Legacy single-plan computation used');
+      }
+
+      console.log('💰 Room price calculation (exclusive, total over cart if present):', {
+        nights,
+        rooms,
+        guests,
         room_price_baht: roomPriceInBaht
       });
       
@@ -276,14 +542,17 @@
     if(!raw) return false;
     let bd = {};
     try{ bd = JSON.parse(raw)||{}; }catch(_){ return false; }
-    const holdId = bd.hold_id;
-    if(!holdId) return false;
-    
+    const ids = Array.isArray(bd.hold_ids) && bd.hold_ids.length ? bd.hold_ids : (bd.hold_id ? [bd.hold_id] : []);
+    if(!ids.length) return false;
+
     const apiBase = getApiBase();
-    console.log(`🔓 Attempting to release hold ${holdId}, reason: ${reason}`);
-    
+    console.log(`🔓 Attempting to release holds ${ids.join(',')}, reason: ${reason}`);
+
     try{
-      const payload = JSON.stringify({ hold_id: holdId, updated_by: reason||'website' });
+      const payloadObj = (Array.isArray(bd.hold_ids) && bd.hold_ids.length)
+        ? { hold_ids: ids, reason: (reason||'website'), updated_by: reason||'website' }
+        : { hold_id: ids[0], updated_by: reason||'website' };
+      const payload = JSON.stringify(payloadObj);
       // Try application/json first (standard), then text/plain as fallback
       const contentTypes = ['application/json', 'text/plain;charset=UTF-8'];
       const urls = [
@@ -322,19 +591,19 @@
       }
       
       // Clean local hold fields regardless of server outcome
-      delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds;
+      delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds; delete bd.hold_ids; delete bd.holds_detail;
       localStorage.setItem('booking_data', JSON.stringify(bd));
       
       if(ok){
-        console.log(`✅ Hold ${holdId} released successfully by ${reason}`);
+        console.log(`✅ Released hold(s) [${ids.join(',')}] by ${reason}`);
       } else {
-        console.warn(`⚠️ Hold ${holdId} release failed, inventory may need manual cleanup`);
+        console.warn(`⚠️ Release failed for hold(s) [${ids.join(',')}]`);
       }
       return ok;
     }catch(err){
-      console.error('❌ Failed to release hold:', err);
+      console.error('❌ Failed to release hold(s):', err);
       // Best effort cleanup locally
-      delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds;
+      delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds; delete bd.hold_ids; delete bd.holds_detail;
       try{ localStorage.setItem('booking_data', JSON.stringify(bd)); }catch(_2){}
       return false;
     }
@@ -351,118 +620,113 @@
           const raw = localStorage.getItem('booking_data');
           const bd = raw ? JSON.parse(raw) : {};
           const holdId = bd.hold_id;
+          console.log('📋 Current hold_id:', holdId);
           
+          // Release hold ด้วย updated_by: "user_change_dates"
           if(holdId){
-            console.log('📤 Releasing hold with updated_by: user_change_dates');
-            // เรียก API release hold ด้วย updated_by: "user_change_dates"
-            try{
-              const payload = { hold_id: holdId, updated_by: 'user_change_dates' };
-              const apiBase = getApiBase();
-              const url = `${apiBase}/api/v1/inventory-hold-release.php`;
-              const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-                credentials: 'omit',
-                mode: 'cors',
-                body: JSON.stringify(payload),
-                cache: 'no-cache',
-                keepalive: true
-              });
-              console.log('✅ Hold released via user_change_dates, status:', res.status);
-            }catch(err){
-              console.warn('⚠️ Failed to release hold:', err);
-              // Continue anyway - redirect to booking.html
-            }
+            console.log('🔓 ปล่อย HOLD โดย user_change_dates');
+            await releaseHoldIfAny('user_change_dates');
           }
           
-          // ลบ hold ออก localStorage ให้ pagehide ไม่ release ซ้ำ
-          delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds;
-          localStorage.setItem('booking_data', JSON.stringify(bd));
-          localStorage.setItem('skip_hold_release', '1'); // Signal pagehide to not release again
-          
+          // กัน pagehide ปล่อยซ้ำ
+          localStorage.setItem('skip_hold_release', '1');
+          console.log('✅ skip_hold_release = 1');
+
+          // เตรียม redirect พร้อมพารามิเตอร์
           const ci = bd.check_in || '';
           const co = bd.check_out || '';
           const g  = bd.guests || '';
           const r  = bd.rooms || '';
+          console.log('📍 Redirect params:', {ci, co, g, r});
           const q = new URLSearchParams({ ci, co, g: String(g||''), r: String(r||'') });
           window.location.href = `booking.html?${q.toString()}`;
-        }catch(_){ 
-          window.location.href = 'booking.html'; 
+        }catch(err){
+          console.error('❌ Error in setupChangeDatesButton:', err);
+          window.location.href = 'booking.html';
         }
       });
     }
   }
 
+  // ---------- Countdown (รองรับ bulk hold_ids) ----------
   function startHoldCountdown(bookingData){
-    const exp = bookingData && bookingData.hold_expires_at;
-    const holdId = bookingData && bookingData.hold_id;
-    const holdSeconds = Number(bookingData && bookingData.hold_seconds);
-    if(!holdId) return;
-    // Parse expiry robustly:
-    // Priority: expires_at (authoritative), fallback to hold_seconds if parsing fails.
-    // If expires_at has no timezone, interpret as Asia/Bangkok (+07:00) to match server.
+    const holdIds = (Array.isArray(bookingData.hold_ids) && bookingData.hold_ids.length)
+      ? bookingData.hold_ids.slice()
+      : (bookingData.hold_id ? [bookingData.hold_id] : []);
+    if (!holdIds.length) return;
+
+    const exp = bookingData.hold_expires_at;
+    const holdSeconds = Number(bookingData.hold_seconds);
     let end = NaN;
-    if(exp){
-      if(/Z$|[+-]\d{2}:?\d{2}$/.test(exp)){
+
+    if (exp) {
+      if (/Z$|[+-]\d{2}:?\d{2}$/.test(exp)) {
         end = Date.parse(exp);
       } else {
         const norm = exp.replace(' ', 'T');
-        // Treat server-provided tz-less string as Asia/Bangkok to avoid client TZ drift
         const withTz = `${norm}+07:00`;
         let parsed = Date.parse(withTz);
-        if(!isFinite(parsed)){
-          // Fallback: local interpretation (less reliable across timezones)
-          parsed = new Date(norm).getTime();
-        }
+        if (!isFinite(parsed)) parsed = new Date(norm).getTime();
         end = parsed;
       }
     }
-    if(!isFinite(end) && Number.isFinite(holdSeconds) && holdSeconds > 0){
+    if (!isFinite(end) && Number.isFinite(holdSeconds) && holdSeconds > 0) {
       end = Date.now() + (holdSeconds * 1000);
     }
-    if(!isFinite(end)) return;
+    if (!isFinite(end)) return;
+
     const btn = document.getElementById('bookBtn');
     const baseTitle = document.title;
-    const tick = ()=>{
+
+    const tick = async () => {
       const now = Date.now();
-      let sec = Math.max(0, Math.floor((end - now)/1000));
-      const m = Math.floor(sec/60); const s = sec%60;
-      // Update title if available
-      try{ document.title = `${m}:${String(s).padStart(2,'0')} • ${baseTitle}`; }catch(_){ }
-      if(sec <= 0){
+      const sec = Math.max(0, Math.floor((end - now) / 1000));
+      const m = Math.floor(sec / 60), s = sec % 60;
+      try { document.title = `${m}:${String(s).padStart(2, '0')} • ${baseTitle}`; } catch (_) {}
+
+      if (sec <= 0) {
         clearInterval(timer);
-        if(btn){ btn.setAttribute('disabled','disabled'); }
-        // Auto-expire the hold immediately when countdown reaches 0
-        expireHoldNow(holdId);
-        // Show custom modal instead of alert
-        showHoldExpiredModal();
+        if (btn) btn.setAttribute('disabled', 'disabled');
+
+        // ⏰ หมดเวลา → หมดอายุแบบ bulk
+        await callHoldApiBulk('inventory-hold-expire.php', {
+          hold_ids: holdIds,
+          reason: 'countdown_expired'
+        });
+
+        // เคลียร์ทุกสิ่งที่ทำให้ "ตะกร้ายังอยู่"
+        try {
+          localStorage.removeItem('booking_session');
+          localStorage.removeItem('booking_session_timestamp');
+          localStorage.setItem('RETURNED_FROM_CHECKOUT', '1');
+        } catch (_) {}
+
+        // เคลียร์ local booking_data เฉพาะคีย์ hold
+        try {
+          const raw = localStorage.getItem('booking_data');
+          const bd = raw ? JSON.parse(raw) : {};
+          delete bd.hold_id;
+          delete bd.hold_ids;
+          delete bd.hold_expires_at;
+          delete bd.hold_seconds;
+          delete bd.holds_detail;
+          localStorage.setItem('booking_data', JSON.stringify(bd));
+        } catch (_) {}
+
+        showHoldExpiredModal?.();
       }
     };
+
     const timer = setInterval(tick, 1000);
     tick();
   }
 
   // Expire hold immediately (called when countdown hits 0)
-  async function expireHoldNow(holdId){
-    if(!holdId) return;
-  const apiBase = getApiBase();
-    const primaryUrl = `${apiBase}/api/v1/inventory-hold-expire.php`;
-    const fallbackUrl = `${apiBase}/php-api/v1/inventory-hold-expire.php`;
-    try{
-      const payload = { hold_id: holdId };
-      let res;
-      try{ res = await fetch(primaryUrl, { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, credentials:'omit', mode:'cors', body: JSON.stringify(payload), cache:'no-cache' }); }catch(_){ res = null; }
-      if(!(res && res.ok)){
-        try{ await fetch(fallbackUrl, { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, credentials:'omit', mode:'cors', body: JSON.stringify(payload), cache:'no-cache' }); }catch(_e){}
-      }
-      // Clean local storage
-      try{
-        const raw = localStorage.getItem('booking_data');
-        const bd = raw ? JSON.parse(raw) : {};
-        delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds;
-        localStorage.setItem('booking_data', JSON.stringify(bd));
-      }catch(_){}
-    }catch(err){ console.warn('Failed to expire hold:', err); }
+  // ---------- Wrapper: expireHoldNow (รองรับ bulk) ----------
+  async function expireHoldNow(reason = 'countdown_expired') {
+    const ids = getHoldIdsFromBookingData();
+    if (!ids.length) return false;
+    return callHoldApiBulk('inventory-hold-expire.php', { hold_ids: ids, reason });
   }
 
   // Show custom hold expired modal
@@ -492,6 +756,9 @@
   (function(){
     let userConfirmedExit = false;
 
+    // Track if user confirmed leaving via custom modal
+    let userConfirmedLeave = false;
+
     window.addEventListener('beforeunload', function(e) {
       // Skip if user already confirmed booking (skip_hold_release flag set during booking flow)
       try{
@@ -508,19 +775,57 @@
       const holdId = bd.hold_id;
       if(!holdId) return; // No active hold
 
-      // Show confirmation dialog (browser will display its own message)
-      const lang = (window.currentLang || document.documentElement.lang || 'th');
-      const msg = (lang === 'en') 
-        ? 'Your room hold will be released. Continue leaving?'
-        : 'ห้องพักที่คุณเลือกจะถูกปล่อยคืน ต้องการออกจากหน้านี้หรือไม่?';
+      // ❌ ไม่ใช้ browser default modal อีกต่อไป
+      // ✅ แทนที่ด้วย custom modal
       
+      // Prevent default browser modal
       e.preventDefault();
-      e.returnValue = msg; // Standard for modern browsers
+      e.returnValue = '';
       
-      // Note: User clicking "Stay on page" will cancel the unload
-      // We'll handle the actual release in 'pagehide' event which fires when page truly unloads
-      return msg;
+      // Show custom modal instead
+      showLeaveSiteModal();
     });
+
+    // Custom modal handlers
+    function showLeaveSiteModal() {
+      const modal = document.getElementById('leaveSiteModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        userConfirmedLeave = false;
+      }
+    }
+
+    function hideLeaveSiteModal() {
+      const modal = document.getElementById('leaveSiteModal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    // Modal button handlers
+    const leaveSiteModalConfirm = document.getElementById('leaveSiteModalConfirm');
+    const leaveSiteModalCancel = document.getElementById('leaveSiteModalCancel');
+    const leaveSiteModalClose = document.getElementById('leaveSiteModalClose');
+
+    if (leaveSiteModalConfirm) {
+      leaveSiteModalConfirm.addEventListener('click', () => {
+        userConfirmedLeave = true;
+        hideLeaveSiteModal();
+        window.location.href = 'about:blank'; // Navigate away
+      });
+    }
+
+    if (leaveSiteModalCancel) {
+      leaveSiteModalCancel.addEventListener('click', () => {
+        hideLeaveSiteModal();
+      });
+    }
+
+    if (leaveSiteModalClose) {
+      leaveSiteModalClose.addEventListener('click', () => {
+        hideLeaveSiteModal();
+      });
+    }
 
     // Fallback: also try when page becomes hidden (some browsers suppress beforeunload)
     // ❌ ปิดไว้เพราะมันทำให้ release hold เมื่อเข้าหน้า checkout เอง
@@ -530,76 +835,94 @@
     // });
 
     // Actually release the hold when page unloads (after user confirms or directly closes)
-    window.addEventListener('pagehide', function(e) {
-      console.log('🚨 pagehide event fired');
-      
-      try{
-        const skipFlag = localStorage.getItem('skip_hold_release');
-        console.log('skip_hold_release flag:', skipFlag);
-        if(skipFlag === '1'){
-          // Clear the flag for future visits
-          localStorage.removeItem('skip_hold_release');
-          console.log('⏭️ Skipping hold release (booking completed)');
-          return;
-        }
-      }catch(_){}
+    // ---------- Browser close/back (pagehide - รองรับ bulk) ----------
+    window.addEventListener('pagehide', function () {
+      try {
+        const skip = localStorage.getItem('skip_hold_release');
+        if (skip === '1') { localStorage.removeItem('skip_hold_release'); return; }
+      } catch (_) {}
 
-      const raw = localStorage.getItem('booking_data');
-      if(!raw){
-        console.log('⚠️ No booking_data found');
-        return;
-      }
-      
-      let bd = {};
-      try{ bd = JSON.parse(raw); }catch(_){ 
-        console.log('❌ Failed to parse booking_data');
-        return; 
-      }
-      
-      const holdId = bd.hold_id;
-      console.log('Hold ID to release:', holdId);
-      if(!holdId){
-        console.log('⚠️ No hold_id in booking_data');
-        return;
-      }
+      const ids = getHoldIdsFromBookingData();
+      if (!ids.length) return;
 
-      // Call inventory-hold-expire.php to release and mark as EXPIRED
-  const apiBase = getApiBase();
-      const url = `${apiBase}/api/v1/inventory-hold-expire.php`;
-      
-      console.log('📡 Attempting to release hold via:', url);
-      
-      // Use sendBeacon for reliable delivery (POST with JSON)
-      try{
-  const payload = JSON.stringify({ hold_id: holdId, updated_by: 'browser_close' });
-  const blob = new Blob([payload], { type: 'text/plain' });
-        const sent = navigator.sendBeacon(url, blob);
-        
-        if(sent){
-          console.log('✅ Hold released via sendBeacon on page exit');
-        } else {
-          console.log('⚠️ sendBeacon failed, trying sync XHR...');
-          // Fallback to synchronous XHR if sendBeacon fails
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', url, false); // synchronous
-          xhr.setRequestHeader('Content-Type', 'text/plain;charset=UTF-8');
-          xhr.send(payload);
-          console.log('✅ Hold released via sync XHR on page exit, status:', xhr.status);
-          if(!(xhr.status>=200 && xhr.status<300)){
-            // Last resort: fetch with keepalive (non-blocking)
-            try{ fetch(url, {method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, credentials:'omit', mode:'cors', body: payload, keepalive:true, cache:'no-cache'}); }catch(_f){}
-          }
-        }
-      }catch(err){
-        console.warn('❌ Failed to release hold on page exit:', err);
-      }
+      // ใช้ sendBeacon เพื่อให้ยิงทันก่อนหน้า unload
+      beaconHoldApiBulk('inventory-hold-expire.php', {
+        hold_ids: ids,
+        reason: 'browser_close'
+      });
 
-      // Clear booking_data from localStorage
-      try{
-        localStorage.removeItem('booking_data');
-        console.log('🗑️ Cleared booking_data from localStorage');
-      }catch(_){}
+      // เคลียร์ทุกสิ่งที่ทำให้ "ตะกร้ายังอยู่"
+      try {
+        localStorage.removeItem('booking_session');
+        localStorage.removeItem('booking_session_timestamp');
+        localStorage.setItem('RETURNED_FROM_CHECKOUT', '1');
+      } catch (_) {}
+
+      // เคลียร์ local booking_data เฉพาะคีย์ hold
+      try {
+        const raw = localStorage.getItem('booking_data');
+        const bd = raw ? JSON.parse(raw) : {};
+        delete bd.hold_id;
+        delete bd.hold_ids;
+        delete bd.hold_expires_at;
+        delete bd.hold_seconds;
+        delete bd.holds_detail;
+        localStorage.setItem('booking_data', JSON.stringify(bd));
+      } catch (_) {}
     });
+
+    // ---------- BFCache support: กด back แล้วหน้ากลับมาจาก cache ----------
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) {
+        // หน้านี้กลับมาจาก bfcache → ไม่ควรค้างตะกร้า/hold
+        console.log('🔄 BFCache detected, releasing holds and redirecting to booking...');
+        const ids = getHoldIdsFromBookingData();
+        if (ids.length) {
+          beaconHoldApiBulk('inventory-hold-expire.php', {
+            hold_ids: ids,
+            reason: 'browser_close:bfcache'
+          });
+        }
+        localStorage.removeItem('booking_session');
+        localStorage.removeItem('booking_session_timestamp');
+        localStorage.setItem('RETURNED_FROM_CHECKOUT', '1');
+        
+        // ไป booking พร้อมพารามิเตอร์เดิม (ถ้ามี)
+        try {
+          const bd = JSON.parse(localStorage.getItem('booking_data') || '{}');
+          const q = new URLSearchParams({
+            ci: bd.check_in || '',
+            co: bd.check_out || '',
+            g: String(bd.adults || bd.guests || ''),
+            r: String(bd.rooms || '')
+          });
+          location.replace(`booking.html?${q.toString()}`);
+        } catch (_) {
+          location.replace('booking.html');
+        }
+      }
+    });
+
+    // ---------- Navigation menu: ปล่อย hold เมื่อคลิกเมนูอื่น ----------
+    document.addEventListener('click', function(e) {
+      const a = e.target.closest('a.nav-link, a[href*=".html"]');
+      if (!a) return;
+      const href = a.getAttribute('href') || '';
+      // Skip if same page or checkout
+      if (href.includes('checkout.html') || href === '#') return;
+      
+      // ปล่อย hold_ids แบบ bulk ก่อนออก
+      const ids = getHoldIdsFromBookingData();
+      if (ids.length) {
+        beaconHoldApiBulk('inventory-hold-expire.php', {
+          hold_ids: ids,
+          reason: 'browser_close:nav'
+        });
+        localStorage.removeItem('booking_session');
+        localStorage.removeItem('booking_session_timestamp');
+        localStorage.setItem('RETURNED_FROM_CHECKOUT', '1');
+      }
+    }, true);
   })();
   
   // ดึงค่า tax config จาก API
@@ -802,67 +1125,82 @@
     if (taxLabel2){ taxLabel2.textContent = 'รวมภาษี'; taxLabel2.removeAttribute('data-i18n'); }
   }
 
-  async function init(){
-    wireActions();
-    await loadDraft(); // รอให้โหลดข้อมูลเสร็จก่อน
-    window.addEventListener('load', ()=>{ try{ if(window.applyLang) window.applyLang(window.currentLang); }catch(e){} });
+  async function releaseHoldIfAny(reason){
+    const raw = localStorage.getItem('booking_data');
+    if(!raw) return false;
+    let bd = {};
+    try{ bd = JSON.parse(raw)||{}; }catch(_){ return false; }
+    const ids = Array.isArray(bd.hold_ids) && bd.hold_ids.length ? bd.hold_ids : (bd.hold_id ? [bd.hold_id] : []);
+    if(!ids.length) return false;
 
-    // Release hold automatically when page is closed or navigated away
+    const apiBase = getApiBase();
+    console.log(`🔓 Attempting to release holds ${ids.join(',')}, reason: ${reason}`);
+
     try{
-      try{ localStorage.removeItem('skip_hold_release'); }catch(_){ }
-      const onUnload = ()=>{ try{ releaseHoldOnUnload(); }catch(_){ } };
-      window.addEventListener('pagehide', onUnload);
-      window.addEventListener('beforeunload', onUnload);
-      document.addEventListener('visibilitychange', ()=>{
-        if(document.visibilityState === 'hidden') { try{ releaseHoldOnUnload(); }catch(_){ } }
-      });
-    }catch(_){ }
+      const payloadObj = (Array.isArray(bd.hold_ids) && bd.hold_ids.length)
+        ? { hold_ids: ids, reason: (reason||'website'), updated_by: reason||'website' }
+        : { hold_id: ids[0], updated_by: reason||'website' };
+      const payload = JSON.stringify(payloadObj);
+      // Try application/json first (standard), then text/plain as fallback
+      const contentTypes = ['application/json', 'text/plain;charset=UTF-8'];
+      const urls = [
+        `${apiBase}/api/v1/inventory-hold-release.php`,
+        `${apiBase}/php-api/v1/inventory-hold-release.php`
+      ];
+
+      let res = null; let ok = false;
+
+      // Try each URL with each content type
+      for(const u of urls){
+        for(const ct of contentTypes){
+          try{ 
+            console.log(`  → Trying ${u} with ${ct}`);
+            const opts = { 
+              method:'POST', 
+              headers:{'Content-Type': ct}, 
+              credentials:'omit', 
+              mode:'cors', 
+              body: payload, 
+              cache:'no-cache'
+            };
+            res = await fetch(u, opts);
+            console.log(`  ← Response: ${res.status} ${res.statusText}`);
+            ok = !!(res && res.ok);
+            if(ok) {
+              console.log(`✅ Released via ${u}`);
+              break;
+            }
+          }catch(_e){ 
+            console.log(`  ✗ Error: ${_e.message}`);
+            ok = false; 
+          }
+        }
+        if(ok) break;
+      }
+
+      // Clean local hold fields regardless of server outcome
+      delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds; delete bd.hold_ids; delete bd.holds_detail;
+      localStorage.setItem('booking_data', JSON.stringify(bd));
+
+      if(ok){
+        console.log(`✅ Released hold(s) [${ids.join(',')}] by ${reason}`);
+      } else {
+        console.warn(`⚠️ Release failed for hold(s) [${ids.join(',')}]`);
+      }
+      return ok;
+    } catch (e) {
+      console.error('Release hold error:', e);
+      return false;
+    }
   }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
-  
-  // Setup change dates button (needs access to releaseHoldIfAny)
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', setupChangeDatesButton); else setupChangeDatesButton();
-  
-  // Toggle visibility and star based on radio selection (self vs other)
+  // เริ่มต้นทำงานเมื่อ DOM พร้อม
   document.addEventListener('DOMContentLoaded', function(){
-    const selfRadio = document.getElementById('bookingForSelf');
-    const otherRadio = document.getElementById('bookingForOther');
-  const otherLabel = document.querySelector('label[for="bookingForOther"]');
-  const otherWrap = document.getElementById('bookingForOtherWrap');
-    const otherDetails = document.getElementById('otherGuestDetails');
-    const stars = document.querySelectorAll('#otherGuestDetails .req-star');
-    if(!selfRadio || !otherRadio || !otherDetails) return;
-
-    // Initial state per requirement:
-    // - Default select self
-    // - Hide other guest details
-    // - Disable the "other" option initially
-  // Disable "other" at first render to match requested flow
-  try{ otherRadio.disabled = true; }catch(_){}
-
-    const apply = ()=>{
-      const isOther = otherRadio.checked;
-      otherDetails.classList.toggle('hidden', !isOther);
-      stars.forEach(s=> s.classList.toggle('hidden', !isOther));
-    };
-    apply();
-
-    // When user clicks the other option, enable it and show the section
-    otherRadio.addEventListener('click', ()=>{ 
-      if(otherRadio.disabled){ otherRadio.disabled = false; otherRadio.checked = true; }
-      apply();
-    });
-    const activateOther = (e)=>{
-      if(otherRadio.disabled){ if(e) e.preventDefault(); otherRadio.disabled = false; otherRadio.checked = true; apply(); }
-    };
-    if(otherLabel){ otherLabel.addEventListener('click', activateOther); }
-    if(otherWrap){ otherWrap.addEventListener('click', (e)=>{
-      // If click originated on the input itself, let its handler run; else activate
-      if(e.target !== otherRadio) activateOther(e);
-    }); }
-    selfRadio.addEventListener('click', ()=>{ apply(); });
+    wireActions();
+    setupChangeDatesButton();
+    loadBookingData();
   });
+
   // Guest details are always visible now; removed checkbox toggle logic.
 })();
 
@@ -892,7 +1230,7 @@
 
     // --- HOLD helpers ---
     function getApiBase(){
-      try{ return (/localhost|127\.0\.0\.1/.test(location.hostname)) ? 'https://www.backpackkohyao.com' : ''; }catch(_){ return ''; }
+      try{ const v = localStorage.getItem('api_base'); return v ? v : ''; }catch(_){ return ''; }
     }
 
     async function releaseHoldIfAny(reason){
@@ -900,10 +1238,12 @@
       if(!raw) return false;
       let bd = {};
       try{ bd = JSON.parse(raw)||{}; }catch(_){ return false; }
-      const holdId = bd.hold_id;
-      if(!holdId) return false;
+      const ids = Array.isArray(bd.hold_ids) && bd.hold_ids.length ? bd.hold_ids : (bd.hold_id ? [bd.hold_id] : []);
+      if(!ids.length) return false;
       const apiBase = getApiBase();
-      const payload = { hold_id: holdId, updated_by: reason||'website' };
+      const payload = (Array.isArray(bd.hold_ids) && bd.hold_ids.length)
+        ? { hold_ids: ids, reason: (reason||'website'), updated_by: reason||'website' }
+        : { hold_id: ids[0], updated_by: reason||'website' };
       let ok = false;
       try{
         let res = null;
@@ -922,7 +1262,11 @@
           if(!(res && res.ok)){
             try{
               await fetch(`${apiBase}/api/v1/inventory-hold-expire.php`, {
-                method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, credentials:'omit', mode:'cors', body: JSON.stringify({ hold_id: holdId, updated_by: (reason||'website')+':fallback_expire' }), cache:'no-cache', keepalive:true
+                method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, credentials:'omit', mode:'cors', body: JSON.stringify(
+                  (Array.isArray(bd.hold_ids) && bd.hold_ids.length)
+                    ? { hold_ids: ids, reason: (reason||'website')+':fallback_expire' }
+                    : { hold_id: ids[0], updated_by: (reason||'website')+':fallback_expire' }
+                ), cache:'no-cache', keepalive:true
               });
             }catch(_e3){}
           }
@@ -930,7 +1274,7 @@
         ok = !!(res && res.ok);
       }finally{
         // Clean local hold fields regardless of server outcome
-        delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds;
+        delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds; delete bd.hold_ids; delete bd.holds_detail;
         try{ localStorage.setItem('booking_data', JSON.stringify(bd)); }catch(_2){}
       }
       return ok;
@@ -943,9 +1287,10 @@
         const raw = localStorage.getItem('booking_data');
         if(!raw) return;
         const bd = JSON.parse(raw)||{};
-        if(!bd.hold_id) return;
+        const ids = Array.isArray(bd.hold_ids) && bd.hold_ids.length ? bd.hold_ids : (bd.hold_id ? [bd.hold_id] : []);
+        if(!ids.length) return;
         const url = `${getApiBase()}/api/v1/inventory-hold-release.php`;
-        const data = JSON.stringify({ hold_id: bd.hold_id, updated_by: 'window_unload' });
+        const data = JSON.stringify((Array.isArray(bd.hold_ids) && bd.hold_ids.length) ? { hold_ids: ids, reason:'window_unload', updated_by:'window_unload' } : { hold_id: ids[0], updated_by: 'window_unload' });
         // Prefer sendBeacon for reliability on unload
         if(navigator.sendBeacon){
           const blob = new Blob([data], { type: 'text/plain' });
@@ -955,7 +1300,7 @@
           fetch(url, { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, credentials:'omit', mode:'cors', body:data, keepalive:true }).catch(()=>{});
         }
         // Local cleanup
-        delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds;
+        delete bd.hold_id; delete bd.hold_expires_at; delete bd.hold_seconds; delete bd.hold_ids; delete bd.holds_detail;
         localStorage.setItem('booking_data', JSON.stringify(bd));
       }catch(_){ }
     }

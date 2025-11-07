@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title data-i18n="demoDorm.title">Demo — Room & Dorm</title>
+  <link rel="stylesheet" href="assets/css/shared-header.css?v=20250929">
+  <link rel="stylesheet" href="assets/css/site-base.css?v=20251005">
+  <link rel="stylesheet" href="assets/css/spacing.css?v=20250929">
+  <link rel="stylesheet" href="assets/css/index.css?v=20250929">
+  <link rel="stylesheet" href="assets/css/demo-room-dorm.css?v=20251005a">
+</head>
+<body>
+  <div class="site-header header-sticky"></div>
+  <div class="wrap header-gap compact">
+    <main>
+      <section class="hero">
+        <div class="card">
+          <h2 class="color-brand" data-i18n="demoDorm.heading">เลือกห้องพัก (Private) หรือ เตียง (Dorm)</h2>
+
+          <div class="tabs mt-6">
+            <button class="tab active" data-tab="private" data-i18n="demoDorm.tab.private">Private</button>
+            <button class="tab" data-tab="dorm" data-i18n="demoDorm.tab.dorm">Dorm</button>
+          </div>
+
+          <div class="tab-panels mt-6">
+            <!-- Private panel -->
+            <div class="tab-panel" id="panel-private">
+              <div class="grid gap-8">
+                <div class="row cols-3">
+                  <div>
+                    <label for="prvCheckIn" data-i18n="demoDorm.label.checkin">เช็คอิน</label>
+                    <input type="date" id="prvCheckIn" class="form-control">
+                  </div>
+                  <div>
+                    <label for="prvNights" data-i18n="demoDorm.label.nights">จำนวนคืน</label>
+                    <div class="stepper">
+                      <button type="button" class="stepper-btn" data-step="-1" data-target="prvNights">-</button>
+                      <input type="number" id="prvNights" class="form-control stepper-input" min="1" max="30" value="1">
+                      <button type="button" class="stepper-btn" data-step="1" data-target="prvNights">+</button>
+                    </div>
+                  </div>
+                  <div>
+                    <label data-i18n="demoDorm.label.checkout">เช็คเอาท์</label>
+                    <input type="text" id="prvCheckOut" class="form-control" disabled>
+                  </div>
+                </div>
+
+                <div class="row cols-3">
+                  <div>
+                    <label for="prvRooms" data-i18n="demoDorm.label.rooms">จำนวนห้อง</label>
+                    <div class="stepper">
+                      <button type="button" class="stepper-btn" data-step="-1" data-target="prvRooms">-</button>
+                      <input type="number" id="prvRooms" class="form-control stepper-input" min="1" max="9" value="1">
+                      <button type="button" class="stepper-btn" data-step="1" data-target="prvRooms">+</button>
+                    </div>
+                  </div>
+                  <div>
+                    <label data-i18n="demoDorm.label.pricePerRoom">ราคา/ห้อง/คืน (THB)</label>
+                    <input type="number" id="prvPrice" class="form-control" value="900">
+                  </div>
+                  <div>
+                    <label data-i18n="demoDorm.label.total">รวมโดยประมาณ</label>
+                    <div class="summary-box"><span>THB </span><strong id="prvTotal">900.00</strong></div>
+                  </div>
+                </div>
+
+                <div class="inline gap-10">
+                  <button class="btn" id="prvProceed" type="button" data-i18n="demoDorm.btn.proceed">ดำเนินการไป Checkout</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dorm panel -->
+            <div class="tab-panel hidden" id="panel-dorm">
+              <div class="grid gap-8">
+                <div class="row cols-3">
+                  <div>
+                    <label for="dCheckIn" data-i18n="demoDorm.label.checkin">เช็คอิน</label>
+                    <input type="date" id="dCheckIn" class="form-control">
+                  </div>
+                  <div>
+                    <label for="dNights" data-i18n="demoDorm.label.nights">จำนวนคืน</label>
+                    <div class="stepper">
+                      <button type="button" class="stepper-btn" data-step="-1" data-target="dNights">-</button>
+                      <input type="number" id="dNights" class="form-control stepper-input" min="1" max="30" value="1">
+                      <button type="button" class="stepper-btn" data-step="1" data-target="dNights">+</button>
+                    </div>
+                  </div>
+                  <div>
+                    <label data-i18n="demoDorm.label.checkout">เช็คเอาท์</label>
+                    <input type="text" id="dCheckOut" class="form-control" disabled>
+                  </div>
+                </div>
+
+                <div class="row cols-3">
+                  <div>
+                    <label for="dBeds" data-i18n="demoDorm.label.beds">จำนวนเตียง</label>
+                    <div class="stepper">
+                      <button type="button" class="stepper-btn" data-step="-1" data-target="dBeds">-</button>
+                      <input type="number" id="dBeds" class="form-control stepper-input" min="1" max="12" value="1">
+                      <button type="button" class="stepper-btn" data-step="1" data-target="dBeds">+</button>
+                    </div>
+                  </div>
+                  <div>
+                    <label data-i18n="demoDorm.label.gender">เพศ (ถ้ามี)</label>
+                    <div class="inline gap-10">
+                      <label class="checkbox-wrapper"><input type="radio" name="dGender" value="mixed" checked><span data-i18n="demoDorm.gender.mixed">รวม</span></label>
+                      <label class="checkbox-wrapper"><input type="radio" name="dGender" value="female"><span data-i18n="demoDorm.gender.female">หญิง</span></label>
+                      <label class="checkbox-wrapper"><input type="radio" name="dGender" value="male"><span data-i18n="demoDorm.gender.male">ชาย</span></label>
+                    </div>
+                  </div>
+                  <div>
+                    <label data-i18n="demoDorm.label.pricePerBed">ราคา/เตียง/คืน (THB)</label>
+                    <input type="number" id="dPrice" class="form-control" value="250">
+                  </div>
+                </div>
+
+                <div>
+                  <label data-i18n="demoDorm.label.preferences">ความต้องการ (ไม่การันตี)</label>
+                  <div class="inline gap-10">
+                    <label class="checkbox-wrapper"><input type="checkbox" id="prefLower"><span data-i18n="demoDorm.pref.lower">เตียงล่าง</span></label>
+                    <label class="checkbox-wrapper"><input type="checkbox" id="prefUpper"><span data-i18n="demoDorm.pref.upper">เตียงบน</span></label>
+                    <label class="checkbox-wrapper"><input type="checkbox" id="prefWindow"><span data-i18n="demoDorm.pref.window">ใกล้หน้าต่าง</span></label>
+                    <label class="checkbox-wrapper"><input type="checkbox" id="prefOutlet"><span data-i18n="demoDorm.pref.outlet">ใกล้ปลั๊กไฟ</span></label>
+                  </div>
+                  <small class="muted" data-i18n="demoDorm.pref.note">เป็นเพียงความต้องการ โรงแรมจะพยายามจัดให้ตามความเหมาะสม</small>
+                </div>
+
+                <div class="row cols-3 items-center">
+                  <div>
+                    <label data-i18n="demoDorm.label.avail">คงเหลือ (เตียง)</label>
+                    <div class="summary-box"><strong id="dAvail">-</strong></div>
+                  </div>
+                  <div>
+                    <label data-i18n="demoDorm.label.total">รวมโดยประมาณ</label>
+                    <div class="summary-box"><span>THB </span><strong id="dTotal">250.00</strong></div>
+                  </div>
+                  <div class="inline gap-10">
+                    <button class="btn" id="dProceed" type="button" data-i18n="demoDorm.btn.proceed">ดำเนินการไป Checkout</button>
+                  </div>
+                </div>
+
+                <div class="card mt-6">
+                  <strong data-i18n="demoDorm.notice.title">ข้อควรทราบสำหรับ Dorm</strong>
+                  <ul class="mt-6">
+                    <li data-i18n="demoDorm.notice.age">อายุขั้นต่ำ 12+ หรือ 18+ ตามนโยบาย</li>
+                    <li data-i18n="demoDorm.notice.locker">มีล๊อคเกอร์ (กรุณานำกุญแจมาเอง หรือสอบถามที่พัก)</li>
+                    <li data-i18n="demoDorm.notice.quiet">โปรดเคารพช่วงเวลางดเสียง</li>
+                    <li data-i18n="demoDorm.notice.bath">ห้องน้ำรวม/ส่วนตัว ขึ้นกับประเภทห้อง</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <div class="site-footer"></div>
+  </div>
+
+  <script src="assets/js/messages.js?v=20250929" defer></script>
+  <script src="assets/js/i18n.js?v=20251005d" defer></script>
+  <script src="assets/js/header-content.js?v=20250929" defer></script>
+  <script src="assets/js/load-shared-header.js?v=20250929" defer></script>
+  <script src="assets/js/header-menu.js?v=20250929" defer></script>
+  <script src="assets/js/lang-fix.js?v=20250929" defer></script>
+  <script src="assets/js/load-shared-footer.js?v=20250929" defer></script>
+  <script src="assets/js/demo-room-dorm.js?v=20251005a" defer></script>
+</body>
+</html>

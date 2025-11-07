@@ -108,7 +108,25 @@
       btn.addEventListener('click', async (e)=>{
         if(e && typeof e.preventDefault === 'function') e.preventDefault();
         
-        console.log('🔵 Select button clicked');
+        // ป้องกันการคลิกซ้ำทันที
+        if(btn.classList.contains('is-disabled') || btn.disabled || btn.style.pointerEvents === 'none'){
+          console.log('� Button already disabled, preventing duplicate click');
+          return;
+        }
+        
+        console.log('�🔵 Select button clicked - Adding to cart (not immediate checkout)');
+        
+        // Disable ปุ่มทันทีเพื่อป้องกันการคลิกซ้ำ
+        const originalText = btn.textContent;
+        if(btn.tagName === 'A'){
+          btn.style.pointerEvents = 'none';
+          btn.style.opacity = '0.6';
+          btn.classList.add('is-disabled');
+        } else {
+          btn.disabled = true;
+          btn.classList.add('is-disabled');
+        }
+        btn.textContent = '...';
         
         // ดึงข้อมูลจาก data attributes
         const roomCode = btn.getAttribute('data-room');
@@ -124,14 +142,18 @@
           console.log('🔵 Plan data (parsed):', plan);
           // หา room_type จากการ์ดเพื่อให้ได้ id และโหมด
           const card = btn.closest('.room-card');
+          console.log('🔵 Card element:', card);
           const rt = card ? (card.__rt || {}) : {};
+          console.log('🔵 Room type (rt):', rt);
           const roomTypeId = rt && typeof rt.id !== 'undefined' ? rt.id : null;
-          const isPrivate = (rt && (rt.is_private===1 || rt.is_private===true || rt.is_private==='1')) ? true : false;
+          console.log('🔵 Room type ID:', roomTypeId);
+          const isPrivate = (rt && (rt.is_private===1 || rt.is_private===true || rt.is_private==='1')) ? 1 : 0;
+          console.log('🔵 Is private:', isPrivate);
           // Derive mode robustly with DOM fallback and safe default
           const domMode = card ? (card.getAttribute('data-room-row') || '') : '';
           let mode = isPrivate ? 'PRIVATE' : 'DORM';
           if(domMode){ mode = (domMode.toUpperCase()==='PRIVATE') ? 'PRIVATE' : 'DORM'; }
-          // nightly_prices_minor ต่อหน่วย ต่อคืน (exclusive)
+          // nightly_prices array: prices in minor units per night
           const nightlyPrices = Array.isArray(plan.pricing_dates)
             ? plan.pricing_dates.map(d => Number(d && d.price_minor || 0))
             : [];
@@ -142,88 +164,131 @@
           const g = qs('#guests');
           const r = qs('#rooms');
           
-          const bookingData = {
-            // ข้อมูลห้อง
-            room_code: roomCode,
-            room_name: roomName,
+          const checkInValue = ci ? ci.value : null;
+          const checkOutValue = co ? co.value : null;
+          const guestsValue = g ? Number(g.value || 2) : 2;
+          
+          console.log('🔵 Check dates:', {checkInValue, checkOutValue});
+          console.log('🔵 Guests value:', guestsValue);
+          
+          // NEW MULTI-RATE-PLAN CART MODEL
+          // Initialize or get existing session cart
+          let sessionData;
+          try {
+            const existingData = localStorage.getItem('booking_session');
+            console.log('🔵 Existing session (raw):', existingData);
+            sessionData = existingData ? JSON.parse(existingData) : null;
+            console.log('🔵 Existing session (parsed):', sessionData);
+          } catch(e) {
+            console.error('🔴 Error parsing session:', e);
+            sessionData = null;
+          }
+          
+          // If session doesn't exist or dates differ, create new session
+          if (!sessionData || sessionData.check_in !== checkInValue || sessionData.check_out !== checkOutValue) {
+            console.log('🔵 Creating NEW booking session');
+            sessionData = {
+              check_in: checkInValue,
+              check_out: checkOutValue,
+              nights: Math.max(1, nightlyPrices.length),
+              adults: guestsValue,
+              children: 0,
+              cart: [],
+              session_timestamp: new Date().toISOString()
+            };
+            console.log('🔵 New session created:', sessionData);
+          } else {
+            console.log('🔵 Using existing session, adding to cart');
+            // Update guest count in case it changed
+            sessionData.adults = guestsValue;
+          }
+          
+          // Create new cart item with NEW schema
+          const cartItem = {
             room_type_id: roomTypeId,
-            is_private: isPrivate ? 1 : 0,
-            mode: mode,
-            
-            // ข้อมูล rate plan
-            rate_plan: plan,
+            is_private: isPrivate,
+            room_name: roomName || '',
             rate_plan_id: (plan && plan.plan_id != null) ? plan.plan_id : undefined,
-            nightly_prices_minor: nightlyPrices,
-            
-            // ข้อมูลวันที่
-            check_in: ci ? ci.value : null,
-            check_out: co ? co.value : null,
-            nights: plan.nights || 0,
-            
-            // ข้อมูลผู้เข้าพัก
-            guests: g ? Number(g.value || 2) : 2,
-            rooms: r ? Number(r.value || 1) : 1,
-            
-            // เวลาที่จอง
-            booking_timestamp: new Date().toISOString()
+            // Prefer explicit plan_name (often contains bed number like "1/101/200"), then fall back to localized names
+            rate_plan_name: (plan && plan.plan_name)
+              ? plan.plan_name
+              : (plan && plan.name_th)
+                ? plan.name_th
+                : (plan && plan.name_en)
+                  ? plan.name_en
+                  : '',
+            // Keep description (Thai/EN) for display in drawer as requested
+            // Use API text verbatim (do not strip prefixes like "เตียง:" or "Bed:")
+            rate_plan_desc: (plan && (plan.description_th || plan.description_en || plan.description))
+              ? (plan.description_th || plan.description_en || plan.description)
+              : '',
+            // Keep both languages for dynamic rendering later (checkout page)
+            rate_plan_desc_th: (plan && plan.description_th) ? plan.description_th : '',
+            rate_plan_desc_en: (plan && plan.description_en) ? plan.description_en : '',
+            qty: 1,  // NEW: quantity
+            guests: guestsValue,  // NEW: guests per item
+            nightly_prices: nightlyPrices  // NEW: array format (already in minor units)
           };
+          console.log('🔵 New cart item:', cartItem);
           
-          // Try to create an inventory HOLD before navigating to checkout
-          const apiBase = (window.location.port === '8080') ? 'https://www.backpackkohyao.com' : '';
-          const payload = {
-            room_type_id: roomTypeId,
-            mode: mode,
-            rooms: bookingData.rooms,
-            guests: bookingData.guests,
-            check_in: bookingData.check_in,
-            check_out: bookingData.check_out,
-            session_id: (typeof window.getSessionId === 'function') ? window.getSessionId() : undefined
-          };
-          console.log('🟦 Creating HOLD with payload:', payload);
-          try{
-            // Try primary API path first, then fallback to /php-api for local envs
-            let res;
-            try{
-              res = await fetch(`${apiBase}/api/v1/inventory-hold-create.php`, {
-                method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload), cache:'no-cache'
-              });
-            }catch(_e){ res = null; }
-            if(!(res && res.ok)){
-              try{
-                res = await fetch(`${apiBase}/php-api/v1/inventory-hold-create.php`, {
-                  method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload), cache:'no-cache'
-                });
-              }catch(_e2){ res = null; }
-            }
-            if(res && res.ok){
-              const json = await res.json();
-              console.log('🟩 HOLD created:', json);
-              if(json && json.hold_id){
-                bookingData.hold_id = json.hold_id;
-                bookingData.hold_expires_at = json.expires_at;
-                bookingData.hold_seconds = json.seconds_to_expiry;
-              }
+          // Deduplication: check if room_type_id + rate_plan_id already in cart
+          const dedupeKey = `${cartItem.room_type_id}|${cartItem.rate_plan_id}`;
+          const existingIdx = sessionData.cart.findIndex(ci => `${ci.room_type_id}|${ci.rate_plan_id}` === dedupeKey);
+          
+          if (existingIdx >= 0) {
+            console.log('🔵 Found duplicate at index', existingIdx, '- incrementing qty');
+            sessionData.cart[existingIdx].qty += 1;
+          } else {
+            console.log('🔵 New item - pushing to cart');
+            sessionData.cart.push(cartItem);
+          }
+          
+          console.log('🔵 Updated cart length:', sessionData.cart.length);
+          console.log('🔵 Updated cart:', sessionData.cart);
+          
+          // Save to localStorage
+          localStorage.setItem('booking_session', JSON.stringify(sessionData));
+          localStorage.setItem('booking_session_timestamp', Date.now().toString());
+          console.log('✅ Session saved successfully');
+          
+          // Disable the "Select" button for this rate plan permanently
+          console.log('🔵 Calling setRatePlanButtonState to disable button:', cartItem.room_type_id, cartItem.rate_plan_id);
+          try {
+            if(window.setRatePlanButtonState && typeof window.setRatePlanButtonState === 'function'){
+              window.setRatePlanButtonState(cartItem.room_type_id, cartItem.rate_plan_id, true);
+              console.log('✅ Button state updated successfully');
             } else {
-              // If sold out (409) inform user and stop
-              if(res && res.status === 409){
-                try{ const err = await res.json(); console.warn('Sold out during selection:', err); }catch(_){ }
-                alert((window.currentLang==='en')? 'Sorry, just sold out for the selected dates.' : 'ขออภัย ช่วงวันที่เลือกมีผู้จองก่อนหน้าแล้ว');
-                return; // do not proceed
-              }
-              console.warn('HOLD API failed or unreachable', res && res.status);
+              console.log('⚠️ setRatePlanButtonState not available');
             }
-          }catch(err){ console.warn('HOLD API error:', err); }
-
-          console.log('💾 Saving booking data:', bookingData);
-          localStorage.setItem('booking_data', JSON.stringify(bookingData));
-          console.log('✅ Saved to localStorage successfully');
+          } catch(err){
+            console.error('🔴 Error calling setRatePlanButtonState:', err);
+          }
           
-          // Navigate to checkout
-          window.location.href = 'checkout.html';
+          // Open booking-drawer to show cart
+          if (window.BookingDrawer && typeof window.BookingDrawer.openFromBooking === 'function') {
+            console.log('🔵 Opening booking drawer');
+            window.BookingDrawer.openFromBooking(sessionData);
+          } else {
+            console.log('⚠️ BookingDrawer not available, fallback to opening drawer manually');
+            const backdrop = document.querySelector('[data-bs-backdrop]');
+            const root = document.documentElement;
+            root.classList.add('bs-is-open');
+            if(backdrop) backdrop.hidden = false;
+          }
         } catch(err) {
-          console.error('Error saving booking data:', err);
-          // Fallback: ไปหน้า checkout ตามปกติ
-          window.location.href = 'checkout.html';
+          console.error('Error adding to cart:', err);
+          alert((window.currentLang==='en')? 'Failed to add room to cart' : 'ไม่สามารถเพิ่มห้องไปยังตะกร้าได้');
+          
+          // Enable ปุ่มคืนเมื่อเกิด error
+          if(btn.tagName === 'A'){
+            btn.style.pointerEvents = '';
+            btn.style.opacity = '';
+            btn.classList.remove('is-disabled');
+          } else {
+            btn.disabled = false;
+            btn.classList.remove('is-disabled');
+          }
+          btn.textContent = originalText;
         }
       });
     });
@@ -432,6 +497,56 @@
   }
 
   function init(){
+    // ---------- เช็คธง RETURNED_FROM_CHECKOUT: เคลียร์ cart + รีเสิร์ชใหม่ ----------
+    try {
+      const returnedFlag = localStorage.getItem('RETURNED_FROM_CHECKOUT');
+      if (returnedFlag === '1') {
+        console.log('🔄 Returned from checkout, clearing cart and re-searching...');
+        localStorage.removeItem('RETURNED_FROM_CHECKOUT');
+        localStorage.removeItem('booking_session');
+        localStorage.removeItem('booking_session_timestamp');
+        
+        // ตั้งธง trigger ให้ runSearch ทำงาน
+        localStorage.setItem('RETURNED_FROM_CHECKOUT_TRIGGER', '1');
+        
+        // รีเซ็ต drawer UI
+        if (window.BookingDrawer && typeof window.BookingDrawer.reset === 'function') {
+          window.BookingDrawer.reset();
+        }
+        // รีเซ็ต badge
+        try {
+          const badges = document.querySelectorAll('[data-cart-badge], .bs-badge');
+          badges.forEach(b => b.textContent = '0');
+          document.documentElement.classList.remove('bs-has-items');
+        } catch (_) {}
+      }
+      
+      // เผื่อ session หมดอายุ (> 5 นาที)
+      try {
+        const sessionTs = localStorage.getItem('booking_session_timestamp');
+        if (sessionTs && (Date.now() - Number(sessionTs) > 5 * 60 * 1000)) {
+          console.log('⏰ Session expired, clearing cart...');
+          localStorage.removeItem('booking_session');
+          localStorage.removeItem('booking_session_timestamp');
+        }
+      } catch (_) {}
+      
+      // ถ้าไม่มี hold แต่มี cart → ลบทิ้ง (เพื่อไม่ให้เห็นรายการค้าง)
+      try {
+        const bdRaw = localStorage.getItem('booking_data');
+        const sessionRaw = localStorage.getItem('booking_session');
+        if (sessionRaw && bdRaw) {
+          const bd = JSON.parse(bdRaw);
+          const hasHold = bd.hold_id || (Array.isArray(bd.hold_ids) && bd.hold_ids.length) || (Array.isArray(bd.holds_detail) && bd.holds_detail.length);
+          if (!hasHold) {
+            console.log('🗑️ No hold found but cart exists, clearing cart...');
+            localStorage.removeItem('booking_session');
+            localStorage.removeItem('booking_session_timestamp');
+          }
+        }
+      } catch (_) {}
+    } catch (_) {}
+
     populateNights();
     wireSameAsGuest();
     wireRoomSelection();
@@ -638,14 +753,16 @@
                 ? 'Exclusive of taxes and fees'
                 : 'ไม่รวมภาษีและค่าธรรมเนียม';
               // เก็บข้อมูล rate plan และราคาแต่ละวันไว้ใน data attribute
+              // Keep API descriptions verbatim (no cleaning)
               const planDataJson = JSON.stringify({
+                room_type_id: rt.id, // include for precise button targeting
                 plan_id: p.id,
                 plan_name: p.name,
                 name_th: p.name_th,
                 name_en: p.name_en,
-                description: desc,
-                description_th: p.description_th,
-                description_en: p.description_en,
+                description: (desc != null ? desc : p.description),
+                description_th: (p.description_th != null ? p.description_th : p.description),
+                description_en: (p.description_en != null ? p.description_en : p.description),
                 base_currency: currency,
                 tax_included: false,
                 refundable: refundableFlag,
@@ -660,6 +777,7 @@
                 <div class="rate-cta"><a href="./checkout.html" class="btn select-room" 
                   data-room="${rt.code||rt.id}" 
                   data-room-name="${name}"
+                  data-original-text="${(window.currentLang==='en') ? 'Select' : 'เลือก'}"
                   data-plan='${planDataJson.replace(/'/g, '&apos;')}'>เลือก</a></div>
               `.trim();
 
@@ -772,6 +890,20 @@
   renderAvailList('panelRooms', roomItems, lang, { checkIn: ci? ci.value : null, guests: guestsNum, rooms: roomsNum });
   renderAvailList('panelBeds', bedItems, lang, { checkIn: ci? ci.value : null, guests: guestsNum, rooms: roomsNum });
 
+        // ✅ AFTER RENDER: Sync button states with current cart
+        try {
+          if(window.syncDisabledButtonsWithCart) {
+            const raw = localStorage.getItem('booking_session');
+            const sessionData = raw ? JSON.parse(raw) : null;
+            if(sessionData && Array.isArray(sessionData.cart)) {
+              console.log('🔄 Syncing button states after render:', sessionData.cart.length, 'items in cart');
+              window.syncDisabledButtonsWithCart(sessionData.cart);
+            }
+          }
+        } catch(err) {
+          console.error('Error syncing button states after render:', err);
+        }
+
         // Decide default visible tab after search per rules provided
         try{
           let target = 'rooms';
@@ -811,18 +943,25 @@
       }
 
       // Auto-run search only when coming from index.html (flag auto=1 in URL)
+      // OR when returning from checkout (RETURNED_FROM_CHECKOUT flag was set)
       // If user opens booking.html directly, they must click the search button themselves.
       try {
         const usp = new URLSearchParams(location.search || '');
         const hasCi = !!usp.get('ci');
         const hasCo = !!usp.get('co');
         const auto = usp.get('auto') === '1';
-        if (auto && hasCi && hasCo) {
+        const returnedFromCheckout = (localStorage.getItem('RETURNED_FROM_CHECKOUT_TRIGGER') === '1');
+        
+        if ((auto && hasCi && hasCo) || returnedFromCheckout) {
           // Ensure the visible date range box reflects params before running
           if (box && ci && co && (!box.value || box.value.indexOf('–') === -1)) {
             box.value = `${ci.value} – ${co.value}`;
           }
           runSearch();
+          // Clear trigger flag after running
+          if (returnedFromCheckout) {
+            localStorage.removeItem('RETURNED_FROM_CHECKOUT_TRIGGER');
+          }
         }
       } catch (_) { /* no-op */ }
     }catch(_){ }

@@ -1,0 +1,466 @@
+/* Extracted page styles for booking.html to comply with CSP */
+:root{
+  --brand: #2aa6b8; /* sea-blue */
+  --bg: #e9f8fa;
+  --card: #ffffff;
+  --text: #08323b;
+  --muted: #5aa6ad;
+  --radius: 12px;
+  --container: 1100px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", Arial; background:var(--bg); color:var(--text);} 
+a{color:inherit;text-decoration:none}
+/* Page-level header (avoid styling all <header> tags globally) */
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;background:linear-gradient(90deg, rgba(42,166,184,0.12), rgba(42,166,184,0.06));border-radius:var(--radius)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .logo{width:56px;height:56px;border-radius:8px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px}
+.brand h1{margin:0;font-size:18px}
+nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* header alignment (match index) */
+.header-right { display:flex; gap:12px; align-items:center }
+#main-nav { display:flex; align-items:center; gap:10px }
+#main-nav a { display:flex; align-items:center; height:38px }
+nav a{padding:8px 12px;border-radius:10px;color:var(--text);font-weight:600}
+nav a:hover{background:rgba(0,0,0,0.04)}
+.lang-toggle{display:flex;gap:8px;align-items:center}
+.lang-toggle button{padding:6px 12px;border-radius:8px;border:1px solid transparent;background:#fff;cursor:pointer;height:36px;line-height:1}
+.lang-toggle button.active{background:var(--brand);color:#fff}
+/* main margin-top is provided by shared-header.css using --space-section */
+.card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 8px 20px rgba(3,50,59,0.04)}
+.muted{color:var(--muted)}
+.contact-inline{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+form.grid{display:grid;gap:12px}
+@media(min-width:800px){ form.grid.cols-2{grid-template-columns:1fr 1fr} }
+/* horizontal search bar layout */
+.search-grid{grid-template-columns:1fr}
+/* At small tablets/large phones, show two columns so Check-in/Check-out sit side-by-side */
+@media(min-width:480px){
+  .search-grid{grid-template-columns:1fr 1fr;align-items:end}
+  .search-grid .actions{grid-column:1 / -1}
+}
+@media(min-width:720px){
+  .search-grid{grid-template-columns:1fr 1fr 1fr 1fr auto;align-items:end}
+  .search-grid .actions{grid-column:auto}
+}
+label{display:block;margin-bottom:6px;font-weight:600}
+input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #e6f6f7}
+.btn{background:var(--brand);color:#fff;padding:8px 12px;border-radius:10px;border:none;cursor:pointer}
+.room-row{transition:box-shadow 180ms, transform 120ms}
+.room-row.room-selected{box-shadow:0 14px 30px rgba(3,50,59,0.08);transform:translateY(-4px);border-radius:10px}
+footer{margin-top:26px;padding:18px;border-radius:var(--radius);background:linear-gradient(180deg, rgba(42,166,184,0.06), rgba(42,166,184,0.03))}
+/* accessibility focus */
+button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outline-offset:2px}
+
+/* sticky search bar (inside content wrap, below shared header) */
+.search-sticky{position:sticky;top:calc(var(--header-inner-height,72px) + 10px);z-index:5}
+
+/* Responsive tweaks for room rows on Booking page */
+@media(max-width:980px){
+  .bdr-e{border-right:none}
+}
+
+/* New room card layout */
+.room-card{display:grid;grid-template-columns:280px 1fr;gap:12px;padding:12px;border:1px solid #e6f6f7;border-radius:12px;background:#fff;transition:box-shadow 180ms, transform 120ms}
+.room-card:hover{box-shadow:0 10px 22px rgba(3,50,59,0.06)}
+.room-card.selected, .room-card.room-selected{box-shadow:0 14px 30px rgba(3,50,59,0.08);transform:translateY(-2px)}
+.room-media{position:relative}
+.room-media img{width:100%;height:180px;object-fit:cover;border-radius:10px;display:block}
+/* --- Simple slider for room media --- */
+.room-media .media-slider{position:relative;overflow:hidden;border-radius:10px}
+.room-media .media-slider .slides{display:flex;transition:transform .35s ease}
+.room-media .media-slider img{flex:0 0 100%}
+.room-media .media-slider .nav{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,0.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.room-media .media-slider .nav.prev{left:8px}
+.room-media .media-slider .nav.next{right:8px}
+.room-media .media-slider .dots{position:absolute;left:0;right:0;bottom:8px;display:flex;gap:6px;justify-content:center}
+.room-media .media-slider .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.6)}
+.room-media .media-slider .dot.active{background:#fff}
+/* Move badges above the image (non-overlay) */
+.room-badges{position:static;left:auto;top:auto;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:nowrap;margin-bottom:8px;z-index:auto;width:100%}
+/* Theme-aligned badge styles (chips) */
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(42,166,184,0.06);color:var(--text);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid rgba(42,166,184,0.15);box-shadow:none}
+.badge-roomname{background:#fff;border-color:rgba(42,166,184,0.28);color:var(--text);font-weight:700;font-size:16px}
+.badge-size{background:rgba(42,166,184,0.10);border-color:rgba(42,166,184,0.22);color:var(--brand);font-weight:700}
+.room-size{display:inline-flex;align-items:center;gap:6px;margin-top:8px;margin-bottom:8px;padding:6px 12px;background:rgba(42,166,184,0.10);color:var(--brand);border-radius:20px;font-size:13px;font-weight:700;border:1px solid rgba(42,166,184,0.22)}
+.room-amenities{margin-top:12px;margin-bottom:12px;padding:12px;background:rgba(42,166,184,0.03);border-radius:10px;border:1px solid rgba(42,166,184,0.08)}
+.room-amenities .amenities-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(42,166,184,0.15)}
+.room-amenities .amenities-list{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;list-style:none;margin:0;padding:0;color:var(--text);font-size:13px}
+.room-amenities .amenities-list li{display:flex;align-items:center;gap:8px;padding:4px 0}
+.room-amenities .amen-icon{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.room-amenities .amen-icon img{width:20px;height:20px;object-fit:contain;display:block}
+.room-amenities .amen-name{display:inline-block}
+
+/* Inline icon helper and colored text for rate details */
+.ic{display:inline-block;margin-right:6px;transform:translateY(1px)}
+.text-green{color:#16a34a}
+.text-red{color:#dc2626}
+.room-media .room-link{display:inline-block;margin-top:8px;color:var(--brand);font-weight:600;font-size:13px}
+.room-body{display:flex;flex-direction:column;gap:8px}
+.room-header{background:none;padding:0;border-radius:0}
+.room-header strong{font-size:18px;display:block}
+.room-header .muted{margin-top:4px}
+
+/* --- Rate Table: Exact test.html parity --- */
+.rate-table{display:flex;flex-direction:column;gap:0;margin-top:8px;border:1px solid #e6f6f7;border-radius:12px;overflow:hidden;background:#fff}
+
+.rate-header{display:grid;grid-template-columns:1.4fr 0.6fr 0.9fr;gap:0;align-items:center;padding:0;border-bottom:2px solid #e0f1f3;color:var(--text);font-weight:600;background:rgba(42,166,184,0.06);font-size:15px}
+.rate-header > div{padding:14px 16px;border-right:1px solid #e6f6f7;display:flex;align-items:center;justify-content:center}
+.rate-header > div:first-child{justify-content:flex-start}
+.rate-header > div:last-child{border-right:none;justify-content:flex-end}
+
+.rate-row{display:grid;grid-template-columns:1.4fr 0.6fr 0.9fr;gap:0;align-items:start;padding:0;border-bottom:1px solid #e6f6f7;background:#fff}
+.rate-row:last-child{border-bottom:none}
+.rate-row > div{padding:16px;border-right:1px solid #e6f6f7;display:flex;flex-direction:column;justify-content:flex-start}
+.rate-row > div:last-child{border-right:none}
+
+.rate-name{font-weight:700;margin-bottom:6px;color:var(--text)}
+.rate-desc{color:#5aa6ad;font-size:14px;line-height:1.6;margin-bottom:4px}
+.rate-desc:last-child{margin-bottom:0}
+.rate-guest{text-align:center;font-size:14px;line-height:1.6}
+.rate-price{text-align:right;color:var(--brand);font-size:20px;font-weight:800;line-height:1.6}
+.rate-tax-info{text-align:right;color:var(--muted);font-size:12px;margin-top:4px;line-height:1.4}
+.rate-cta{text-align:right;margin-top:8px}
+.price{font-weight:700}
+
+/* Improved legibility inspired by example คอลัมน์ "ตัวเลือกห้องพัก"*/
+.rate-title{font-weight:700;color:#64748b;font-size:13px;margin-bottom:4px}
+.rate-desc{font-size:14px;color:var(--muted)}
+.rate-lines{display:block}
+.rate-lines .rl-name{font-size:14px;color:var(--muted);display:flex;align-items:flex-start;gap:6px}
+.rate-lines .rl-name::before{content:'✓';color:#16a34a;font-weight:700;font-size:16px;flex-shrink:0}
+.rate-lines .rl-meta{font-size:14px;color:var(--muted);display:flex;align-items:flex-start;gap:6px;margin-top:4px}
+.rate-lines .rl-meta::before{content:none}
+.rate-lines .rl-desc{font-size:14px;color:var(--muted);margin-top:2px}
+.rate-info .rate-lines .rl-meta{font-size:14px;color:var(--muted);display:block}
+.rate-info .rate-lines .rl-meta::before{display:none}
+.pill{display:inline-flex;align-items:center;gap:6px;margin-top:6px;margin-right:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(42,166,184,0.2);background:rgba(42,166,184,0.08);color:var(--text);font-size:13px}
+.pill-success{background:rgba(22,163,74,0.10);border-color:rgba(22,163,74,0.25);color:#0f8a4f}
+.pill-danger{background:rgba(220,53,69,0.10);border-color:rgba(220,53,69,0.25);color:#b52b3b}
+.pill-info{background:rgba(42,166,184,0.10);border-color:rgba(42,166,184,0.25);color:#0d5e69}
+.pill-meal{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.3);color:#946200}
+.info-line{display:flex;align-items:center;gap:8px;color:var(--text);font-size:14px}
+.icon{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center}
+.icon-user::before{content:"👤"}
+.icon-child::before{content:"🧒"}
+.price{display:flex;gap:6px;align-items:baseline;line-height:18px}
+.price .currency{color:var(--muted);font-weight:600}
+.price .amount{color:var(--brand);font-size:20px;line-height:1;font-weight:800}
+
+@media(max-width:800px){
+  .room-card{grid-template-columns:1fr}
+  .room-media img{height:200px}
+}
+
+/* Modal gallery layout - FIXED STRUCTURE (no scroll on container) */
+.modal-gallery{
+  position:relative;
+  overflow:hidden; /* ไม่ให้เลื่อนทั้งก้อน */
+  border-right:1px solid #eef6f7;
+  padding-right:10px;
+  display:flex;
+  flex-direction:column;
+  height: 100%; /* ใช้พื้นที่เต็ม */
+}
+
+/* OLD CLASSES - HIDDEN */
+.modal-gallery .modal-slider{display:none !important}
+.modal-gallery .modal-thumb-strip{display:none !important}
+
+/* 🎨 TRAVELOKA-STYLE GALLERY - FIXED LAYOUT */
+.traveloka-room-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+  flex-shrink: 0; /* ไม่ให้ถูกบีบ */
+}
+
+.traveloka-main-slider {
+  position: relative;
+  width: 100%;
+  /* Fix a responsive height so portrait photos are cropped to a wide view */
+  height: clamp(260px, 45vh, 520px);
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.traveloka-main-slider .slides {
+  display: flex;
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.traveloka-main-slider .slides img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;         /* fill the wide area */
+  object-position: center;   /* center crop for portrait images */
+}
+
+.traveloka-main-slider .nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.9);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.traveloka-main-slider .nav:hover {
+  background: #fff;
+}
+
+.traveloka-main-slider .nav.prev { left: 12px; }
+.traveloka-main-slider .nav.next { right: 12px; }
+
+/* Thumbnail strip - FIXED at bottom, dark background */
+.traveloka-thumb-strip {
+  position: relative;
+  background: #2c3e50;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0; /* ตรึงขนาด ไม่ให้ถูกบีบ */
+  min-height: 84px; /* ensure visible even with small viewport */
+}
+
+/* Fine-tune slider height across breakpoints */
+@media (max-width: 900px){
+  .traveloka-main-slider{ height: clamp(220px, 42vh, 460px); }
+}
+@media (min-width: 1200px){
+  .traveloka-main-slider{ height: clamp(300px, 45vh, 560px); }
+}
+
+.traveloka-thumb-inner {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 4px 0;
+}
+
+.traveloka-thumb-inner::-webkit-scrollbar {
+  height: 6px;
+}
+
+.traveloka-thumb-inner::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+.traveloka-thumb-inner::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+.traveloka-thumb {
+  flex: 0 0 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.traveloka-thumb:hover {
+  opacity: 0.9;
+}
+
+.traveloka-thumb.active {
+  border-color: #fff;
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.traveloka-counter {
+  flex: 0 0 auto;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Remove old gallery CSS if exists */
+.modal-room-name-header,
+.modal-slider,
+.modal-thumb-strip,
+.modal-slider-counter {
+  display: none !important;
+}
+
+.modal-gallery .modal-slider .slides {
+  display: flex;
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.modal-gallery .modal-slider .slides img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-gallery .modal-slider .nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.9);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.modal-gallery .modal-slider .nav:hover {
+  background: #fff;
+}
+
+.modal-gallery .modal-slider .nav.prev { left: 12px; }
+.modal-gallery .modal-slider .nav.next { right: 12px; }
+
+/* Thumbnail strip - dark background, below image */
+.modal-gallery .modal-thumb-strip {
+  position: relative;
+  background: #2c3e50;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-gallery .modal-thumb-inner {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 4px 0;
+}
+
+.modal-gallery .modal-thumb-inner::-webkit-scrollbar {
+  height: 6px;
+}
+
+.modal-gallery .modal-thumb-inner::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+.modal-gallery .modal-thumb-inner::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+.modal-gallery .modal-thumb {
+  flex: 0 0 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.modal-gallery .modal-thumb:hover {
+  opacity: 0.9;
+}
+
+.modal-gallery .modal-thumb.active {
+  border-color: #fff;
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.modal-gallery .modal-counter {
+  flex: 0 0 auto;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Modal details layout and scrollable sections */
+.modal-details{padding-left:16px}
+.modal-meta-grid{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.modal-meta-grid .pill{padding:6px 10px;border-radius:999px;background:rgba(42,166,184,0.08);border:1px solid rgba(42,166,184,0.2);font-size:13px}
+.modal-section{margin-top:16px;padding-top:16px;border-top:1px solid rgba(42,166,184,0.12)}
+.modal-section:first-of-type{border-top:none;margin-top:8px;padding-top:0}
+.modal-section h4{margin:0 0 10px 0;font-size:14px;font-weight:600;color:var(--text)}
+.modal-section .scrollable{max-height:200px;overflow:auto}
+@media(max-width:700px){
+  /* Keep badges non-overlay on small screens too (avoid overlaying the image when DevTools narrows viewport) */
+  .room-badges{position:static !important; left:auto !important; top:auto !important; flex-wrap:wrap; justify-content:flex-start; margin-bottom:8px}
+  .badge{font-size:11px;padding:5px 8px}
+  /* Collapse rate grid to single column (test.html parity) */
+  .rate-header, .rate-row{grid-template-columns:1fr}
+  .rate-header > div, .rate-row > div{border-right:none;text-align:left}
+  .rate-cta{text-align:left}
+}
+
+/* Room details modal (right-side panel) */
+.modal[hidden]{display:none}
+.modal{position:fixed;inset:0;z-index:50}
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45)}
+.modal-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1000px, 96vw);max-height:90vh;background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden}
+.modal-close{position:absolute;top:8px;right:8px;width:36px;height:36px;border-radius:999px;border:1px solid #e6f6f7;background:#fff;color:#333;cursor:pointer;font-size:20px;line-height:1}
+.modal-content{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;padding:16px;min-height:320px;max-height:90vh;overflow:hidden}
+.modal-details{overflow:auto;padding-right:4px}
+.modal-title{margin:0 0 12px 0;font-size:14px;font-weight:600;color:var(--text);padding-bottom:12px;border-bottom:1px solid rgba(42,166,184,0.12)}
+.modal-meta{color:var(--muted);margin-bottom:12px}
+.modal-amenities ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.modal-cta{position:sticky;bottom:0;background:linear-gradient(180deg, rgba(255,255,255,0.86), #fff);padding:12px;border-top:1px solid #eef6f7;display:flex;justify-content:flex-end}
+@media(max-width:900px){ .modal-content{grid-template-columns:1fr} .modal-gallery{border-right:none;padding-right:0} }
+
+/* Room name header - displayed ABOVE the image slider */
+.modal-gallery .modal-room-name-header{
+  margin:0 0 12px 0;
+  padding:10px 16px;
+  font-size:16px;
+  font-weight:700;
+  color:#08323b;
+  background:rgba(42,166,184,0.08);
+  border-radius:6px;
+}
+
+/* Tabs (Rooms | Beds) */
+.tabs{display:flex;gap:6px;border-bottom:1px solid #e6f6f7}
+.tabs .tab{background:#fff;border:1px solid #e6f6f7;border-bottom:none;padding:8px 12px;border-top-left-radius:10px;border-top-right-radius:10px;color:var(--text);cursor:pointer}
+.tabs .tab.active{background:rgba(42,166,184,0.06);color:var(--text);font-weight:700;border-color:rgba(42,166,184,0.25)}
+.tab-panel{padding-top:10px}
+.hidden{display:none !important}

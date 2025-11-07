@@ -15,6 +15,7 @@ try {
     $mode = strtoupper(trim($body['mode'] ?? ''));
     $rooms = isset($body['rooms']) ? max(1, (int)$body['rooms']) : 1;
     $guests = isset($body['guests']) ? max(1, (int)$body['guests']) : 1;
+    $reservedQty = isset($body['reserved_qty']) ? (int)$body['reserved_qty'] : 0;
 
     $checkIn  = isset($body['check_in']) ? must_date($body['check_in'], 'check_in') : '';
     $checkOut = isset($body['check_out']) ? must_date($body['check_out'], 'check_out') : '';
@@ -24,7 +25,9 @@ try {
         exit;
     }
 
-    $units = ($mode === 'PRIVATE') ? $rooms : $guests;
+    // Prefer explicit reserved_qty when provided (>0) to avoid ambiguity across modes.
+    // Fallback to legacy behavior: PRIVATE uses `rooms`, DORM uses `guests`.
+    $units = ($reservedQty > 0) ? $reservedQty : (($mode === 'PRIVATE') ? $rooms : $guests);
     if ($units <= 0) { $units = 1; }
 
     $dates = dates_between($checkIn, $checkOut);

@@ -1,0 +1,9 @@
+
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shower">
+  <title>Shower</title>
+  <g fill="#14B8A6">
+    <path d="M4 5h16v2H4V5zM10 7v2a5 5 0 0 1 10 0v2h-2V9a3 3 0 0 0-6 0v2h-2V7z"/>
+    <circle cx="8" cy="15" r="1.2"/><circle cx="12" cy="15" r="1.2"/><circle cx="16" cy="15" r="1.2"/>
+    <circle cx="10" cy="18" r="1.2"/><circle cx="14" cy="18" r="1.2"/>
+  </g>
+</svg>
