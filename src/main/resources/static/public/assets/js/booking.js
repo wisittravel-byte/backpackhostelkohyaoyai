@@ -1,4 +1,20 @@
 (function(){
+  // --- Handle browser Back/Forward: redirect user to index (no other side effects) ---
+  try{
+    // pageshow fires even when returning from bfcache; detect BF navigation robustly
+    window.addEventListener('pageshow', function(ev){
+      let isBF = false;
+      try{
+        const nav = (performance && performance.getEntriesByType) ? performance.getEntriesByType('navigation')[0] : null;
+        isBF = (ev && ev.persisted === true) || (nav && nav.type === 'back_forward');
+      }catch(_){ /* noop */ }
+      if(isBF){
+        // Do not touch any other logic; just send user to the start page
+        try{ location.replace('./index.html'); }catch(__){ location.href = './index.html'; }
+      }
+    });
+  }catch(_){ /* noop */ }
+
   // --- Lightweight slider helpers (room cards + modal) ---
   function initSliderContainer(container){
     if(!container) return;
