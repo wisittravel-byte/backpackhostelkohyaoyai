@@ -193,6 +193,26 @@
   bookBtn.addEventListener('click', async (e)=>{ 
     e.preventDefault(); 
     if(!mustAgree()) return; 
+    // Validate special requests that require note
+    try{
+      const grid = document.getElementById('request-presets-grid');
+      if(grid){
+        let invalid = false; let firstEl = null;
+        grid.querySelectorAll('input[data-requires-note="1"]').forEach(cb=>{
+          if(cb.checked){
+            const id = cb.getAttribute('data-preset-id');
+            const ta = grid.querySelector(`textarea[data-note-for="${id}"]`);
+            const noteReq = grid.querySelector(`small[data-note-required-for="${id}"]`);
+            if(ta && ta.value.trim().length===0){ invalid = true; if(noteReq) noteReq.classList.remove('hidden'); if(!firstEl) firstEl = ta; }
+          }
+        });
+        if(invalid){
+          (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.requests.noteRequired') : alert((window.currentLang==='en')? 'Please fill the required note for selected requests':'กรุณาระบุรายละเอียดสำหรับคำขอที่เลือก');
+          if(firstEl) firstEl.focus();
+          return;
+        }
+      }
+    }catch(_){ }
     try{
       const draftRaw = localStorage.getItem('booking_draft');
       const draft = draftRaw ? JSON.parse(draftRaw) : {};
@@ -1264,6 +1284,8 @@
     wireActions();
     setupChangeDatesButton();
     loadBookingData();
+    // After booking data load kick off dynamic special requests rendering
+    try{ window.__initRequestPresets && window.__initRequestPresets(); }catch(_){ }
   });
 
   // Guest details are always visible now; removed checkbox toggle logic.
@@ -1430,4 +1452,121 @@
     if(inCk) inCk.addEventListener('change', applyTimes);
     if(outCk) outCk.addEventListener('change', applyTimes);
   });
+})();
+
+// Dynamic Special Request Presets (request_presets) rendering
+(function(){
+  function getApiBase(){ try{ const v = localStorage.getItem('api_base'); return v || ''; }catch(_){ return ''; } }
+  function currentLang(){ return (window.currentLang || document.documentElement.lang || 'th').toLowerCase()==='en' ? 'en':'th'; }
+  function readCache(){
+    try{ const raw = localStorage.getItem('request_presets'); if(!raw) return null; const obj = JSON.parse(raw); if(obj && Array.isArray(obj.presets)) return obj.presets; }catch(_){ } return null;
+  }
+  function persistSelections(grid){
+    const selected = [];
+    grid.querySelectorAll('input[data-preset-id]').forEach(cb=>{
+      if(cb.checked){
+        const id = Number(cb.getAttribute('data-preset-id'));
+        const code = cb.getAttribute('data-preset-code')||'';
+        const requiresNote = cb.getAttribute('data-requires-note')==='1';
+        let note='';
+        if(requiresNote){
+          const ta = grid.querySelector(`textarea[data-note-for="${id}"]`);
+          if(ta) note = ta.value.trim();
+        }
+        selected.push({ id, code, note });
+      }
+    });
+    try{ localStorage.setItem('booking_requests', JSON.stringify(selected)); }catch(_){ }
+  }
+  function renderPresets(presets){
+    const grid = document.getElementById('request-presets-grid');
+    if(!grid) return;
+    grid.removeAttribute('data-loading');
+    grid.innerHTML='';
+    const lang = currentLang();
+    if(!Array.isArray(presets) || !presets.length){
+      grid.innerHTML = `<div class="muted">${lang==='en'?'No special requests available':'ไม่มีคำขอพิเศษ'}</div>`;
+      return;
+    }
+    // Build items
+    presets.forEach(p=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'preset-item';
+      const label = (lang==='en' ? (p.label_en||p.label_th) : (p.label_th||p.label_en)) || p.code;
+      wrap.innerHTML = `
+        <label class="checkbox-wrapper">
+          <input type="checkbox" data-preset-id="${p.id}" data-preset-code="${p.code}" data-requires-note="${p.requires_note}">
+          <span>${label}</span>
+        </label>
+        ${p.requires_note? `<textarea class="form-control hidden mt-4" rows="2" data-note-for="${p.id}" placeholder="${lang==='en'?'Please specify':'โปรดระบุ'}"></textarea>
+        <small class="text-danger hidden" data-note-required-for="${p.id}">${lang==='en'?'This field is required':'ต้องกรอกข้อมูลในช่องนี้'}</small>`:''}`;
+      grid.appendChild(wrap);
+    });
+    // Restore previous selections
+    let prev=[]; try{ const raw=localStorage.getItem('booking_requests'); prev = raw? JSON.parse(raw):[]; }catch(_){ }
+    prev.forEach(sel=>{
+      const cb = grid.querySelector(`input[data-preset-id="${sel.id}"]`);
+      if(cb){
+        cb.checked = true;
+        if(cb.getAttribute('data-requires-note')==='1'){
+          const ta = grid.querySelector(`textarea[data-note-for="${sel.id}"]`);
+          if(ta){ ta.classList.remove('hidden'); ta.value = sel.note||''; }
+        }
+      }
+    });
+    // Events
+    grid.addEventListener('change', function(e){
+      const cb = e.target.closest('input[data-preset-id]');
+      if(cb){
+        const id = cb.getAttribute('data-preset-id');
+        const requiresNote = cb.getAttribute('data-requires-note')==='1';
+        const ta = grid.querySelector(`textarea[data-note-for="${id}"]`);
+        const noteReq = grid.querySelector(`small[data-note-required-for="${id}"]`);
+        if(requiresNote){
+          if(cb.checked){ ta && ta.classList.remove('hidden'); }
+          else { if(ta){ ta.classList.add('hidden'); ta.value=''; } noteReq && noteReq.classList.add('hidden'); }
+        }
+        persistSelections(grid);
+      }
+    });
+    grid.addEventListener('input', function(e){
+      const ta = e.target.closest('textarea[data-note-for]');
+      if(ta){
+        const id = ta.getAttribute('data-note-for');
+        const cb = grid.querySelector(`input[data-preset-id="${id}"]`);
+        const noteReq = grid.querySelector(`small[data-note-required-for="${id}"]`);
+        if(cb && cb.checked){
+          if(ta.value.trim().length===0){ noteReq && noteReq.classList.remove('hidden'); }
+          else { noteReq && noteReq.classList.add('hidden'); }
+        } else { noteReq && noteReq.classList.add('hidden'); }
+        persistSelections(grid);
+      }
+    });
+  }
+  async function fetchPresets(){
+    const apiBase = getApiBase();
+    const urls = [ `${apiBase}/api/v1/request-presets.php`, `${apiBase}/php-api/v1/request-presets.php` ];
+    for(const u of urls){
+      try{
+        const r = await fetch(u,{cache:'no-cache'});
+        if(r.ok){
+          const data = await r.json();
+          if(data && data.ok && Array.isArray(data.presets)){
+            try{ localStorage.setItem('request_presets', JSON.stringify({ fetched_at: Date.now(), presets: data.presets })); }catch(_){ }
+            return data.presets;
+          }
+        }
+      }catch(_){ }
+    }
+    return [];
+  }
+  function initRequestPresets(){
+    const grid = document.getElementById('request-presets-grid');
+    if(!grid) return;
+    const cached = readCache();
+    if(cached){ renderPresets(cached); }
+    else { fetchPresets().then(renderPresets); }
+  }
+  try{ window.__initRequestPresets = initRequestPresets; }catch(_){ }
+  document.addEventListener('DOMContentLoaded', initRequestPresets);
 })();

@@ -174,3 +174,20 @@ button:focus, a:focus, input:focus, select:focus, textarea:focus{outline:3px sol
 /* Bed type radios: keep each option on a single line and avoid stretching full width */
 #reqBedOptions .checkbox-wrapper{ width:auto; }
 #reqBedOptions .checkbox-wrapper span{ white-space: nowrap; }
+
+/* Dynamic request presets grid (2 columns) */
+.request-presets-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:8px 24px;
+  align-items:start;
+}
+.request-presets-grid[data-loading]{ opacity:.6; }
+.request-presets-grid .preset-item{ padding:4px 0; }
+.request-presets-grid .preset-item textarea{ margin-top:8px; }
+@media(max-width:640px){
+  .request-presets-grid{ grid-template-columns:1fr 1fr; }
+}
+@media(max-width:480px){
+  .request-presets-grid{ grid-template-columns:1fr; }
+}

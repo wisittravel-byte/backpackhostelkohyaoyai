@@ -1,3 +1,26 @@
+(function forceFreshBookingPage(){
+  try {
+    const hasCart = localStorage.getItem('booking_session') || localStorage.getItem('booking_session_timestamp');
+    const onceFlag = sessionStorage.getItem('__bk_reload_once');
+    if (hasCart && !onceFlag) {
+      // ล้างตะกร้าก่อนรีโหลด
+      localStorage.removeItem('booking_session');
+      localStorage.removeItem('booking_session_timestamp');
+      // ป้องกันรีโหลดซ้ำ
+      sessionStorage.setItem('__bk_reload_once','1');
+      // รีโหลดหน้า booking (ตัด hash ทิ้ง)
+      location.replace(location.pathname + location.search);
+      return;
+    }
+    // หลังรีโหลด: รีเซ็ต badge แล้วปลด flag สำหรับรอบถัดไป
+    if (onceFlag) {
+      const badge = document.querySelector('.bs-badge');
+      if (badge) badge.textContent = '0';
+      sessionStorage.removeItem('__bk_reload_once');
+    }
+  } catch(_){}
+})();
+
 (function(){
   // --- Handle browser Back/Forward: redirect user to index (no other side effects) ---
   try{
@@ -566,6 +589,49 @@
     populateNights();
     wireSameAsGuest();
     wireRoomSelection();
+
+    // --- Prefetch request presets (special requests) and cache for checkout ---
+    // This runs early on booking page so checkout can render immediately without extra API latency.
+    (function prefetchRequestPresets(){
+      try{
+        // Skip if already cached recently (< 30 min)
+        const raw = localStorage.getItem('request_presets');
+        if(raw){
+          try{
+            const obj = JSON.parse(raw);
+            if(obj && Array.isArray(obj.presets) && obj.fetched_at && (Date.now() - obj.fetched_at < 30*60*1000)){
+              return; // Fresh cache
+            }
+          }catch(_){ /* invalid cache → refetch */ }
+        }
+      }catch(_){ }
+      function getApiBase(){
+        if (typeof window !== 'undefined' && window.API_BASE) return window.API_BASE;
+        return (window.location.port === '8080') ? 'https://www.backpackkohyao.com' : '';
+      }
+      async function fetchPresets(){
+        const apiBase = getApiBase();
+        const urls = [
+          `${apiBase}/api/v1/request-presets.php`,
+          `${apiBase}/php-api/v1/request-presets.php`
+        ];
+        for(const u of urls){
+          try{
+            const res = await fetch(u, { cache:'no-cache' });
+            if(res && res.ok){
+              const data = await res.json();
+              if(data && data.ok && Array.isArray(data.presets)){
+                try{ localStorage.setItem('request_presets', JSON.stringify({ fetched_at: Date.now(), presets: data.presets })); }catch(_){ }
+                console.log('✅ Cached request presets:', data.presets.length);
+                return;
+              }
+            }
+          }catch(err){ console.warn('⚠️ request-presets fetch failed on', u, err.message); }
+        }
+        console.warn('⚠️ Unable to fetch any request_presets endpoints');
+      }
+      fetchPresets();
+    })();
 
     // --- Dynamic availability rendering using new API ---
     function getApiBase(){

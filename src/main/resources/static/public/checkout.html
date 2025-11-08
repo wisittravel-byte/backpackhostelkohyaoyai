@@ -100,51 +100,8 @@
                 <div id="specialRequests" class="span-all">
                   <h3 class="color-brand" data-i18n="checkout.requests.title">แจ้งให้เราทราบหากคุณมีคำขอใด ๆ</h3>
                   <p class="muted" data-i18n="checkout.requests.lead">คุณสามารถระบุคำขอบางอย่าง เช่น ห้องปลอดบุหรี่ ประเภทเตียง หรือเวลาเช็คอิน/เช็คเอาท์</p>
-                  <div class="grid gap-8 mt-6">
-                    <div class="row cols-2">
-                      <label class="checkbox-wrapper"><input type="checkbox" id="reqNoSmoking"><span data-i18n="checkout.requests.noSmoking">ห้องพักปลอดบุหรี่</span></label>
-                      <label class="checkbox-wrapper"><input type="checkbox" id="reqConnecting"><span data-i18n="checkout.requests.connecting">ห้องพักแบบเชื่อมถึงกัน</span></label>
-                      <label class="checkbox-wrapper"><input type="checkbox" id="reqHighFloor"><span data-i18n="checkout.requests.highFloor">ห้องพักที่อยู่ชั้นสูง</span></label>
-                      <div id="reqBedWrap">
-                        <label class="checkbox-wrapper"><input type="checkbox" id="reqBedToggle"><span data-i18n="checkout.requests.bedType">ประเภทเตียง</span></label>
-                        <div id="reqBedOptions" class="hidden req-sub inline gap-10">
-                          <label class="checkbox-wrapper"><input type="radio" name="reqBedType" id="reqBedTwin"><span data-i18n="checkout.requests.bed.twin">เตียงเดี่ยว 2 เตียง</span></label>
-                          <label class="checkbox-wrapper"><input type="radio" name="reqBedType" id="reqBedKing"><span data-i18n="checkout.requests.bed.king">เตียงใหญ่</span></label>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row cols-2">
-                      <div>
-                        <div class="checkbox-wrapper" id="reqCheckinWrap">
-                          <input type="checkbox" id="reqCheckinTime">
-                          <label for="reqCheckinTime" data-i18n="checkout.requests.checkin">เวลาเช็คอิน</label>
-                        </div>
-                        <div id="reqCheckinBox" class="hidden req-sub">
-                          <input type="time" id="reqCheckinInput" class="form-control" value="15:00" step="300">
-                          <small class="muted" data-i18n="checkout.requests.time.localNote">เวลาท้องถิ่นของโรงแรม</small>
-                        </div>
-                      </div>
-                      <div>
-                        <div class="checkbox-wrapper" id="reqCheckoutWrap">
-                          <input type="checkbox" id="reqCheckoutTime">
-                          <label for="reqCheckoutTime" data-i18n="checkout.requests.checkout">เวลาเช็คเอาท์</label>
-                        </div>
-                        <div id="reqCheckoutBox" class="hidden req-sub">
-                          <input type="time" id="reqCheckoutInput" class="form-control" value="11:00" step="300">
-                          <small class="muted" data-i18n="checkout.requests.time.localNote">เวลาท้องถิ่นของโรงแรม</small>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div class="checkbox-wrapper" id="reqOtherWrap">
-                        <input type="checkbox" id="reqOther">
-                        <label for="reqOther" data-i18n="checkout.requests.other">อื่นๆ</label>
-                      </div>
-                      <textarea id="reqOtherText" class="form-control hidden" rows="3" data-i18n-placeholder="checkout.requests.other.placeholder" placeholder="โปรดระบุ..."></textarea>
-                      <small id="reqOtherNote" class="text-danger hidden" data-i18n="checkout.requests.other.required">ต้องกรอกข้อมูลในช่องนี้</small>
-                    </div>
+                  <div id="request-presets-grid" class="request-presets-grid mt-6" data-loading="1">
+                    <div class="muted" data-i18n="checkout.requests.loading">กำลังโหลด...</div>
                   </div>
                 </div>
 
@@ -256,28 +213,7 @@
   <script src="assets/js/lang-fix.js?v=20250929" defer></script>
   <script src="assets/js/load-shared-footer.js?v=20250929" defer></script>
 
-  <!-- Terms & Policies Modal -->
-  <div id="termsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
-    <div class="modal-content" tabindex="-1">
-      <div class="modal-header">
-        <h3 id="termsTitle" class="color-brand" data-i18n="checkout.terms.title">ข้อกำหนดและนโยบายทั้งหมด</h3>
-        <button type="button" class="btn ghost" id="termsCloseBtn" data-i18n="checkout.terms.close">ปิด</button>
-      </div>
-      <div class="modal-body">
-        <p class="muted" data-i18n="checkout.terms.lead">โปรดอ่านข้อกำหนดและนโยบายโดยสรุปด้านล่าง (ข้อมูลจำลอง)</p>
-        <ul class="mt-6">
-          <li><strong data-i18n="checkout.terms.section.booking">การจอง</strong> — <span data-i18n="checkout.terms.mock.booking">การจองทั้งหมดขึ้นกับความพร้อมให้บริการ และอาจมีเงื่อนไขไม่คืนเงิน</span></li>
-          <li><strong data-i18n="checkout.terms.section.checkin">เช็คอิน/เช็คเอาท์</strong> — <span data-i18n="checkout.terms.mock.checkin">เช็คอินหลัง 15:00 น. และเช็คเอาท์ก่อน 11:00 น.</span></li>
-          <li><strong data-i18n="checkout.terms.section.policy">นโยบาย</strong> — <span data-i18n="checkout.terms.mock.policy">ห้ามสูบบุหรี่ในห้องพัก ค่าปรับอาจถูกเรียกเก็บ</span></li>
-          <li><strong data-i18n="checkout.terms.section.privacy">ความเป็นส่วนตัว</strong> — <span data-i18n="checkout.terms.mock.privacy">เราเก็บและใช้ข้อมูลตามวัตถุประสงค์ของการให้บริการเท่านั้น</span></li>
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn secondary" id="termsOkBtn" data-i18n="checkout.terms.ok">เข้าใจแล้ว</button>
-      </div>
-    </div>
-  </div>
-
+  
   <!-- Hold Expired Alert Modal -->
   <div id="holdExpiredModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="holdExpiredTitle">
     <div class="modal-content compact" tabindex="-1">
