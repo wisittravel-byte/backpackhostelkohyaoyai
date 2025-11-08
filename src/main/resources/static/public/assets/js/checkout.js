@@ -125,18 +125,64 @@
     const termsCloseBtn = document.getElementById('termsCloseBtn');
     function openTerms(){ if(termsModal) termsModal.classList.remove('hidden'); }
     function closeTerms(){ if(termsModal) termsModal.classList.add('hidden'); }
+    // Dynamic Terms fetch & render
+    async function fetchAndRenderTerms(){
+      const lang = (window.currentLang || document.documentElement.lang || 'th').toLowerCase() === 'en' ? 'en' : 'th';
+      const listContainer = termsModal ? termsModal.querySelector('.modal-body ul') : null;
+      if(listContainer){ listContainer.innerHTML = '<li class="muted">กำลังโหลด...</li>'; }
+      try{
+        const apiBase = (typeof getApiBase === 'function') ? getApiBase() : '';
+        const urls = [
+          `${apiBase}/api/v1/booking-terms-with-items.php?lang=${lang}`,
+          `${apiBase}/php-api/v1/booking-terms-with-items.php?lang=${lang}`
+        ];
+        let data = null; let ok = false; let lastErr = null;
+        for(const u of urls){
+          try{
+            const r = await fetch(u, { cache:'no-cache' });
+            if(r.ok){ data = await r.json(); ok = true; break; } else { lastErr = new Error('HTTP '+r.status); }
+          }catch(e){ lastErr = e; }
+        }
+        if(!ok || !data){ throw lastErr || new Error('NETWORK'); }
+        if(!data.ok){
+          if(listContainer){ listContainer.innerHTML = `<li class="text-danger">${data.error||'ไม่พบข้อกำหนด'}</li>`; }
+          return;
+        }
+        if(listContainer){
+          listContainer.innerHTML = '';
+          const items = Array.isArray(data.items) ? data.items : [];
+          items.forEach(it => {
+            const li = document.createElement('li');
+            // เลือก content ตามภาษา
+            const content = (lang==='en' ? (it.content_en||'') : (it.content_th||'')) || '';
+            const title = (lang==='en' ? (it.title_en||'') : (it.title_th||'')) || '';
+            li.innerHTML = `<strong>${title}</strong> — <span>${content}</span>`;
+            listContainer.appendChild(li);
+          });
+          if(!items.length){
+            listContainer.innerHTML = '<li class="muted">(ไม่มีรายการข้อกำหนด)</li>';
+          }
+        }
+      }catch(err){
+        if(listContainer){ listContainer.innerHTML = `<li class="text-danger">โหลดข้อกำหนดล้มเหลว กรุณาลองอีกครั้ง (${err.message})</li>`; }
+      }
+    }
+    function openTermsDynamic(){ openTerms(); fetchAndRenderTerms(); }
     if(agree){
-      agree.addEventListener('change', (e)=>{
-        // Only open when user is trying to check it
+      agree.addEventListener('change', ()=>{
         if(agree.checked){
-          // pause and show modal; uncheck until confirmed
-          agree.checked = false;
-          openTerms();
+          agree.checked = false; // wait for explicit confirmation in modal
+          openTermsDynamic();
         }
       });
     }
     if(termsOkBtn){ termsOkBtn.addEventListener('click', ()=>{ if(agree) agree.checked = true; closeTerms(); }); }
     if(termsCloseBtn){ termsCloseBtn.addEventListener('click', ()=>{ closeTerms(); }); }
+    // Allow clicking heading to re-open & refresh
+    const termsTitle = document.getElementById('termsTitle');
+    if(termsTitle){ termsTitle.style.cursor = 'pointer'; termsTitle.addEventListener('click', openTermsDynamic); }
+  const agreeLabel = document.querySelector('label[for="agree"]');
+  if(agreeLabel){ agreeLabel.addEventListener('click', function(e){ e.preventDefault(); if(agree) agree.checked = false; openTermsDynamic(); }); }
 
     // Change Dates button handler removed here - now handled after loadBookingData() to ensure hold release
     
