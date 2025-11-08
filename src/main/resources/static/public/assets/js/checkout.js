@@ -220,13 +220,26 @@
 
     const totalRooms = (Array.isArray(items) ? items.reduce((s,it)=> s + Number(it.qty||1), 0) : 0) || (bookingData.rooms||0);
     const guests = Number(bookingData.adults || bookingData.guests || 0);
+    // กำหนดหน่วยเป็น "ห้อง" หรือ "เตียง" ตาม room_types.is_private (รองรับค่าทั้ง 0/1 และ true/false)
+    let unitWord = 'ห้อง';
+    try{
+      const isPrivTrue = v => (v === true || v === 1 || v === '1');
+      const isPrivFalse = v => (v === false || v === 0 || v === '0');
+      if(Array.isArray(items) && items.length>0){
+        const allPrivate = items.every(it => isPrivTrue(it && it.is_private));
+        const allDorm   = items.every(it => isPrivFalse(it && it.is_private));
+        if(allPrivate) unitWord = 'ห้อง';
+        else if(allDorm) unitWord = 'เตียง';
+        // หากผสมกัน คงเป็นค่าเริ่มต้น
+      }
+    }catch(_){ }
     console.log('📊 Room data (cart preferred):', {items, totalRooms, guests});
 
-    // Summary line at the top
-    const summaryLine = document.createElement('div');
-    summaryLine.className = 'mb-2';
-    summaryLine.innerHTML = `<strong>${totalRooms} ห้อง สำหรับผู้ใหญ่ ${guests} ท่าน</strong>`;
-    listContainer.appendChild(summaryLine);
+  // แสดงบรรทัดสรุปกลับมาอีกครั้งตามคำขอ (X ห้อง/เตียง สำหรับผู้ใหญ่ Y ท่าน)
+  const summaryLine = document.createElement('div');
+  summaryLine.className = 'mb-2';
+  summaryLine.innerHTML = `<strong>${totalRooms} ${unitWord} สำหรับผู้ใหญ่ ${guests} ท่าน</strong>`;
+  listContainer.appendChild(summaryLine);
 
     if (Array.isArray(items) && items.length > 0) {
       const lang = (window.currentLang || document.documentElement.lang || 'th').toLowerCase();
@@ -257,6 +270,12 @@
   function displayGuestCount(guests) {
     const guestCountDisplay = document.getElementById('guestCountDisplay');
     if (guestCountDisplay) {
+      // ตามคำขอ: ไม่แสดงบรรทัด "ผู้ใหญ่: X ท่าน" ในกล่องสรุปด้านขวา
+      try{
+        const container = guestCountDisplay.closest('div');
+        if(container) container.style.display = 'none';
+      }catch(_){ }
+      // เก็บค่าไว้ใน DOM เผื่อสคริปต์อื่นอ้างอิง แต่ไม่แสดงผล
       guestCountDisplay.textContent = guests || '0';
     }
   }
@@ -419,12 +438,15 @@
       // 4. แสดงจำนวนผู้เข้าพัก
       // Prefer adults, fallback to guests; normalize to number
       const guestsForDisplay = Number((bookingData.adults != null ? bookingData.adults : bookingData.guests) || 0);
-      const paxDetailsEl = document.getElementById('paxDetails');
-      if (paxDetailsEl) {
-        paxDetailsEl.textContent = `ผู้ใหญ่ ${guestsForDisplay} ท่าน`;
-        // ลบ data-i18n เพื่อไม่ให้ i18n system มาทับ
-        paxDetailsEl.removeAttribute('data-i18n');
-      }
+      // เอาข้อความผู้ใหญ่ในตำแหน่ง paxDetails ออกตามคำขอ (ซ่อน/เคลียร์)
+      try {
+        const paxDetailsEl = document.getElementById('paxDetails');
+        if (paxDetailsEl) {
+          paxDetailsEl.textContent = '';
+          paxDetailsEl.removeAttribute('data-i18n');
+          paxDetailsEl.style.display = 'none';
+        }
+      } catch(_) {}
       
       // 4.5 แสดงรายละเอียดห้องที่เลือก (ท่านเลือก: 3 ห้อง สำหรับผู้ใหญ่ 1 ท่าน)
       displayRoomSelection(bookingData);
@@ -736,21 +758,18 @@
     if(!modal) return;
     modal.classList.remove('hidden');
     if(backBtn){
-      backBtn.addEventListener('click', ()=>{
-        // Navigate back to booking page
-        try{
-          const raw = localStorage.getItem('booking_data');
-          const bd = raw ? JSON.parse(raw) : {};
-          const ci = bd.check_in || '';
-          const co = bd.check_out || '';
-          const g  = bd.guests || '';
-          const r  = bd.rooms || '';
-          const q = new URLSearchParams({ ci, co, g: String(g||''), r: String(r||'') });
-          window.location.href = `booking.html?${q.toString()}`;
-        }catch(_){ window.location.href = 'booking.html'; }
-      }, { once: true });
+      backBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
     }
   }
+
+  // Fallback delegated handler: ensures redirect even if binding above was skipped
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.closest('#holdExpiredBackBtn')){
+      window.location.href = 'index.html';
+    }
+  });
 
   // Auto-release HOLD when user closes page/browser without booking
   (function(){
@@ -861,7 +880,7 @@
       // เคลียร์ local booking_data เฉพาะคีย์ hold
       try {
         const raw = localStorage.getItem('booking_data');
-        const bd = raw ? JSON.parse(raw) : {};
+        const bd = raw ? JSON.parse(bd) : {};
         delete bd.hold_id;
         delete bd.hold_ids;
         delete bd.hold_expires_at;
