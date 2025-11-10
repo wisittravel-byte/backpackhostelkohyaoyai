@@ -29,10 +29,42 @@ if (!$policy || empty($policy['agreed_terms'])) {
   exit;
 }
 
+// Resolve policy_id: prefer payload.policy_id, otherwise pick the latest active term
+$policyId = ig($policy, 'policy_id');
+if (!$policyId) {
+  try {
+    $stmt = $pdo->query("SELECT policy_id FROM booking_terms WHERE is_active = 1 ORDER BY effective_from DESC LIMIT 1");
+    $pid = $stmt ? $stmt->fetchColumn() : null;
+    if ($pid) { $policyId = (int)$pid; }
+  } catch (Throwable $e) {
+    // ignore here; will be validated below
+  }
+}
+if (!$policyId) {
+  json_out(['error' => 'missing_policy', 'detail' => 'No active booking policy found'], 400);
+  exit;
+}
+
 $checkIn  = ig($cart, 'check_in_date');
 $checkOut = ig($cart, 'check_out_date');
 $currency = ig($cart, 'currency', 'THB');
-$nights   = intval(ig($cart, 'nights', 0));
+// Nights is a generated column in DB (DATEDIFF or similar). Do NOT insert explicitly.
+// Always compute server-side to avoid trusting client payload and to match DB value.
+$nights = 0;
+if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$checkIn) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$checkOut)) {
+  try {
+    $ci = new DateTime($checkIn);
+    $co = new DateTime($checkOut);
+    $diff = $ci->diff($co);
+    $nights = max(0, (int)$diff->days);
+  } catch (Throwable $e) {
+    // Fallback to client-provided nights if diff fails (should rarely happen)
+    $nights = intval(ig($cart, 'nights', 0));
+  }
+} else {
+  // fallback path prior to validation below
+  $nights = intval(ig($cart, 'nights', 0));
+}
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$checkIn) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$checkOut)) {
   json_out(['error' => 'invalid_dates'], 400);
   exit;
@@ -75,14 +107,14 @@ try {
   // 2) Insert into bookings (head)
   $sql = "INSERT INTO bookings (
       booking_ref, status, policy_id,
-      check_in_date, check_out_date, nights,
+      check_in_date, check_out_date,
       currency,
       room_charge, service_charge, fee, vat, local_tax,
       room_total_minor, taxes_total_minor, grand_total_minor, pay_now_minor,
       terms_version, agreed_terms, channel, created_by, updated_by
     ) VALUES (
       :booking_ref, 'PENDING', :policy_id,
-      :check_in, :check_out, :nights,
+      :check_in, :check_out,
       :currency,
       :room_charge, :service_charge, :fee, :vat, :local_tax,
       :room_total_minor, :taxes_total_minor, :grand_total_minor, :pay_now_minor,
@@ -91,10 +123,9 @@ try {
   $stmt = $pdo->prepare($sql);
   $stmt->execute([
     ':booking_ref' => $ref,
-    ':policy_id'   => ig($policy, 'policy_id'),
-    ':check_in'    => $checkIn,
-    ':check_out'   => $checkOut,
-    ':nights'      => $nights,
+  ':policy_id'   => $policyId,
+  ':check_in'    => $checkIn,
+  ':check_out'   => $checkOut,
     ':currency'    => $currency,
     ':room_charge' => intval(ig($sum,'room_charge',0)),
     ':service_charge' => intval(ig($sum,'service_charge',0)),
@@ -113,10 +144,28 @@ try {
   ]);
   $bookingId = intval($pdo->lastInsertId());
 
-  // 3) booking_items + nights
+  // Persist nights value if column exists and is intended to store the computed nights
+  try {
+    $stmtUpd = $pdo->prepare('UPDATE bookings SET nights = :n WHERE id = :id');
+    $stmtUpd->execute([':n' => $nights, ':id' => $bookingId]);
+  } catch (Throwable $e) {
+    // non-fatal; continue (column may be absent in some environments)
+  }
+
+  // 3) booking_items + nights (Bottom-Up Calculation)
   $itemsMap = [];
   $items = ig($cart,'items',[]);
   if (!is_array($items)) $items = [];
+
+  // คำนวณภาษีต่อคืนจาก summary (VAT + Local Tax) แบ่งเฉลี่ยทุกคืน
+  $totalVat = intval(ig($sum, 'vat', 0));
+  $totalLocalTax = intval(ig($sum, 'local_tax', 0));
+  $totalTaxes = $totalVat + $totalLocalTax;
+  $taxPerNight = ($nights > 0) ? round($totalTaxes / $nights) : 0;
+
+  // ตัวแปรสำหรับ rollup ไปยัง bookings
+  $bookingRoomCharge = 0;
+  $bookingTotalTaxes = 0;
 
   $stmtItem = $pdo->prepare("INSERT INTO booking_items (
       booking_id, room_type_id, rate_plan_id, unit_type, quantity, pax_adults, pax_children,
@@ -133,39 +182,77 @@ try {
     )");
 
   foreach ($items as $it) {
+    // Normalize unit type to DB enum ('ROOM','DORM_BED')
+    $unit = strtoupper((string)ig($it,'unit_type','ROOM'));
+    if ($unit !== 'ROOM' && $unit !== 'DORM_BED') { $unit = ($unit === 'BED') ? 'DORM_BED' : 'ROOM'; }
+    
+    // คำนวณ line totals จาก booking_item_nights (Bottom-Up)
+    $lineSubtotal = 0;
+    $lineTaxes = 0;
+    
+    $nightsArr = ig($it,'nights',[]);
+    if (is_array($nightsArr)){
+      foreach ($nightsArr as $n) {
+        $qty = intval(ig($n,'quantity',1));
+        $basePrice = intval(ig($n,'base_price_minor',0));
+        
+        // คำนวณใหม่ตามกติกา:
+        // tax_minor = ภาษีต่อคืน (VAT + Local Tax แบ่งเฉลี่ย)
+        // total_minor = (base_price_minor × quantity) + tax_minor
+        $nightTax = $taxPerNight;
+        $nightTotal = ($basePrice * $qty) + $nightTax;
+        
+        // เก็บค่าสะสมสำหรับ booking_items
+        $lineSubtotal += ($basePrice * $qty);
+        $lineTaxes += $nightTax;
+      }
+    }
+    
+    $lineTotal = $lineSubtotal + $lineTaxes;
+    
+    // บันทึก booking_items ด้วยค่าที่คำนวณจาก booking_item_nights
     $stmtItem->execute([
       ':booking_id' => $bookingId,
       ':room_type_id' => intval(ig($it,'room_type_id')),
       ':rate_plan_id' => intval(ig($it,'rate_plan_id')),
-      ':unit_type'    => (string)ig($it,'unit_type','ROOM'),
+      ':unit_type'    => $unit,
       ':quantity'     => intval(ig($it,'quantity',1)),
       ':pax_adults'   => intval(ig($it,'pax_adults',0)),
       ':pax_children' => intval(ig($it,'pax_children',0)),
-      ':line_subtotal_minor' => intval(ig($it,'line_subtotal_minor',0)),
-      ':line_taxes_minor'    => intval(ig($it,'line_taxes_minor',0)),
-      ':line_total_minor'    => intval(ig($it,'line_total_minor',0)),
+      ':line_subtotal_minor' => $lineSubtotal,  // ← คำนวณจาก nights
+      ':line_taxes_minor'    => $lineTaxes,     // ← คำนวณจาก nights
+      ':line_total_minor'    => $lineTotal,     // ← คำนวณจาก nights
       ':created_by'    => $createdBy,
       ':updated_by'    => $createdBy,
     ]);
     $itemId = intval($pdo->lastInsertId());
     $itemsMap[] = $itemId;
 
-    $nightsArr = ig($it,'nights',[]);
+    // บันทึก booking_item_nights
     if (is_array($nightsArr)){
       foreach ($nightsArr as $n) {
+        $qty = intval(ig($n,'quantity',1));
+        $basePrice = intval(ig($n,'base_price_minor',0));
+        $nightTax = $taxPerNight;
+        $nightTotal = ($basePrice * $qty) + $nightTax;
+        
         $stmtNight->execute([
           ':booking_item_id' => $itemId,
           ':stay_date'       => ig($n,'stay_date'),
-          ':quantity'        => intval(ig($n,'quantity',1)),
-          ':base_price_minor'=> intval(ig($n,'base_price_minor',0)),
-          ':tax_minor'       => intval(ig($n,'tax_minor',0)),
-          ':total_minor'     => intval(ig($n,'total_minor',0)),
+          ':quantity'        => $qty,
+          ':base_price_minor'=> $basePrice,
+          ':tax_minor'       => $nightTax,
+          ':total_minor'     => $nightTotal,
           ':rate_source'     => (string)ig($n,'rate_source','PLAN'),
           ':created_by'      => $createdBy,
           ':updated_by'      => $createdBy,
         ]);
       }
     }
+    
+    // เก็บค่าสะสมสำหรับ bookings (rollup)
+    $bookingRoomCharge += $lineSubtotal;
+    $bookingTotalTaxes += $lineTaxes;
   }
 
   // 4) booking_tax_lines
@@ -177,16 +264,26 @@ try {
       :booking_id, :booking_item_id, :scope, :tax_type, :base_amount_minor, :rate_pct, :unit, :quantity, :amount_minor, :currency, :vat_base, :fee_base, :local_tax_unit, :created_by, :updated_by
     )");
   foreach ($taxLines as $t) {
-    $scope = strtoupper((string)ig($t,'scope','BOOKING'));
-    if ($scope === 'BOOKING') $scope = 'ORDER'; // map to DB enum
+    // กติกาใหม่: กำหนด scope จาก unit ตาม mapping
+    // - PER_BOOKING          -> ORDER (คิดต่อการจอง)
+    // - PERCENT, PER_ROOM_*, PER_PERSON_*, อื่น ๆ -> ITEM (คิดในระดับรายการ)
+    $unitU = strtoupper((string)ig($t,'unit','FIXED'));
+    $scope = ($unitU === 'PER_BOOKING') ? 'ORDER' : 'ITEM';
+    
+    // กติกา booking_item_id: ORDER -> NULL, ITEM -> ใช้ booking_items.id แรก
+    $taxItemId = null;
+    if ($scope === 'ITEM' && count($itemsMap) > 0) {
+      $taxItemId = $itemsMap[0];  // ใช้ booking_item แรก
+    }
+    
     $stmtTax->execute([
       ':booking_id' => $bookingId,
-      ':booking_item_id' => null,
+      ':booking_item_id' => $taxItemId,
       ':scope' => $scope,
       ':tax_type' => (string)ig($t,'tax_type','VAT'),
       ':base_amount_minor' => intval(ig($t,'base_amount_minor',0)),
       ':rate_pct' => is_null(ig($t,'rate_pct',null)) ? null : (float)$t['rate_pct'],
-      ':unit' => (string)ig($t,'unit','FIXED'),
+      ':unit' => $unitU,
       ':quantity' => intval(ig($t,'quantity',1)),
       ':amount_minor' => intval(ig($t,'amount_minor',0)),
       ':currency' => (string)ig($t,'currency',$currency),
@@ -198,7 +295,59 @@ try {
     ]);
   }
 
-  // 5) booking_request
+  // 5) UPDATE bookings ด้วยค่าที่คำนวณจาก booking_items (Bottom-Up Aggregation)
+  // คำนวณ service_charge และ fee จาก summary
+  $serviceCharge = intval(ig($sum,'service_charge',0));
+  $bookingFee = intval(ig($sum,'fee',0));
+  
+  // คำนวณยอดรวม
+  $roomTotalMinor = $bookingRoomCharge + $serviceCharge + $bookingFee;
+  $taxesTotalMinor = $bookingTotalTaxes;  // จาก SUM booking_items.line_taxes_minor
+  $grandTotalMinor = $roomTotalMinor + $taxesTotalMinor;
+  
+  // แยก VAT และ Local Tax ตามสัดส่วน
+  $configVat = intval(ig($sum,'vat',0));
+  $configLocalTax = intval(ig($sum,'local_tax',0));
+  $totalConfigTax = $configVat + $configLocalTax;
+  
+  if ($totalConfigTax > 0) {
+    $vatRatio = $configVat / $totalConfigTax;
+    $localTaxRatio = $configLocalTax / $totalConfigTax;
+    $calculatedVat = round($taxesTotalMinor * $vatRatio);
+    $calculatedLocalTax = round($taxesTotalMinor * $localTaxRatio);
+  } else {
+    $calculatedVat = 0;
+    $calculatedLocalTax = 0;
+  }
+  
+  // UPDATE bookings ด้วยค่าที่คำนวณแล้ว (ถูกต้องและสัมพันธ์กับ booking_items)
+  $sqlUpdateBooking = "UPDATE bookings SET
+    room_charge = :room_charge,
+    service_charge = :service_charge,
+    fee = :fee,
+    vat = :vat,
+    local_tax = :local_tax,
+    room_total_minor = :room_total_minor,
+    taxes_total_minor = :taxes_total_minor,
+    grand_total_minor = :grand_total_minor,
+    pay_now_minor = :pay_now_minor
+  WHERE id = :booking_id";
+  
+  $stmtUpdateBooking = $pdo->prepare($sqlUpdateBooking);
+  $stmtUpdateBooking->execute([
+    ':booking_id' => $bookingId,
+    ':room_charge' => $bookingRoomCharge,
+    ':service_charge' => $serviceCharge,
+    ':fee' => $bookingFee,
+    ':vat' => $calculatedVat,
+    ':local_tax' => $calculatedLocalTax,
+    ':room_total_minor' => $roomTotalMinor,
+    ':taxes_total_minor' => $taxesTotalMinor,
+    ':grand_total_minor' => $grandTotalMinor,
+    ':pay_now_minor' => $grandTotalMinor,
+  ]);
+
+  // 6) booking_request
   if (is_array($requests)){
     $stmtReq = $pdo->prepare("INSERT INTO booking_request (booking_id, preset_id, preset_code, note, selected, created_by, updated_by) VALUES (:booking_id,:preset_id,:preset_code,:note,:selected,:created_by,:updated_by)");
     foreach ($requests as $r){
@@ -215,7 +364,7 @@ try {
     }
   }
 
-  // 6) guests (single-row for this phase)
+  // 7) guests (single-row for this phase)
   if (is_array($guForm)){
     // Normalize guest fields
     $isGuest = intval(ig($guForm,'is_guest',1));

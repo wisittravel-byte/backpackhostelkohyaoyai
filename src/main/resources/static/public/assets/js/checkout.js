@@ -193,7 +193,9 @@
 
   function collectPolicyAgreement(){
     const agreed = !!(document.getElementById('agree') && document.getElementById('agree').checked);
-    return { agreed_terms: agreed, terms_version: 'v1', policy_id: null };
+    const policyId = window.__bookingPolicyId || null;
+    const termsVer = window.__bookingTermsVersion || 'v1';
+    return { agreed_terms: agreed, terms_version: termsVer, policy_id: policyId };
   }
 
   function sum(arr){ return (Array.isArray(arr)? arr.reduce((s,v)=> s + Number(v||0), 0):0); }
@@ -550,7 +552,15 @@
       console.log('📤 PENDING booking payload:', fullPayload);
       let resp=null; let apiErr=null;
       if(window.API && window.API.fetchJson){
-        try{ resp = await window.API.fetchJson('/php-api/v1/bookings.php', { method:'POST', body: JSON.stringify(fullPayload) }); }catch(err){ apiErr=err; }
+        // Primary: standard API path; Fallback: legacy php-api path (for local/dev)
+        try{
+          resp = await window.API.fetchJson('/api/v1/bookings.php', { method:'POST', body: JSON.stringify(fullPayload) });
+        }catch(err1){
+          apiErr = err1;
+          try{
+            resp = await window.API.fetchJson('/php-api/v1/bookings.php', { method:'POST', body: JSON.stringify(fullPayload) });
+          }catch(err2){ apiErr = err2; }
+        }
       }
       if(resp && resp.ok){
         console.log('✅ Booking created:', resp.booking);
@@ -1885,10 +1895,36 @@
     else { fetchPresets().then(renderPresets); }
   }
   try{ window.__initRequestPresets = initRequestPresets; }catch(_){ }
+  // Load active booking policy (terms) to use when creating booking
+  async function loadBookingPolicy(){
+    const apiBase = getApiBase();
+    const lang = (window.currentLang || 'th').toLowerCase();
+    const urls = [
+      `${apiBase}/api/v1/booking-terms-with-items.php?lang=${lang}`,
+      `${apiBase}/php-api/v1/booking-terms-with-items.php?lang=${lang}`
+    ];
+    for(const u of urls){
+      try{
+        const r = await fetch(u, { cache: 'no-cache' });
+        if(r.ok){
+          const data = await r.json();
+          if(data && data.ok && data.term && data.term.policy_id){
+            window.__bookingPolicyId = Number(data.term.policy_id);
+            window.__bookingTermsVersion = String(data.term.version || 'v1');
+            console.log('✅ Loaded booking policy:', window.__bookingPolicyId, window.__bookingTermsVersion);
+            return;
+          }
+        }
+      }catch(_){ }
+    }
+    console.warn('⚠️ Failed to load booking policy; will rely on server fallback');
+  }
+
   // Clear previously selected special request checkboxes each time checkout loads
   // (Do not modify existing functions; just remove the persisted selection key before rendering presets)
   document.addEventListener('DOMContentLoaded', function(){
     try{ localStorage.removeItem('booking_requests'); }catch(_){ }
+    loadBookingPolicy(); // Load policy on page load
   });
   document.addEventListener('DOMContentLoaded', initRequestPresets);
 })();
