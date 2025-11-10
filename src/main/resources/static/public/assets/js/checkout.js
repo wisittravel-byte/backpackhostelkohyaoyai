@@ -109,6 +109,216 @@
     const payNowRight = document.getElementById('payNowRight'); if(payNowRight) payNowRight.textContent = toTHB(total);
   }
 
+  // ---------- Guest form helpers ----------
+  function ensureGuestFormValid(){
+    try{
+      const other = document.getElementById('bookingForOther');
+      const isOther = !!(other && other.checked);
+      if(!isOther) return true; // Self booking: main fields are already required upstream on server
+      const title = (document.getElementById('guestTitle')||{}).value || '';
+      const first = (document.getElementById('otherGuestFirstName')||{}).value || '';
+      const last  = (document.getElementById('otherGuestLastName')||{}).value || '';
+      const cc    = (document.getElementById('guestPhoneCountryCode')||{}).value || '';
+      const ph    = (document.getElementById('guestPhoneNumber')||{}).value || '';
+      if(!title || !first.trim() || !last.trim() || !cc || !ph.trim()){
+        const msg = (window.currentLang==='en')? 'Please fill in all guest details' : 'กรุณากรอกรายละเอียดผู้เข้าพักให้ครบถ้วน';
+        showCustomAlert(msg);
+        // focus first missing
+        if(!title) (document.getElementById('guestTitle')||{}).focus?.();
+        else if(!first.trim()) (document.getElementById('otherGuestFirstName')||{}).focus?.();
+        else if(!last.trim()) (document.getElementById('otherGuestLastName')||{}).focus?.();
+        else if(!cc) (document.getElementById('guestPhoneCountryCode')||{}).focus?.();
+        else (document.getElementById('guestPhoneNumber')||{}).focus?.();
+        return false;
+      }
+      return true;
+    }catch(_){ return true; }
+  }
+
+  function collectGuestForm(){
+    const selfChecked = !!(document.getElementById('bookingForSelf') && document.getElementById('bookingForSelf').checked);
+    const title = (document.getElementById('title')||{}).value || '';
+    const first = (document.getElementById('firstName')||{}).value || '';
+    const last  = (document.getElementById('lastName')||{}).value || '';
+    const cc    = (document.getElementById('countryCode')||{}).value || '';
+    const ph    = (document.getElementById('mobile')||{}).value || '';
+    const email = (document.getElementById('email')||{}).value || '';
+    const form = {
+      is_guest: selfChecked ? 1 : 0,
+      title, booker_first_name:first, booker_last_name:last,
+      email, phone_country_code:cc, phone_number:ph
+    };
+    if(!selfChecked){
+      form.guest_title = (document.getElementById('guestTitle')||{}).value || '';
+      form.guest_first_name = (document.getElementById('otherGuestFirstName')||{}).value || '';
+      form.guest_last_name  = (document.getElementById('otherGuestLastName')||{}).value || '';
+      form.guest_phone_country_code = (document.getElementById('guestPhoneCountryCode')||{}).value || '';
+      form.guest_phone_number = (document.getElementById('guestPhoneNumber')||{}).value || '';
+    }
+    return form;
+  }
+
+  function ymd(d){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; }
+  function deriveStayDates(ci, nights){
+    const arr=[]; if(!ci || !Number.isFinite(nights)) return arr; const start = new Date(ci); start.setHours(0,0,0,0);
+    for(let i=0;i<nights;i++){ const d = new Date(start); d.setDate(start.getDate()+i); arr.push(ymd(d)); }
+    return arr;
+  }
+
+  function collectSpecialRequests(){
+    try{
+      const raw = localStorage.getItem('booking_requests');
+      const list = raw ? JSON.parse(raw) : [];
+      if(Array.isArray(list)){
+        return list.map(x=>({ preset_id: x.id, preset_code: x.code, note: x.note||'', selected: 1 }));
+      }
+    }catch(_){ }
+    // Fallback: read from DOM
+    const grid = document.getElementById('request-presets-grid');
+    const res=[];
+    if(grid){
+      grid.querySelectorAll('input[data-preset-id]').forEach(cb=>{
+        if(cb.checked){
+          const id = Number(cb.getAttribute('data-preset-id'));
+          const code = cb.getAttribute('data-preset-code')||'';
+          let note='';
+          const requires = cb.getAttribute('data-requires-note')==='1';
+          if(requires){ const ta = grid.querySelector(`textarea[data-note-for="${id}"]`); if(ta) note = (ta.value||'').trim(); }
+          res.push({ preset_id:id, preset_code:code, note, selected:1 });
+        }
+      });
+    }
+    return res;
+  }
+
+  function collectPolicyAgreement(){
+    const agreed = !!(document.getElementById('agree') && document.getElementById('agree').checked);
+    return { agreed_terms: agreed, terms_version: 'v1', policy_id: null };
+  }
+
+  function sum(arr){ return (Array.isArray(arr)? arr.reduce((s,v)=> s + Number(v||0), 0):0); }
+  function itemsRoomsCount(items){ return items.reduce((s,it)=> s + Number(it.quantity||0), 0); }
+
+  function buildCartForBooking(bd){
+    const nights = calculateNights(bd.check_in, bd.check_out);
+    const stayDates = deriveStayDates(bd.check_in, nights);
+    const items=[]; let room_total_minor=0;
+    const adults = Number(bd.adults || bd.guests || 1);
+    const children = Number(bd.children || 0);
+    if(Array.isArray(bd.cart) && bd.cart.length){
+      bd.cart.forEach(ci=>{
+        const qty = Number(ci.qty||1);
+        const nightly = Array.isArray(ci.nightly_prices) ? ci.nightly_prices.slice() : [];
+        const lineSub = sum(nightly) * qty;
+        const nightsArr = stayDates.map((d,idx)=>{
+          const base = Number(nightly[idx]||0);
+          return { stay_date:d, quantity: qty, base_price_minor: base, tax_minor: 0, total_minor: base*qty, rate_source:'PLAN' };
+        });
+        items.push({
+          room_type_id: ci.room_type_id,
+          rate_plan_id: ci.rate_plan_id,
+          unit_type: (ci.is_private? 'ROOM':'BED'),
+          quantity: qty,
+          pax_adults: Number(ci.guests || adults),
+          pax_children: children,
+          line_subtotal_minor: lineSub,
+          line_taxes_minor: 0,
+          line_total_minor: lineSub,
+          nights: nightsArr
+        });
+        room_total_minor += lineSub;
+      });
+    } else if(Array.isArray(bd.rooms_detail) && bd.rooms_detail.length){
+      const rd = bd.rooms_detail[0];
+      const qty = Number(bd.rooms || 1);
+      const nightly = Array.isArray(rd.nightly_prices_minor) ? rd.nightly_prices_minor.slice() : [];
+      const lineSub = sum(nightly) * qty;
+      const nightsArr = stayDates.map((d,idx)=>{
+        const base = Number(nightly[idx]||0);
+        return { stay_date:d, quantity: qty, base_price_minor: base, tax_minor: 0, total_minor: base*qty, rate_source:'PLAN' };
+      });
+      items.push({
+        room_type_id: rd.room_type_id,
+        rate_plan_id: rd.rate_plan_id,
+        unit_type: (bd.is_private? 'ROOM':'BED'),
+        quantity: qty,
+        pax_adults: adults,
+        pax_children: children,
+        line_subtotal_minor: lineSub,
+        line_taxes_minor: 0,
+        line_total_minor: lineSub,
+        nights: nightsArr
+      });
+      room_total_minor += lineSub;
+    }
+
+    // Taxes and fees calculation (reuse last loaded config)
+    const taxConfig = (window.__lastTaxConfig || getDefaultTaxConfig());
+    const calc = calculateTaxesAndFees(room_total_minor/100, taxConfig, {
+      guests: adults,
+      rooms: itemsRoomsCount(items) || Number(bd.rooms||1),
+      nights
+    });
+    const service_charge = Math.round(Number(calc.service_charge||0)*100);
+    const fee = Math.round(Number(calc.booking_fee||0)*100);
+    const vat = Math.round(Number(calc.vat||0)*100);
+    const local_tax = Math.round(Number(calc.local_tax||0)*100);
+    const grand_total_minor = Math.round(Number(calc.grand_total||0)*100);
+    const taxes_total_minor = vat + local_tax;
+
+    const summary_minor = {
+      room_charge: Math.round(room_total_minor),
+      service_charge, fee, vat, local_tax,
+      room_total_minor: Math.round(room_total_minor + service_charge + fee),
+      taxes_total_minor,
+      grand_total_minor,
+      pay_now_minor: grand_total_minor
+    };
+
+    const tax_breakdown = [];
+    if(vat>0){ tax_breakdown.push({ scope:'BOOKING', tax_type:'VAT', base_amount_minor: Math.round((calc.vat_base_amount_minor)|| Math.round((room_total_minor+service_charge+fee))), rate_pct: Number(taxConfig.vat_pct||0), unit:'PERCENT', quantity:1, amount_minor: vat, currency:'THB', vat_base: String(taxConfig.vat_base||'ROOM_ONLY') }); }
+    if(local_tax>0){ tax_breakdown.push({ scope:'BOOKING', tax_type:'LOCAL_TAX', base_amount_minor: 0, rate_pct: null, unit: String(taxConfig.local_tax_unit||'PER_BOOKING'), quantity: 1, amount_minor: local_tax, currency:'THB', local_tax_unit: String(taxConfig.local_tax_unit||'PER_BOOKING') }); }
+    if(fee>0){ tax_breakdown.push({ scope:'BOOKING', tax_type:'BOOKING_FEE', base_amount_minor: 0, rate_pct: null, unit: String(taxConfig.fee_unit||'PER_BOOKING'), quantity: 1, amount_minor: fee, currency:'THB', fee_base: String(taxConfig.fee_base||'ROOM_ONLY') }); }
+
+    return {
+      check_in_date: bd.check_in || null,
+      check_out_date: bd.check_out || null,
+      nights,
+      currency: 'THB',
+      items,
+      tax_breakdown,
+      summary_minor
+    };
+  }
+
+  // Custom alert modal (system style)
+  function showCustomAlert(message){
+    let modal = document.getElementById('customAlertModal');
+    if(!modal){
+      modal = document.createElement('div');
+      modal.id = 'customAlertModal';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content compact" style="max-width:400px;" tabindex="-1">
+          <div class="modal-header">
+            <h3 class="color-brand">แจ้งเตือน</h3>
+          </div>
+          <div class="modal-body">
+            <p id="customAlertMessage"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn" id="customAlertOkBtn">ตรวจสอบ</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const okBtn = modal.querySelector('#customAlertOkBtn');
+      okBtn.addEventListener('click', ()=> modal.classList.add('hidden'));
+    }
+    modal.querySelector('#customAlertMessage').textContent = message;
+    modal.classList.remove('hidden');
+  }
+
   function wireActions(){
   const agree = document.getElementById('agree');
   const bookBtn = document.getElementById('bookBtn');
@@ -118,6 +328,81 @@
   const toggleRequests = null;
   const requestsWrap = null;
 
+  // Booking for self/other toggles
+  const bookingForSelf = document.getElementById('bookingForSelf');
+  const bookingForOther = document.getElementById('bookingForOther');
+  const otherGuestDetails = document.getElementById('otherGuestDetails');
+  function applyBookingFor(){
+    const showOther = !!(bookingForOther && bookingForOther.checked);
+    if(otherGuestDetails){
+      otherGuestDetails.classList.toggle('hidden', !showOther);
+      try{ otherGuestDetails.setAttribute('aria-hidden', showOther? 'false':'true'); }catch(_){ }
+      try{ otherGuestDetails.querySelectorAll('.req-star').forEach(el=> el.classList.toggle('hidden', !showOther)); }catch(_){ }
+    }
+    // Recompute gating whenever booking-for mode changes
+    try{ updateAgreeAvailability && updateAgreeAvailability(); updateBookBtnState && updateBookBtnState(); }catch(_){ }
+  }
+  if(bookingForSelf) bookingForSelf.addEventListener('change', applyBookingFor);
+  if(bookingForOther) bookingForOther.addEventListener('change', applyBookingFor);
+  // Initialize state on load
+  applyBookingFor();
+
+
+    // Initial state: disable Book button until contact+terms pass
+    if(bookBtn){ bookBtn.setAttribute('disabled','disabled'); }
+
+    // Helper: basic validators for contact section
+    const tl = document.getElementById('title');
+    const fn = document.getElementById('firstName');
+    const ln = document.getElementById('lastName');
+    const cc = document.getElementById('countryCode');
+    const mb = document.getElementById('mobile');
+    const em = document.getElementById('email');
+    function nonEmpty(v){ return !!(v && String(v).trim().length>0); }
+    function isEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+    function isContactValid(){
+      return nonEmpty(tl?.value) && nonEmpty(fn?.value) && nonEmpty(ln?.value) && nonEmpty(mb?.value) && nonEmpty(cc?.value) && isEmail(em?.value);
+    }
+      // Validate other-guest fields only when booking for others
+      function isOtherGuestValid(){
+        const isOther = !!(document.getElementById('bookingForOther') && document.getElementById('bookingForOther').checked);
+        if(!isOther) return true;
+        const gtl = document.getElementById('guestTitle');
+        const gfn = document.getElementById('otherGuestFirstName');
+        const gln = document.getElementById('otherGuestLastName');
+        const gcc = document.getElementById('guestPhoneCountryCode');
+        const gph = document.getElementById('guestPhoneNumber');
+        return nonEmpty(gtl?.value) && nonEmpty(gfn?.value) && nonEmpty(gln?.value) && nonEmpty(gcc?.value) && nonEmpty(gph?.value);
+      }
+    function focusFirstInvalid(){
+      if(!nonEmpty(tl?.value)) { tl?.focus?.(); return; }
+      if(!nonEmpty(fn?.value)) { fn?.focus?.(); return; }
+      if(!nonEmpty(ln?.value)) { ln?.focus?.(); return; }
+      if(!nonEmpty(cc?.value)) { cc?.focus?.(); return; }
+      if(!nonEmpty(mb?.value)) { mb?.focus?.(); return; }
+      if(!isEmail(em?.value)) { em?.focus?.(); return; }
+    }
+    function showFillContactAlert(){
+      const th = 'กรุณากรอกรายละเอียดข้อมูลติดต่อในการจองให้ครบถ้วน';
+      const en = 'Please fill in all contact information for booking';
+      const msg = (window.currentLang||'th').toLowerCase()==='en' ? en : th;
+      showCustomAlert(msg);
+    }
+    function updateAgreeAvailability(){ if(agree){ agree.disabled = !(isContactValid() && isOtherGuestValid()); } }
+    function updateBookBtnState(){ if(bookBtn){ if(agree && agree.checked && isContactValid() && isOtherGuestValid()) bookBtn.removeAttribute('disabled'); else bookBtn.setAttribute('disabled','disabled'); } }
+    // Attach listeners to contact inputs
+    [fn, ln, cc, mb, em].forEach(el=>{ if(!el) return; ['input','change','blur'].forEach(ev=> el.addEventListener(ev, ()=>{ updateAgreeAvailability(); updateBookBtnState(); })); });
+    // Attach listeners to other-guest fields and radio toggles to keep gating in sync
+    const otherInputs = [
+      document.getElementById('bookingForSelf'),
+      document.getElementById('bookingForOther'),
+      document.getElementById('guestTitle'),
+      document.getElementById('otherGuestFirstName'),
+      document.getElementById('otherGuestLastName'),
+      document.getElementById('guestPhoneCountryCode'),
+      document.getElementById('guestPhoneNumber')
+    ];
+    otherInputs.forEach(el=>{ if(!el) return; ['input','change','blur'].forEach(ev=> el.addEventListener(ev, ()=>{ updateAgreeAvailability(); updateBookBtnState(); })); });
 
     // Wire Terms modal
     const termsModal = document.getElementById('termsModal');
@@ -171,18 +456,57 @@
     if(agree){
       agree.addEventListener('change', ()=>{
         if(agree.checked){
+          // Block until contact section is valid
+          if(!isContactValid()){
+            agree.checked = false;
+            showFillContactAlert();
+            focusFirstInvalid();
+            updateAgreeAvailability();
+            updateBookBtnState();
+            return;
+          }
+          // If booking for others, ensure guest fields are valid before opening terms
+          if(!isOtherGuestValid()){
+            agree.checked = false;
+            // Reuse existing guest validator to show message and focus
+            ensureGuestFormValid();
+            updateAgreeAvailability();
+            updateBookBtnState();
+            return;
+          }
           agree.checked = false; // wait for explicit confirmation in modal
           openTermsDynamic();
         }
       });
     }
-    if(termsOkBtn){ termsOkBtn.addEventListener('click', ()=>{ if(agree) agree.checked = true; closeTerms(); }); }
+    if(termsOkBtn){ termsOkBtn.addEventListener('click', ()=>{ if(agree) agree.checked = true; closeTerms(); updateBookBtnState(); }); }
     if(termsCloseBtn){ termsCloseBtn.addEventListener('click', ()=>{ closeTerms(); }); }
     // Allow clicking heading to re-open & refresh
     const termsTitle = document.getElementById('termsTitle');
     if(termsTitle){ termsTitle.style.cursor = 'pointer'; termsTitle.addEventListener('click', openTermsDynamic); }
   const agreeLabel = document.querySelector('label[for="agree"]');
-  if(agreeLabel){ agreeLabel.addEventListener('click', function(e){ e.preventDefault(); if(agree) agree.checked = false; openTermsDynamic(); }); }
+  if(agreeLabel){ agreeLabel.addEventListener('click', function(e){
+    e.preventDefault();
+    // Guard: require contact section before opening modal
+    if(!isContactValid()){
+      showFillContactAlert();
+      focusFirstInvalid();
+      updateAgreeAvailability();
+      updateBookBtnState();
+      return;
+    }
+    // Guard: require other-guest fields when booking for others
+    if(!isOtherGuestValid()){
+      ensureGuestFormValid();
+      updateAgreeAvailability();
+      updateBookBtnState();
+      return;
+    }
+    if(agree) agree.checked = false; openTermsDynamic();
+  }); }
+    // Initialize toggle availability and button state
+    updateAgreeAvailability();
+    updateBookBtnState();
 
     // Change Dates button handler removed here - now handled after loadBookingData() to ensure hold release
     
@@ -190,65 +514,58 @@
       if(!agree.checked){ try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.mustAgree') : alert('Please accept the terms'); }catch(_){ } return false; }
       return true;
     }
-  bookBtn.addEventListener('click', async (e)=>{ 
-    e.preventDefault(); 
-    if(!mustAgree()) return; 
-    // Validate special requests that require note
+  bookBtn.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    if(!mustAgree()) return;
+    if(!ensureGuestFormValid()) return;
+    // Validate special requests notes
     try{
-      const grid = document.getElementById('request-presets-grid');
+      const grid=document.getElementById('request-presets-grid');
       if(grid){
-        let invalid = false; let firstEl = null;
+        let invalid=false; let firstEl=null;
         grid.querySelectorAll('input[data-requires-note="1"]').forEach(cb=>{
           if(cb.checked){
-            const id = cb.getAttribute('data-preset-id');
-            const ta = grid.querySelector(`textarea[data-note-for="${id}"]`);
-            const noteReq = grid.querySelector(`small[data-note-required-for="${id}"]`);
-            if(ta && ta.value.trim().length===0){ invalid = true; if(noteReq) noteReq.classList.remove('hidden'); if(!firstEl) firstEl = ta; }
+            const id=cb.getAttribute('data-preset-id');
+            const ta=grid.querySelector(`textarea[data-note-for="${id}"]`);
+            const noteReq=grid.querySelector(`small[data-note-required-for="${id}"]`);
+            if(ta && ta.value.trim().length===0){ invalid=true; if(noteReq) noteReq.classList.remove('hidden'); if(!firstEl) firstEl=ta; }
           }
         });
         if(invalid){
-          (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.requests.noteRequired') : alert((window.currentLang==='en')? 'Please fill the required note for selected requests':'กรุณาระบุรายละเอียดสำหรับคำขอที่เลือก');
+          (window.Messages && window.Messages.alert)? window.Messages.alert('msg.checkout.requests.noteRequired') : alert((window.currentLang==='en')? 'Please fill the required note for selected requests':'กรุณาระบุรายละเอียดสำหรับคำขอที่เลือก');
           if(firstEl) firstEl.focus();
           return;
         }
       }
     }catch(_){ }
+    // Build phase-1 booking payload and call new API
     try{
-      const draftRaw = localStorage.getItem('booking_draft');
-      const draft = draftRaw ? JSON.parse(draftRaw) : {};
-      const payload = {
-        checkIn: draft.checkIn,
-        checkOut: draft.checkOut,
-        guests: Number(draft.guests||2),
-        rooms: Number(draft.rooms||1),
-        roomType: draft.roomType||'dorm',
-        email: document.getElementById('email')?.value||'',
-        firstName: document.getElementById('firstName')?.value||'',
-        lastName: document.getElementById('lastName')?.value||''
-      };
-      let saved = null;
+      const bdRaw = localStorage.getItem('booking_data');
+      const bd = bdRaw ? JSON.parse(bdRaw) : {};
+      const cart = buildCartForBooking(bd);
+  const guest_form = collectGuestForm();
+      const requests = collectSpecialRequests();
+      const policy = collectPolicyAgreement();
+      const fullPayload = { cart, guest_form, requests, policy, channel:'WEBSITE', created_by:'website' };
+      console.log('📤 PENDING booking payload:', fullPayload);
+      let resp=null; let apiErr=null;
       if(window.API && window.API.fetchJson){
-        try{ saved = await window.API.fetchJson('/api/bookings', { method:'POST', body: JSON.stringify(payload) }); }catch(_){ saved = null; }
-        if(saved && saved.id){ localStorage.setItem('booking_id', String(saved.id)); }
+        try{ resp = await window.API.fetchJson('/php-api/v1/bookings.php', { method:'POST', body: JSON.stringify(fullPayload) }); }catch(err){ apiErr=err; }
       }
-      // Attempt to CONFIRM hold if present (idempotent on server)
-      try{
-        const bdRaw = localStorage.getItem('booking_data');
-        const bd = bdRaw ? JSON.parse(bdRaw) : null;
-        if(bd && bd.hold_id){
-          try{ localStorage.setItem('skip_hold_release','1'); }catch(_){ }
-          const apiBase = getApiBase();
-          await fetch(`${apiBase}/api/v1/inventory-hold-confirm.php`, {
-            method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, credentials:'omit', mode:'cors', body: JSON.stringify({
-              hold_id: bd.hold_id,
-              booking_id: saved && saved.id ? saved.id : null,
-              updated_by: 'website'
-            })
-          }).catch(()=>{});
-        }
-      }catch(_){ }
-    }catch(err){ console.warn('Booking save failed:', err); }
-    window.location.href = 'payment.html';
+      if(resp && resp.ok){
+        console.log('✅ Booking created:', resp.booking);
+        try{ localStorage.setItem('booking_result', JSON.stringify(resp)); }catch(_){ }
+        try{ localStorage.setItem('booking_id', String(resp.booking.id)); }catch(_){ }
+        try{ localStorage.setItem('skip_hold_release','1'); }catch(_){ }
+        window.location.href = 'payment.html'; // placeholder next step
+      } else {
+        console.warn('❌ Booking API failed', apiErr);
+        alert((window.currentLang==='en')? 'Failed to create booking' : 'สร้างใบจองไม่สำเร็จ');
+      }
+    }catch(err){
+      console.error('❌ Unexpected booking error', err);
+      alert((window.currentLang==='en')? 'Unexpected error creating booking' : 'เกิดข้อผิดพลาดระหว่างสร้างใบจอง');
+    }
   });
   if(reviewBtn){
     reviewBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.checkout.reviewing') : alert('Reviewing your booking…'); }catch(_){ } });
@@ -1568,5 +1885,10 @@
     else { fetchPresets().then(renderPresets); }
   }
   try{ window.__initRequestPresets = initRequestPresets; }catch(_){ }
+  // Clear previously selected special request checkboxes each time checkout loads
+  // (Do not modify existing functions; just remove the persisted selection key before rendering presets)
+  document.addEventListener('DOMContentLoaded', function(){
+    try{ localStorage.removeItem('booking_requests'); }catch(_){ }
+  });
   document.addEventListener('DOMContentLoaded', initRequestPresets);
 })();

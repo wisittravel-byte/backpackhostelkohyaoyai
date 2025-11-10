@@ -73,24 +73,42 @@
 
                 <!-- 1. Radio group: booking for self vs others -->
                 <div class="divider span-all"></div>
-                <div class="booking-for inline mt-6">
-                  <div class="checkbox-wrapper">
-                    <input type="radio" name="bookingFor" id="bookingForSelf" value="self" checked>
-                    <label for="bookingForSelf" data-i18n="checkout.selfBooking">ฉันเป็นผู้เข้าพัก</label>
+                  <div class="booking-for inline mt-6" id="bookingForGroup">
+                    <div class="checkbox-wrapper">
+                      <input type="radio" name="bookingFor" id="bookingForSelf" value="self" checked>
+                      <label for="bookingForSelf" data-i18n="checkout.selfBooking">ฉันเป็นผู้เข้าพัก</label>
+                    </div>
+                    <div class="checkbox-wrapper" id="bookingForOtherWrap">
+                      <input type="radio" name="bookingFor" id="bookingForOther" value="other">
+                      <label for="bookingForOther" data-i18n="checkout.otherBooking">ฉันจองสำหรับผู้อื่น</label>
+                    </div>
                   </div>
-                  <div class="checkbox-wrapper" id="bookingForOtherWrap">
-                    <input type="radio" name="bookingFor" id="bookingForOther" value="other" disabled>
-                    <label for="bookingForOther" data-i18n="checkout.otherBooking">ฉันจองสำหรับผู้อื่น</label>
-                  </div>
-                </div>
 
                 <!-- 2. Guest Details Section (hidden by default; shown when booking for others) -->
-                <div id="otherGuestDetails" class="hidden span-all grid gap-8">
+                <div id="otherGuestDetails" class="hidden span-all grid gap-8" aria-hidden="true">
                   <h3 class="span-all color-brand" data-i18n="checkout.otherGuest.title">รายละเอียดผู้เข้าพัก</h3>
+                  <!-- Guest Name: 3 columns (title + first + last) -->
                   <label class="span-all"><span data-i18n="checkout.otherGuest.label.guestName">ชื่อ-นามสกุล ผู้เข้าพัก</span> <span class="text-danger req-star hidden">*</span></label>
-                  <div class="row cols-2">
+                  <div class="row cols-3">
+                    <select id="guestTitle" class="form-control" aria-label="Guest Title">
+                      <option value="">--Select--</option>
+                      <option>Mr.</option>
+                      <option>Ms.</option>
+                      <option>Mrs.</option>
+                    </select>
                     <input id="otherGuestFirstName" class="form-control" data-i18n-placeholder="checkout.placeholder.firstName" placeholder="First Name">
                     <input id="otherGuestLastName" class="form-control" data-i18n-placeholder="checkout.placeholder.lastName" placeholder="Last Name">
+                  </div>
+                  <!-- Guest Phone: 2 columns (country code + number) -->
+                  <label class="span-all" for="guestPhone"><span data-i18n="checkout.otherGuest.label.guestPhone">เบอร์โทรศัพท์ ผู้เข้าพัก</span> <span class="text-danger req-star hidden">*</span></label>
+                  <div class="row cols-2">
+                    <select id="guestPhoneCountryCode" class="form-control" aria-label="Guest Phone Country Code">
+                      <option value="" data-i18n="checkout.countryCode">Country Code</option>
+                      <option value="+66">+66</option>
+                      <option value="+65">+65</option>
+                      <option value="+60">+60</option>
+                    </select>
+                    <input id="guestPhoneNumber" class="form-control" placeholder="Phone number">
                   </div>
                   <small class="span-all muted" data-i18n="checkout.otherGuest.note">โดยไม่มีคำนำหน้า</small>
                 </div>
@@ -115,7 +133,7 @@
                 <div class="btn-group span-all justify-between">
                   <div></div>
                   <div class="inline gap-10">
-                    <button id="bookBtn" class="btn" type="button" data-i18n="checkout.book.btn">Book Now</button>
+                    <button id="bookBtn" class="btn" type="button" disabled data-i18n="checkout.book.btn">Book Now</button>
                   </div>
                 </div>
               </div>
@@ -205,13 +223,29 @@
 
   <script src="assets/js/messages.js?v=20250929" defer></script>
   <script src="assets/js/api.js?v=20250929" defer></script>
-  <script src="assets/js/checkout.js?v=20251105-rooms-array-support" defer></script>
+  <script src="assets/js/checkout.js?v=20251109-radio-toggle" defer></script>
   <script src="assets/js/i18n.js?v=20251031-taxonly" defer></script>
   <script src="assets/js/header-content.js?v=20250929" defer></script>
   <script src="assets/js/load-shared-header.js?v=20250929" defer></script>
   <script src="assets/js/header-menu.js?v=20250929" defer></script>
   <script src="assets/js/lang-fix.js?v=20250929" defer></script>
   <script src="assets/js/load-shared-footer.js?v=20250929" defer></script>
+
+  <!-- Terms & Policies Modal (dynamic content from API) -->
+  <div id="termsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+    <div class="modal-content terms-wide" tabindex="-1">
+      <div class="modal-header">
+        <h3 id="termsTitle" class="color-brand" data-i18n="checkout.terms.title">ข้อกำหนดและนโยบายทั้งหมด</h3>
+        <button type="button" class="btn ghost" id="termsCloseBtn" data-i18n="checkout.terms.close">ปิด</button>
+      </div>
+      <div class="modal-body">
+        <ul class="list gap-6"><li class="muted">กำลังโหลด...</li></ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn secondary" id="termsOkBtn" data-i18n="checkout.terms.ok">เข้าใจแล้ว</button>
+      </div>
+    </div>
+  </div>
 
   
   <!-- Hold Expired Alert Modal -->
