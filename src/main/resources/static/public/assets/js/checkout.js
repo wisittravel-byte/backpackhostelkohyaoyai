@@ -254,10 +254,22 @@
       room_total_minor += lineSub;
     }
 
+    // ✅ คำนวณจำนวนคนจริงจาก booking items (สำหรับ local tax calculation)
+    // กรณี Dorm Bed: 1 เตียง = 1 คน, กรณี Private Room: นับตาม pax_adults ของ item
+    const actualGuests = items.reduce((total, item) => {
+      if (item.unit_type === 'BED') {
+        // Dorm: จำนวนเตียง = จำนวนคน
+        return total + Number(item.quantity || 0);
+      } else {
+        // Private Room: นับตาม pax_adults
+        return total + Number(item.pax_adults || 0);
+      }
+    }, 0);
+
     // Taxes and fees calculation (reuse last loaded config)
     const taxConfig = (window.__lastTaxConfig || getDefaultTaxConfig());
     const calc = calculateTaxesAndFees(room_total_minor/100, taxConfig, {
-      guests: adults,
+      guests: actualGuests, // ✅ ใช้จำนวนคนจริงจาก items
       rooms: itemsRoomsCount(items) || Number(bd.rooms||1),
       nights
     });
@@ -612,7 +624,19 @@
       : (Array.isArray(bookingData.rooms_detail) ? bookingData.rooms_detail : []);
 
     const totalRooms = (Array.isArray(items) ? items.reduce((s,it)=> s + Number(it.qty||1), 0) : 0) || (bookingData.rooms||0);
-    const guests = Number(bookingData.adults || bookingData.guests || 0);
+    
+    // ✅ คำนวณจำนวนคนจริงจาก items (Dorm: 1 เตียง = 1 คน, Private: ตาม pax_adults)
+    const guests = Array.isArray(items) ? items.reduce((total, it) => {
+      const isPrivTrue = v => (v === true || v === 1 || v === '1');
+      if (isPrivTrue(it && it.is_private)) {
+        // Private Room: นับตาม pax_adults
+        return total + Number(it.pax_adults || it.guests || 0);
+      } else {
+        // Dorm Bed: จำนวนเตียง = จำนวนคน
+        return total + Number(it.qty || 0);
+      }
+    }, 0) : Number(bookingData.adults || bookingData.guests || 0);
+    
     // กำหนดหน่วยเป็น "ห้อง" หรือ "เตียง" ตาม room_types.is_private (รองรับค่าทั้ง 0/1 และ true/false)
     let unitWord = 'ห้อง';
     try{
@@ -1408,9 +1432,13 @@
       case 'PER_ROOM_PER_STAY': feeQty = rooms; break;
       default: feeQty = 1; // PER_BOOKING
     }
+    
+    // ✅ Fix: fee_value เป็น BIGINT (minor units) แล้ว
+    const feeValueBaht = Number(taxConfig.fee_value||0) / 100; // สำหรับ FIXED: satang → THB
+    const feeValuePercent = Number(taxConfig.fee_value||0) / 10000; // สำหรับ PERCENTAGE: basis points → decimal (500 → 0.05)
     const bookingFee = (String(taxConfig.fee_type||'FIXED') === 'FIXED')
-      ? Number(taxConfig.fee_value||0) * feeQty
-      : (feeBaseAmount * (Number(taxConfig.fee_value||0)/100) * feeQty);
+      ? feeValueBaht * feeQty
+      : (feeBaseAmount * feeValuePercent * feeQty);
 
     // 3) VAT
     const vatBaseAmount = (function(){
@@ -1429,7 +1457,10 @@
       case 'PER_PERSON_PER_STAY': localQty = guests; break;
       default: localQty = 1; // PER_BOOKING
     }
-    const localTax = Number(taxConfig.local_tax_amount||0) * localQty;
+    
+    // ✅ Fix: local_tax_amount เป็น BIGINT (minor units) แล้ว → แปลงเป็นบาท (÷100)
+    const localTaxAmountBaht = Number(taxConfig.local_tax_amount||0) / 100;
+    const localTax = localTaxAmountBaht * localQty;
 
     // 5) Totals
     const subtotalRoomAndService = roomPrice + serviceCharge;
@@ -1507,9 +1538,10 @@
     const localTaxEl = document.getElementById('sumLocalTax');
     if (localTaxEl) localTaxEl.textContent = toTHB(round2(calc.local_tax));
 
-    // รวมค่าห้อง (subtotal)
-    const subEl = document.getElementById('sumSub');
-    if (subEl) subEl.textContent = toTHB(round2(calc.subtotal_before_vat || (calc.room_price + calc.service_charge + (calc.booking_fee||0))));
+  // รวมค่าห้อง (subtotal) = ค่าห้อง + ค่าบริการ (ไม่รวมค่าธรรมเนียม)
+  // ให้ตรงกับฐาน room_total_minor ในตาราง bookings
+  const subEl = document.getElementById('sumSub');
+  if (subEl) subEl.textContent = toTHB(round2(calc.subtotal_room_and_service || (calc.room_price + calc.service_charge)));
 
     // รวมภาษี = VAT + ภาษีท้องถิ่น (ไม่รวมค่าบริการ)
     const taxOnly = (calc.total_tax != null)

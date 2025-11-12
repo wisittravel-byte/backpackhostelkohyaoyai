@@ -33,11 +33,12 @@ try {
         'service_charge_pct' => (float)$config['service_charge_pct'],
         'vat_pct' => (float)$config['vat_pct'],
         'vat_base' => $config['vat_base'],
-        'local_tax_amount' => (float)$config['local_tax_amount'],
+        // ✅ After migration: local_tax_amount and fee_value are BIGINT (minor units - satang)
+        'local_tax_amount' => (int)$config['local_tax_amount'], // e.g., 5000 = 50.00 THB
         'local_tax_unit' => $config['local_tax_unit'],
         // Booking fee fields (canonical)
         'fee_type' => $config['fee_type'] ?? 'FIXED',
-        'fee_value' => isset($config['fee_value']) ? (float)$config['fee_value'] : 0.0,
+        'fee_value' => isset($config['fee_value']) ? (int)$config['fee_value'] : 0, // e.g., 10000 = 100.00 THB
         'fee_base' => $config['fee_base'] ?? 'ROOM_ONLY',
         'fee_unit' => $config['fee_unit'] ?? 'PER_BOOKING',
         'effective_from' => $config['effective_from'],

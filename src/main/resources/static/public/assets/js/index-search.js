@@ -5,22 +5,21 @@
     const ci = qs('#checkin');
     const co = qs('#checkout');
     const g  = qs('#guests');
-    const r  = qs('#rooms');
+    // ✅ Removed 'rooms' field - not needed for validation
     return {
-      ci, co, g, r,
+      ci, co, g,
       ciVal: ci && ci.value || '',
       coVal: co && co.value || '',
-      gVal: g && g.value || '',
-      rVal: r && r.value || ''
+      gVal: g && g.value || ''
     };
   }
 
   function isValid(){
-    const {ciVal, coVal, gVal, rVal} = getVals();
+    const {ciVal, coVal, gVal} = getVals();
     if(!ciVal || !coVal) return false;
     if(coVal < ciVal) return false;
     if(!gVal || Number(gVal) < 1) return false;
-    if(!rVal || Number(rVal) < 1) return false;
+    // ✅ Removed 'rooms' validation - user selects quantity on booking page
     return true;
   }
 
@@ -88,7 +87,8 @@
     // Do not prefill from localStorage on index page; Booking prefill is handled by booking.js
     updateBtnState(btn);
 
-    ['#checkin','#checkout','#guests','#rooms'].forEach(sel=>{
+    // ✅ Removed '#rooms' from listeners
+    ['#checkin','#checkout','#guests'].forEach(sel=>{
       const el = qs(sel); if(!el) return;
       el.addEventListener('change', ()=> updateBtnState(btn));
       el.addEventListener('input', ()=> updateBtnState(btn));
@@ -102,9 +102,9 @@
           try{ (window.Messages && window.Messages.alert) ? window.Messages.alert('msg.search.required') : alert('Please fill required fields'); }catch(_){ }
           return;
         }
-        // Navigate with query once; booking.js will call API once from these params.
+        // ✅ Navigate without 'r' (rooms) parameter
         const v = getVals();
-        const url = `booking.html?ci=${encodeURIComponent(v.ciVal)}&co=${encodeURIComponent(v.coVal)}&g=${encodeURIComponent(v.gVal)}&r=${encodeURIComponent(v.rVal)}&auto=1`;
+        const url = `booking.html?ci=${encodeURIComponent(v.ciVal)}&co=${encodeURIComponent(v.coVal)}&g=${encodeURIComponent(v.gVal)}&auto=1`;
         ev.preventDefault();
         window.location.href = url;
       });

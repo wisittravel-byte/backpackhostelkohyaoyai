@@ -37,8 +37,39 @@
   }
 
   function alertMsg(key, vars){
-    try{ window.alert(t(key, vars)); }catch(_){ /* no-op */ }
+    // ใช้ custom modal ถ้ามี ไม่งั้น fallback เป็น window.alert
+    const msg = t(key, vars);
+    if(typeof window.showSystemAlert === 'function'){ window.showSystemAlert(msg); return; }
+    if(typeof window.showCustomAlert === 'function'){ window.showCustomAlert(msg); return; }
+    try{ window.alert(msg); }catch(_){ }
   }
 
   window.Messages = { t, alert: alertMsg };
+
+  // Global system alert (reusable modal แบบเดียวกับ checkout)
+  if(!window.showSystemAlert){
+    window.showSystemAlert = function(message){
+      let modal = document.getElementById('systemAlertModal');
+      if(!modal){
+        modal = document.createElement('div');
+        modal.id = 'systemAlertModal';
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+          <div class="modal-content compact" tabindex="-1">
+            <div class="modal-header"><h3 class="color-brand">แจ้งเตือน</h3></div>
+            <div class="modal-body"><p id="systemAlertMessage"></p></div>
+            <div class="modal-footer"><button type="button" class="btn" id="systemAlertOkBtn">ตกลง</button></div>
+          </div>`;
+        document.body.appendChild(modal);
+        const okBtn = modal.querySelector('#systemAlertOkBtn');
+        okBtn.addEventListener('click', ()=> modal.classList.add('hidden'));
+      }
+      const lang = (window.currentLang||'th').toLowerCase().startsWith('en')?'en':'th';
+      // เปลี่ยนหัวข้อปุ่มตามภาษา
+      try{ modal.querySelector('#systemAlertOkBtn').textContent = (lang==='en')? 'OK' : 'ตกลง'; }catch(_){ }
+      try{ modal.querySelector('.modal-header h3').textContent = (lang==='en')? 'Notice' : 'แจ้งเตือน'; }catch(_){ }
+      modal.querySelector('#systemAlertMessage').textContent = message;
+      modal.classList.remove('hidden');
+    };
+  }
 })();

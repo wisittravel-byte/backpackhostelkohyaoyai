@@ -201,7 +201,7 @@
           const ci = qs('#checkin');
           const co = qs('#checkout');
           const g = qs('#guests');
-          const r = qs('#rooms');
+          // ✅ Removed 'rooms' field reference
           
           const checkInValue = ci ? ci.value : null;
           const checkOutValue = co ? co.value : null;
@@ -240,6 +240,33 @@
             console.log('🔵 Using existing session, adding to cart');
             // Update guest count in case it changed
             sessionData.adults = guestsValue;
+          }
+          
+          // ✅ Validation: สำหรับ Dorm Bed ต้องเช็คว่าจำนวนเตียงในตะกร้า + 1 ไม่เกินจำนวนผู้เข้าพัก
+          if (!isPrivate) {
+            const currentDormBeds = sessionData.cart
+              .filter(ci => !ci.is_private)
+              .reduce((sum, ci) => sum + Number(ci.qty || 0), 0);
+            
+            if (currentDormBeds + 1 > guestsValue) {
+              const lang = window.currentLang || 'th';
+              const msg = (lang === 'en')
+                ? `Cannot add more beds. You selected ${guestsValue} guest(s), so you need exactly ${guestsValue} bed(s). Currently ${currentDormBeds} bed(s) in cart.`
+                : `ไม่สามารถเพิ่มเตียงได้ คุณเลือก ${guestsValue} คน ต้องเลือกเตียง ${guestsValue} เตียง ปัจจุบันมี ${currentDormBeds} เตียงในตะกร้า`;
+              try{ (window.Messages && window.Messages.alert) ? window.Messages.alert(msg) : (window.showSystemAlert? window.showSystemAlert(msg): alert(msg)); }catch(_){ }
+              
+              // Enable ปุ่มคืน
+              if(btn.tagName === 'A'){
+                btn.style.pointerEvents = '';
+                btn.style.opacity = '';
+                btn.classList.remove('is-disabled');
+              } else {
+                btn.disabled = false;
+                btn.classList.remove('is-disabled');
+              }
+              btn.textContent = originalText;
+              return;
+            }
           }
           
           // Create new cart item with NEW schema
@@ -316,7 +343,10 @@
           }
         } catch(err) {
           console.error('Error adding to cart:', err);
-          alert((window.currentLang==='en')? 'Failed to add room to cart' : 'ไม่สามารถเพิ่มห้องไปยังตะกร้าได้');
+          try{
+            const m = (window.currentLang==='en')? 'Failed to add room to cart' : 'ไม่สามารถเพิ่มห้องไปยังตะกร้าได้';
+            (window.Messages && window.Messages.alert) ? window.Messages.alert(m) : (window.showSystemAlert? window.showSystemAlert(m): alert(m));
+          }catch(_){ }
           
           // Enable ปุ่มคืนเมื่อเกิด error
           if(btn.tagName === 'A'){
@@ -898,7 +928,7 @@
       const ci = qs('#checkin');
       const co = qs('#checkout');
       const g  = qs('#guests');
-      const r  = qs('#rooms');
+      // ✅ Removed 'rooms' field reference
       const box = qs('#daterange');
       // Fallback defaults for booking page if values are empty
       try{
@@ -920,11 +950,9 @@
         const ciQ = usp.get('ci');
         const coQ = usp.get('co');
         const gQ  = usp.get('g');
-        const rQ  = usp.get('r');
         if(ci && ciQ) ci.value = ciQ;
         if(co && coQ) co.value = coQ;
         if(g && gQ) g.value = String(gQ);
-        if(r && rQ) r.value = String(rQ);
         // Update the visible combined date range box if both are present
         if(box && (ciQ || coQ)){
           const left = ci ? (ci.value||ciQ||'') : (ciQ||'');
@@ -937,7 +965,7 @@
         if(ciQ) draft.checkIn = ciQ;
         if(coQ) draft.checkOut = coQ;
         if(gQ)  draft.guests = Number(gQ);
-        if(rQ)  draft.rooms = Number(rQ);
+        // ✅ Removed 'rooms' from draft - not needed anymore
         localStorage.setItem('booking_draft', JSON.stringify(draft));
       }catch(_){ }
 
@@ -947,11 +975,24 @@
           check_in: ci? ci.value : undefined, 
           check_out: co? co.value : undefined, 
           sort:'price_asc',
-          // Include guests/rooms for capacity-aware availability
-          guests: g ? Number(g.value||2) : undefined,
-          rooms:  r ? Number(r.value||1) : undefined,
+          // ✅ Include only guests (rooms removed - quantity selected per item)
+          guests: g ? Number(g.value||2) : undefined
         };
         
+        // Guard: if dates missing, show info and abort
+        if(!paramsBase.check_in || !paramsBase.check_out){
+          try{
+            const msgTh = 'กรุณาเลือกวันที่เช็คอินและเช็คเอาท์ก่อนค้นหา';
+            const msgEn = 'Please select check-in and check-out dates first.';
+            const msg = (lang==='en') ? msgEn : msgTh;
+            const p1 = document.getElementById('panelRooms');
+            const p2 = document.getElementById('panelBeds');
+            if(p1) p1.innerHTML = `<p class="muted">${msg}</p>`;
+            if(p2) p2.innerHTML = `<p class="muted">${msg}</p>`;
+          }catch(_){ }
+          return;
+        }
+
         console.log('🔍 Fetching availability with params:', paramsBase);
         
         const [rooms, beds] = await Promise.all([
@@ -965,12 +1006,11 @@
         const roomItems = Array.isArray(rooms.items) ? rooms.items : [];
         const bedItems  = Array.isArray(beds.items) ? beds.items : [];
         
-        console.log('✅ Parsed - Room items:', roomItems.length, 'Bed items:', bedItems.length);
+    console.log('✅ Parsed - Room items:', roomItems.length, 'Bed items:', bedItems.length);
 
-  const guestsNum = g ? Number(g.value||2) : undefined;
-  const roomsNum  = r ? Number(r.value||1) : undefined;
-  renderAvailList('panelRooms', roomItems, lang, { checkIn: ci? ci.value : null, guests: guestsNum, rooms: roomsNum });
-  renderAvailList('panelBeds', bedItems, lang, { checkIn: ci? ci.value : null, guests: guestsNum, rooms: roomsNum });
+    const guestsNum = g ? Number(g.value||2) : undefined;
+    renderAvailList('panelRooms', roomItems, lang, { checkIn: ci? ci.value : null, guests: guestsNum });
+    renderAvailList('panelBeds', bedItems, lang, { checkIn: ci? ci.value : null, guests: guestsNum });
 
         // ✅ AFTER RENDER: Sync button states with current cart
         try {
@@ -1015,7 +1055,6 @@
             draft.checkIn  = ci ? ci.value : draft.checkIn;
             draft.checkOut = co ? co.value : draft.checkOut;
             draft.guests   = g ? Number(g.value||2) : (draft.guests||2);
-            draft.rooms    = r ? Number(r.value||1) : (draft.rooms||1);
             localStorage.setItem('booking_draft', JSON.stringify(draft));
           }catch(_){ }
           // Update hash for accessibility/scroll and fetch

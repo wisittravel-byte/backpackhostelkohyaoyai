@@ -5,8 +5,10 @@ require_once __DIR__ . '/../common.php';
 $checkIn  = isset($_GET['check_in']) ? must_date($_GET['check_in'], 'check_in') : null;
 $checkOut = isset($_GET['check_out']) ? must_date($_GET['check_out'], 'check_out') : null;
 if (!$checkIn || !$checkOut) { json_out(['error'=>'missing_params','message'=>'check_in and check_out required'],400); exit; }
-$rooms = max(1, (int)($_GET['rooms'] ?? 1));
 $guests = max(1, (int)($_GET['guests'] ?? (int)($_GET['adults'] ?? 1)));
+// ✅ 'rooms' is optional now (used only for Private Room capacity calculation)
+// Frontend no longer sends 'rooms' param - default to 1 for capacity check
+$rooms = max(1, (int)($_GET['rooms'] ?? 1));
 $isPrivate = isset($_GET['is_private']) ? (($_GET['is_private']==='1'||$_GET['is_private']===1)?1:0) : null;
 $limit = min(50, max(1, (int)($_GET['limit'] ?? 20)));
 $offset = max(0, (int)($_GET['offset'] ?? 0));

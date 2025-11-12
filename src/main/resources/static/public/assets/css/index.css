@@ -72,13 +72,15 @@ nav a:hover{background:rgba(0,0,0,0.04)}
 .hidden { display: none; }
 
 /* Search form on hero card (match booking page breakpoints) */
-.hero .card .search-grid{grid-template-columns:1fr}
+.hero .card .search-grid{grid-template-columns:1fr;justify-content:flex-start}
 @media(min-width:480px){
+  /* 2 columns: dates + guests, button on next row for small tablets */
   .hero .card .search-grid{grid-template-columns:1fr 1fr;align-items:end}
   .hero .card .search-grid .actions{grid-column:1 / -1}
 }
-@media(min-width:720px){
-  .hero .card .search-grid{grid-template-columns:1fr 1fr 1fr 1fr auto}
+@media(min-width:960px){
+  /* Desktop: single row compact layout aligned to the left */
+  .hero .card .search-grid{grid-template-columns:360px 220px auto;align-items:end;justify-content:flex-start}
   .hero .card .search-grid .actions{grid-column:auto}
 }
 

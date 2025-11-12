@@ -86,7 +86,7 @@
 
                 <!-- 2. Guest Details Section (hidden by default; shown when booking for others) -->
                 <div id="otherGuestDetails" class="hidden span-all grid gap-8" aria-hidden="true">
-                  <h3 class="span-all color-brand" data-i18n="checkout.otherGuest.title">รายละเอียดผู้เข้าพัก</h3>
+                  <h3 class="span-all color-brand" data-i18n="checkout.otherGuest.title">รายละเอียดผู้เข้าพัก กรณีจองสำหรับผู้อื่น</h3>
                   <!-- Guest Name: 3 columns (title + first + last) -->
                   <label class="span-all"><span data-i18n="checkout.otherGuest.label.guestName">ชื่อ-นามสกุล ผู้เข้าพัก</span> <span class="text-danger req-star hidden">*</span></label>
                   <div class="row cols-3">
@@ -110,7 +110,6 @@
                     </select>
                     <input id="guestPhoneNumber" class="form-control" placeholder="Phone number">
                   </div>
-                  <small class="span-all muted" data-i18n="checkout.otherGuest.note">โดยไม่มีคำนำหน้า</small>
                 </div>
 
                 <!-- Special Requests section -->
@@ -149,7 +148,7 @@
               <div class="hotel-row">
                 <div>
                   <a href="#" class="inline gap-6"><strong data-i18n="header.title">Backpack Hostel Kohyaoyai</strong><span class="muted">★★★</span></a>
-                  <div class="muted fs-12" data-i18n="checkout.address">33/8 blog1, KohYaoYai Rd, KohYaoYai, Phang Nga 82160, Thailand</div>
+                  <div class="muted fs-12" data-i18n="checkout.address">33/38 blog1, KohYaoYai Rd, KohYaoYai, Phang Nga 82160, Thailand</div>
                   <div class="muted fs-12" data-i18n="checkout.contact">☎ +66 083-550-6600 · ✉ backpackkohyao@gmail.com</div>
                 </div>
               </div>
@@ -223,7 +222,7 @@
 
   <script src="assets/js/messages.js?v=20250929" defer></script>
   <script src="assets/js/api.js?v=20250929" defer></script>
-  <script src="assets/js/checkout.js?v=20251109-radio-toggle" defer></script>
+  <script src="assets/js/checkout.js?v=20251110-bookings-api" defer></script>
   <script src="assets/js/i18n.js?v=20251031-taxonly" defer></script>
   <script src="assets/js/header-content.js?v=20250929" defer></script>
   <script src="assets/js/load-shared-header.js?v=20250929" defer></script>

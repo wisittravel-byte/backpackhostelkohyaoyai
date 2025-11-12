@@ -102,9 +102,9 @@ window.I18N = {
     "confirmed.guest":"ข้อมูลผู้เข้าพัก",
     "confirmed.booking":"รายละเอียดการจอง",
     "confirmed.payment":"การชำระเงิน",
-    "confirmed.name":"ชื่อผู้เข้าพัก:",
+    "confirmed.name":"ชื่อ-นามสกุล ผู้เข้าพัก:",
     "confirmed.email":"อีเมล:",
-    "confirmed.mobile":"มือถือ:",
+    "confirmed.mobile":"เบอร์โทรศัพท์ ผู้เข้าพัก:",
     "confirmed.nights":"จำนวนคืน",
     "confirmed.guests":"ผู้เข้าพัก",
     "confirmed.total":"ยอดชำระ",
@@ -288,13 +288,12 @@ window.I18N = {
   window.I18N.th['checkout.roomsRates'] = 'ห้องและอัตรา';
   // Newly added UI strings
    window.I18N.th['checkout.countryCode'] = 'รหัสประเทศ';
-  window.I18N.th['checkout.label.guestName'] = 'ชื่อผู้เข้าพัก';
+  window.I18N.th['checkout.label.guestName'] = 'ชื่อ-นามสกุล ผู้เข้าพัก';
   // new: booking-for radio labels
   window.I18N.th['checkout.selfBooking'] = 'ฉันเป็นผู้เข้าพัก';
   window.I18N.th['checkout.otherBooking'] = 'ฉันจองสำหรับผู้อื่น';
-  window.I18N.th['checkout.otherGuest.title'] = 'รายละเอียดผู้เข้าพัก';
+  window.I18N.th['checkout.otherGuest.title'] = 'รายละเอียดผู้เข้าพัก กรณีจองสำหรับผู้อื่น';
   window.I18N.th['checkout.otherGuest.label.guestName'] = 'ชื่อ-นามสกุล ผู้เข้าพัก';
-  window.I18N.th['checkout.otherGuest.note'] = 'โดยไม่มีคำนำหน้า';
     // removed: Special Requests toggle labels
 
   window.I18N.en['checkout.guestInfo'] = 'Guest Information';
@@ -308,7 +307,7 @@ window.I18N = {
   window.I18N.en['checkout.selfBooking'] = 'I am the guest';
   window.I18N.en['checkout.otherBooking'] = 'I am booking for someone else';
   window.I18N.en['checkout.otherGuest.title'] = 'Other guest details';
-  window.I18N.en['checkout.otherGuest.label.guestName'] = 'Guest first/last name';
+  window.I18N.en['checkout.otherGuest.label.guestName'] = 'Other Guest Name';
   window.I18N.en['checkout.otherGuest.note'] = 'No title required';
     // removed: Special Requests toggle labels
 })();
@@ -388,8 +387,8 @@ window.I18N = {
   // Terms modal (Thai/English)
   th['checkout.terms.title'] = 'ข้อกำหนดและนโยบายทั้งหมด';
   en['checkout.terms.title'] = 'Terms and Policies';
-  th['checkout.terms.lead'] = 'โปรดอ่านข้อกำหนดและนโยบายโดยสรุปด้านล่าง (ข้อมูลจำลอง)';
-  en['checkout.terms.lead'] = 'Please review the summary of our terms and policies below (mock data).';
+  th['checkout.terms.lead'] = 'โปรดอ่านข้อกำหนดและนโยบายโดยสรุปด้านล่าง';
+  en['checkout.terms.lead'] = 'Please review the summary of our terms and policies below.';
   th['checkout.terms.section.booking'] = 'การจอง';
   en['checkout.terms.section.booking'] = 'Booking';
   th['checkout.terms.section.checkin'] = 'เช็คอิน/เช็คเอาท์';
@@ -411,11 +410,11 @@ window.I18N = {
   th['checkout.terms.close'] = 'ปิด';
   en['checkout.terms.close'] = 'Close';
 
-  th['checkout.address'] = '55 Koh Yao Yai Rd, Phang Nga 82160, Thailand';
-  en['checkout.address'] = '55 Koh Yao Yai Rd, Phang Nga 82160, Thailand';
+  th['checkout.address'] = '33/38 blog1, KohYaoYai Rd, KohYaoYai, Phang Nga 82160, Thailand';
+  en['checkout.address'] = '33/38 blog1, KohYaoYai Rd, KohYaoYai, Phang Nga 82160, Thailand';
 
-  th['checkout.contact'] = '☎ +66 8X-XXX-XXXX · ✉ hello@backpackhostel.com';
-  en['checkout.contact'] = '☎ +66 8X-XXX-XXXX · ✉ hello@backpackhostel.com';
+  th['checkout.contact'] = '☎ +66 083-550-6600 · ✉ backpackkohyao@gmail.com';
+  en['checkout.contact'] = '☎ +66 083-550-6600 · ✉ backpackkohyao@gmail.com';
 
   th['checkout.nightStay'] = '1 คืน';
   en['checkout.nightStay'] = '1 Night Stay';

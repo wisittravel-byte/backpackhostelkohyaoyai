@@ -33,14 +33,16 @@ nav a:hover{background:rgba(0,0,0,0.04)}
 form.grid{display:grid;gap:12px}
 @media(min-width:800px){ form.grid.cols-2{grid-template-columns:1fr 1fr} }
 /* horizontal search bar layout */
-.search-grid{grid-template-columns:1fr}
+.search-grid{grid-template-columns:1fr;justify-content:flex-start}
 /* At small tablets/large phones, show two columns so Check-in/Check-out sit side-by-side */
 @media(min-width:480px){
+  /* 2 columns: dates + guests, button on next row */
   .search-grid{grid-template-columns:1fr 1fr;align-items:end}
   .search-grid .actions{grid-column:1 / -1}
 }
-@media(min-width:720px){
-  .search-grid{grid-template-columns:1fr 1fr 1fr 1fr auto;align-items:end}
+@media(min-width:960px){
+  /* Desktop: single row compact layout aligned to the left (match index) */
+  .search-grid{grid-template-columns:360px 220px auto;align-items:end;justify-content:flex-start}
   .search-grid .actions{grid-column:auto}
 }
 label{display:block;margin-bottom:6px;font-weight:600}
@@ -437,6 +439,22 @@ button:focus, a:focus, input:focus{outline:3px solid rgba(42,166,184,0.18);outli
 .modal[hidden]{display:none}
 .modal{position:fixed;inset:0;z-index:50}
 .modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45)}
+.modal-overlay.hidden{display:none}
+.modal-content.compact{
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  display:block;            /* override grid of .modal-content */
+  width:auto;               /* auto-size to content */
+  max-width:clamp(320px, 80vw, 560px); /* grow with text, cap for large screens */
+  padding:20px;
+  outline:none
+}
+.modal-content.compact .modal-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--border,#e6f6f7)}
+.modal-content.compact .modal-body{line-height:1.7;margin-bottom:8px;overflow-wrap:anywhere;word-break:break-word}
+.modal-content.compact .modal-footer{display:flex;justify-content:center;padding-top:10px;border-top:1px solid var(--border,#e6f6f7)}
+/* Center the system alert overlay */
+#systemAlertModal.modal-overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:16px; z-index:1000; }
 .modal-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1000px, 96vw);max-height:90vh;background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden}
 .modal-close{position:absolute;top:8px;right:8px;width:36px;height:36px;border-radius:999px;border:1px solid #e6f6f7;background:#fff;color:#333;cursor:pointer;font-size:20px;line-height:1}
 .modal-content{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;padding:16px;min-height:320px;max-height:90vh;overflow:hidden}

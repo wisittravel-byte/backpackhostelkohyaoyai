@@ -347,7 +347,10 @@
     }
     
     if(!sessionData || !Array.isArray(sessionData.cart) || sessionData.cart.length === 0) {
-      alert((window.currentLang==='en')? 'No items in cart' : 'ไม่มีรายการในตะกร้า');
+      try{
+        const m = (window.currentLang==='en')? 'No items in cart' : 'ไม่มีรายการในตะกร้า';
+        (window.Messages && window.Messages.alert) ? window.Messages.alert(m) : (window.showSystemAlert? window.showSystemAlert(m): alert(m));
+      }catch(_){ }
       return;
     }
 
@@ -366,6 +369,20 @@
       groups.set(k, g);
     });
 
+    // ✅ Validation: สำหรับ Dorm Bed ต้องเช็คว่าจำนวนเตียง = จำนวนผู้เข้าพัก
+    const dormBeds = sessionData.cart
+      .filter(ci => !ci.is_private)
+      .reduce((sum, ci) => sum + Number(ci.qty || 0), 0);
+    
+    if (dormBeds > 0 && dormBeds !== sessionData.adults) {
+      const lang = window.currentLang || 'th';
+      const msg = (lang === 'en')
+        ? `Invalid booking: You selected ${sessionData.adults} guest(s) but have ${dormBeds} dorm bed(s) in cart. For dorm beds, number of beds must equal number of guests.`
+        : `ไม่สามารถจองได้: คุณเลือก ${sessionData.adults} คน แต่มี ${dormBeds} เตียงในตะกร้า สำหรับเตียง Dorm จำนวนเตียงต้องเท่ากับจำนวนคน`;
+      try{ (window.Messages && window.Messages.alert) ? window.Messages.alert(msg) : (window.showSystemAlert? window.showSystemAlert(msg): alert(msg)); }catch(_){ }
+      return;
+    }
+    
     // 2) Create holds sequentially, rollback on failure, ensure button restored on error
     const createdHolds = []; // { hold_id, room_type_id, reserved_qty, expires_at, seconds_to_expiry }
     let navigating = false;
@@ -459,7 +476,10 @@
           await fetch(`${apiBase}/api/v1/inventory-hold-release.php`, { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body: payload }).catch(()=>{});
         } catch(_) {}
       }
-      alert((window.currentLang==='en') ? 'Cannot hold the selected rooms right now.' : 'ไม่สามารถทำการถือห้องพักได้ในขณะนี้');
+      try{
+        const m = (window.currentLang==='en') ? 'Cannot hold the selected rooms right now.' : 'ไม่สามารถทำการถือห้องพักได้ในขณะนี้';
+        (window.Messages && window.Messages.alert) ? window.Messages.alert(m) : (window.showSystemAlert? window.showSystemAlert(m): alert(m));
+      }catch(_){ }
     } finally {
       if (!navigating && bookBtn) {
         bookBtn.disabled = false;
