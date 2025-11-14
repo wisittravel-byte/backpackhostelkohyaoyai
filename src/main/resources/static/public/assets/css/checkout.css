@@ -185,6 +185,24 @@ button:focus, a:focus, input:focus, select:focus, textarea:focus{outline:3px sol
   gap:8px 24px;
   align-items:start;
 }
+
+/* --- Omise Modal Hardening ---
+   บาง browser/CSP จะบล็อค inline-style ของ Omise ทำให้ iframe ไม่เต็มจอ
+   บังคับให้ iframe ของ Omise ครอบหน้าจอแน่นอน และอยู่บนสุด */
+iframe[src*="omise.co"],
+.omise-checkout, .omise-checkout-modal, .omise-card--modal,
+#omise-checkout, #omise-card-frame {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  z-index: 2147483647 !important; /* on top of everything */
+}
+
+/* ปิด scroll เมื่อ modal เปิด (เราอาจเพิ่ม/เอา class นี้ใน JS ได้) */
+html.lock-scroll, body.lock-scroll{ overflow:hidden !important; }
 .request-presets-grid[data-loading]{ opacity:.6; }
 .request-presets-grid .preset-item{ padding:4px 0; }
 .request-presets-grid .preset-item textarea{ margin-top:8px; }

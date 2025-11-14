@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <!-- Security & SEO -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://www.backpackkohyao.com; img-src 'self' data: https:; style-src 'self' https:; script-src 'self'; connect-src 'self' https://www.backpackkohyao.com https://backpackkohyao.com http://localhost http://127.0.0.1; font-src 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://www.backpackkohyao.com; img-src 'self' data: https:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https://cdn.omise.co; connect-src 'self' https://www.backpackkohyao.com https://backpackkohyao.com http://localhost http://127.0.0.1 https://api.omise.co https://vault.omise.co; frame-src 'self' https://*.omise.co; child-src 'self' https://*.omise.co; font-src 'self'">
   <meta property="og:title" content="Checkout — Backpack Hostel Kohyaoyai" />
   <meta property="og:description" content="ชำระเงินออนไลน์และยืนยันการจองกับ Backpack Hostel Kohyaoyai" />
   <meta property="og:type" content="website" />
@@ -222,6 +222,8 @@
 
   <script src="assets/js/messages.js?v=20250929" defer></script>
   <script src="assets/js/api.js?v=20250929" defer></script>
+  <!-- Omise.js Pre-built Payment Form -->
+  <script src="https://cdn.omise.co/omise.js"></script>
   <script src="assets/js/checkout.js?v=20251110-bookings-api" defer></script>
   <script src="assets/js/i18n.js?v=20251031-taxonly" defer></script>
   <script src="assets/js/header-content.js?v=20250929" defer></script>

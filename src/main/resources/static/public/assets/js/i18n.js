@@ -316,7 +316,7 @@ window.I18N = {
   // UI buttons and labels used on Checkout
   const keys = [
     ['review.btn','Review Your Booking'],
-    ['book.btn','Book Now'],
+    ['book.btn','Proceed to Payment'],
     ['price.roomCharges','Room Charges'],
     ['price.taxesFees','Taxes & Fees'],
     ['price.totalRoom','Total Room Charges'],
@@ -334,7 +334,7 @@ window.I18N = {
   // Thai equivalents
   const ths = {
     'checkout.review.btn':'ทบทวนการจอง',
-    'checkout.book.btn':'จองตอนนี้',
+    'checkout.book.btn':'ชำระเงิน',
     'checkout.price.roomCharges':'ค่าห้อง',
     'checkout.price.taxesFees':'ภาษีและค่าธรรมเนียม',
     'checkout.price.totalRoom':'รวมค่าห้อง',

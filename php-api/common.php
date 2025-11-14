@@ -56,3 +56,50 @@ function dates_between(string $checkIn, string $checkOut): array {
     }
     return $dates;
 }
+
+// --- Payments security helpers (lightweight, optional) ---
+function env_bool(string $name, bool $default=false): bool {
+    $v = getenv($name);
+    if ($v === false || $v === null) return $default;
+    $v = strtolower(trim((string)$v));
+    return in_array($v, ['1','true','yes','y','on'], true);
+}
+
+/**
+ * Decrypt a ciphertext produced with AES-256-GCM.
+ * Supported formats:
+ * - JSON: {"alg":"aes-256-gcm","iv":"base64","tag":"base64","ct":"base64"}
+ * - Colon-delimited: ivBase64:tagBase64:ciphertextBase64
+ * Key is expected in env PAYMENTS_DEK (base64-encoded 32 bytes)
+ * Returns plaintext string on success, or null on failure.
+ */
+function payments_decrypt_secret(?string $ciphertext): ?string {
+    if (!$ciphertext) return null;
+    $dekB64 = getenv('PAYMENTS_DEK') ?: '';
+    if (strlen($dekB64) < 44) { // base64 of 32 bytes ~ 44 chars
+        return null; // not configured
+    }
+    $key = base64_decode($dekB64, true);
+    if ($key === false || strlen($key) !== 32) return null;
+
+    $iv = $tag = $ct = null;
+    $raw = trim($ciphertext);
+    // Try JSON first
+    $parsed = json_decode($raw, true);
+    if (is_array($parsed) && isset($parsed['ct'])) {
+        $iv = base64_decode($parsed['iv'] ?? '', true);
+        $tag = base64_decode($parsed['tag'] ?? '', true);
+        $ct  = base64_decode($parsed['ct'] ?? '', true);
+    } else {
+        // Try colon-delimited
+        $parts = explode(':', $raw);
+        if (count($parts) === 3) {
+            $iv  = base64_decode($parts[0], true);
+            $tag = base64_decode($parts[1], true);
+            $ct  = base64_decode($parts[2], true);
+        }
+    }
+    if (!$iv || !$tag || !$ct) return null;
+    $pt = openssl_decrypt($ct, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+    return ($pt === false) ? null : $pt;
+}

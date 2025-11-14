@@ -5,6 +5,26 @@
 // 2) Environment variables: DB_HOST, DB_NAME, DB_USER, DB_PASS
 // 3) Local defaults (for development only)
 
+// Load .env file (for local development and single source of truth for API keys)
+$projectRoot = dirname(dirname(__DIR__)); // .../backpackkohyao.com
+$envFile = $projectRoot . '/.env';
+if (@is_file($envFile)) {
+    $lines = @file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines) {
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line && $line[0] !== '#' && strpos($line, '=') !== false) {
+                list($key, $value) = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                if (!getenv($key)) {
+                    putenv("$key=$value");
+                }
+            }
+        }
+    }
+}
+
 $charset = 'utf8mb4';
 
 // Local defaults

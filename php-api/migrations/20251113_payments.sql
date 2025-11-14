@@ -1,0 +1,80 @@
+-- Payments core tables (idempotent create)
+SET NAMES utf8mb4;
+SET SESSION sql_require_primary_key = 0;
+
+CREATE TABLE IF NOT EXISTS `payments` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `booking_id` BIGINT UNSIGNED NOT NULL,
+  `provider_id` BIGINT UNSIGNED NOT NULL,
+  `merchant_account_id` BIGINT UNSIGNED NOT NULL,
+  `idempotency_key` VARCHAR(80) NOT NULL,
+  `provider_charge_id` VARCHAR(64) DEFAULT NULL,
+  `amount_minor` INT UNSIGNED NOT NULL,
+  `currency` CHAR(3) NOT NULL DEFAULT 'THB',
+  `method_code` VARCHAR(32) DEFAULT NULL,
+  `card_brand` VARCHAR(16) DEFAULT NULL,
+  `card_last4` CHAR(4) DEFAULT NULL,
+  `customer_ip` VARCHAR(45) DEFAULT NULL,
+  `country` CHAR(2) DEFAULT NULL,
+  `risk_score` TINYINT UNSIGNED DEFAULT NULL,
+  `three_ds_status` ENUM('authenticated','attempted','NA') NOT NULL DEFAULT 'NA',
+  `status` ENUM('PENDING','REQUIRES_ACTION','AUTHORIZED','SUCCESSFUL','FAILED','REFUNDED','PARTIALLY_REFUNDED','CANCELLED') NOT NULL DEFAULT 'PENDING',
+  `authorized_at` DATETIME DEFAULT NULL,
+  `captured_at` DATETIME DEFAULT NULL,
+  `refunded_at` DATETIME DEFAULT NULL,
+  `failure_code` VARCHAR(64) DEFAULT NULL,
+  `failure_message` VARCHAR(255) DEFAULT NULL,
+  `metadata_json` JSON DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` VARCHAR(50) DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_payments_idempotency` (`idempotency_key`),
+  UNIQUE KEY `uniq_payments_provider_charge_id` (`provider_charge_id`),
+  KEY `idx_payments_booking_id` (`booking_id`),
+  KEY `idx_payments_status` (`status`),
+  KEY `idx_payments_provider` (`provider_id`,`merchant_account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `payment_audit_logs` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `payment_id` BIGINT UNSIGNED NOT NULL,
+  `action` VARCHAR(64) NOT NULL,
+  `old_status` VARCHAR(32) DEFAULT NULL,
+  `new_status` VARCHAR(32) DEFAULT NULL,
+  `actor_type` ENUM('SYSTEM','USER','STAFF') NOT NULL DEFAULT 'SYSTEM',
+  `actor_id` BIGINT UNSIGNED DEFAULT NULL,
+  `note` VARCHAR(255) DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` VARCHAR(50) DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_payment_logs_payment_id` (`payment_id`),
+  KEY `idx_payment_logs_action` (`action`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `payment_webhook_events` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `provider` VARCHAR(20) NOT NULL,
+  `event_id` VARCHAR(64) NOT NULL,
+  `event_type` VARCHAR(64) DEFAULT NULL,
+  `charge_id` VARCHAR(64) DEFAULT NULL,
+  `signature_header` VARCHAR(255) DEFAULT NULL,
+  `payload_sha256` CHAR(64) DEFAULT NULL,
+  `received_at` DATETIME DEFAULT NULL,
+  `processed_at` DATETIME DEFAULT NULL,
+  `processing_status` ENUM('RECEIVED','VERIFIED','SKIPPED') DEFAULT 'RECEIVED',
+  `http_status_sent` SMALLINT DEFAULT NULL,
+  `attempts_count` TINYINT UNSIGNED DEFAULT 0,
+  `error_message` VARCHAR(255) DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` VARCHAR(50) DEFAULT 'webhook',
+  `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by` VARCHAR(50) DEFAULT 'webhook',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_webhook_event` (`provider`,`event_id`),
+  KEY `idx_webhook_charge_id` (`charge_id`),
+  KEY `idx_webhook_status` (`processing_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

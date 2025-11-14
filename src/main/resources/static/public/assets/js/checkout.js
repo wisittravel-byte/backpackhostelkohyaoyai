@@ -7,6 +7,191 @@
     try{ const v = localStorage.getItem('api_base'); return v ? v : ''; }catch(_){ return ''; }
   }
 
+  // ---------- Omise.js Pre-built Payment Form Configuration ----------
+  // โหลดสคริปต์ให้แน่ใจ และ configure เสมอก่อนใช้งาน
+  const OMISE_PUBLIC_KEY = 'pkey_test_65p5n4ueavmxgyvf6pb'; // TODO: เปลี่ยนเป็น key ของจริง
+
+  function ensureOmiseLoaded(){
+    return new Promise((resolve, reject) => {
+      function configure(){
+        try{
+          if (typeof OmiseCard === 'undefined') return false;
+          OmiseCard.configure({ publicKey: OMISE_PUBLIC_KEY, currency: 'thb' });
+          return true;
+        }catch(e){ console.error('Omise configure error', e); return false; }
+      }
+      // ถ้าโหลดจาก HTML ไว้แล้ว (แนะนำ) ก็จะมี OmiseCard
+      if (typeof OmiseCard !== 'undefined') {
+        if (configure()) return resolve();
+      }
+      // ตรวจว่ามี <script src="https://cdn.omise.co/omise.js"> ในหน้าแล้วไหม
+      const existing = Array.from(document.scripts||[]).some(s=>/cdn\.omise\.co\/omise\.js/.test(s.src||''));
+      if (!existing){
+        console.log('⚠️ Omise.js script not found, injecting...');
+        const s = document.createElement('script');
+        s.src = 'https://cdn.omise.co/omise.js';
+        s.onload = () => { 
+          console.log('✅ Omise.js loaded dynamically');
+          if (configure()) resolve(); else reject(new Error('OmiseCard not available after load')); 
+        };
+        s.onerror = () => reject(new Error('Failed to load Omise.js'));
+        document.head.appendChild(s);
+      } else {
+        // รอสักครู่ให้สคริปต์พร้อม (เพิ่มเวลารอและ interval)
+        console.log('⏳ Omise.js script exists, waiting for OmiseCard to be ready...');
+        let tries = 0; 
+        const timer = setInterval(()=>{
+          if (configure()) { 
+            clearInterval(timer); 
+            console.log('✅ OmiseCard ready after', tries, 'attempts');
+            resolve(); 
+          }
+          else if (++tries > 50) { // เพิ่มจาก 20 เป็น 50 (5 วินาที)
+            clearInterval(timer); 
+            console.error('❌ OmiseCard timeout after 5s');
+            reject(new Error('OmiseCard not ready after 5s')); 
+          }
+        }, 100);
+      }
+    });
+  }
+
+  // เปิด Omise modal หลังบันทึก booking สำเร็จ
+  async function openOmisePaymentModal(booking) {
+    console.log('🔵 [openOmisePaymentModal] Called with booking:', booking);
+    const amount = Math.round(Number(booking.grand_total_minor || booking.pay_now_minor || 0)); // หน่วยสตางค์
+    if (!amount || amount <= 0) {
+      console.error('❌ Invalid amount:', amount, 'from booking:', booking);
+      alert('ไม่สามารถคำนวณยอดชำระได้');
+      return;
+    }
+    
+    console.log(`💳 Opening Omise modal for booking ID: ${booking.id}, amount: ${amount} satang (${(amount/100).toFixed(2)} THB)`);
+    try { 
+      console.log('⏳ Ensuring Omise.js is loaded...');
+      await ensureOmiseLoaded();
+      console.log('✅ Omise.js ready, OmiseCard:', typeof OmiseCard);
+    } catch(e) {
+      console.error('❌ Omise.js not ready:', e);
+      alert('ระบบชำระเงินยังไม่พร้อม กรุณาลองใหม่อีกครั้ง');
+      return;
+    }
+
+    console.log('🚀 Calling OmiseCard.open()...');
+  // Lock scroll while modal is open
+  try{ document.documentElement.classList.add('lock-scroll'); document.body.classList.add('lock-scroll'); }catch(_){ }
+  OmiseCard.open({
+      amount: amount,
+      currency: 'thb',
+      defaultPaymentMethod: 'credit_card',
+      // ไม่ส่ง image เพื่อหลีกเลี่ยงปัญหา CORS/Mixed Content
+      frameLabel: 'Backpack Hostel Kohyaoyai',
+      onCreateTokenSuccess: async function(token) {
+        console.log('✅ Token received:', token);
+        // ส่ง token ไป PHP API เพื่อสร้าง charge
+        await processPayment(booking.id, token, amount);
+      },
+      onFormClosed: function() {
+        console.log('ℹ️ User closed Omise form without payment');
+        try{ document.documentElement.classList.remove('lock-scroll'); document.body.classList.remove('lock-scroll'); }catch(_){ }
+        // ถ้าผู้ใช้ปิดหน้าต่างโดยไม่ชำระ สามารถกลับไปหน้าจองหรือแสดง confirmation modal
+      }
+    });
+    console.log('✅ OmiseCard.open() called successfully');
+  }
+
+  // ส่ง token ไป backend เพื่อสร้าง charge
+  async function processPayment(bookingId, omiseToken, amount) {
+    try {
+      const apiBase = getApiBase();
+      // New unified payments endpoint expects: token_or_source_id + object_type
+      const payload = { booking_id: bookingId, token_or_source_id: omiseToken, object_type: 'token' };
+      
+      console.log('📤 Sending payment request:', payload);
+      
+      // ใช้ relative path บน localhost port เดียวกัน (หลีกเลี่ยง CSP/CORS)
+      const urls = [];
+      
+      // ถ้ามี api_base กำหนดมา ใช้เลย
+      if (apiBase) {
+        urls.push(`${apiBase}/php-api/payments/create.php`);
+        urls.push(`${apiBase}/php-api/v1/charge.php`);
+        urls.push(`${apiBase}/payments/create.php`);
+        urls.push(`${apiBase}/v1/charge.php`);
+      }
+      
+      // relative paths สำหรับ localhost (ลำดับความสำคัญ: php-api ก่อน)
+      urls.push('/php-api/payments/create.php');
+      urls.push('/php-api/v1/charge.php');
+      
+      let resp = null;
+      for (const url of urls) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            credentials: 'omit',
+            mode: 'cors'
+          });
+          if (res && res.ok) {
+            resp = await res.json();
+            break;
+          }
+        } catch (_) { /* try next URL */ }
+      }
+      
+      if (resp && resp.ok) {
+        console.log('✅ Payment successful:', resp);
+        // 3DS หรือ flow ที่ต้อง redirect ต่อ
+        if (resp.requires_action && resp.authorize_uri) {
+          console.log('🔐 3DS required, redirecting to authorize_uri...');
+          try { localStorage.setItem('skip_hold_release', '1'); } catch(_) {}
+          window.location.href = resp.authorize_uri;
+          return;
+        }
+        // ยืนยันสิทธิ์จองห้อง/เตียง (confirm holds) ก่อน redirect
+        try {
+          const ids = getHoldIdsFromBookingData();
+          if (ids.length) {
+            for (const hid of ids) {
+              await callHoldApiBulk('inventory-hold-confirm.php', { hold_id: hid, booking_id: bookingId });
+            }
+            // ป้องกัน pagehide ไปปล่อย hold ซ้ำ
+            localStorage.setItem('skip_hold_release', '1');
+            // เคลียร์ key hold ใน booking_data
+            const raw = localStorage.getItem('booking_data');
+            const bd = raw ? JSON.parse(raw) : {};
+            delete bd.hold_id; delete bd.hold_ids; delete bd.hold_expires_at; delete bd.hold_seconds; delete bd.holds_detail;
+            localStorage.setItem('booking_data', JSON.stringify(bd));
+          }
+        } catch (e) { console.warn('hold confirm failed (non-blocking):', e); }
+
+        alert('ชำระเงินสำเร็จ!');
+        window.location.href = 'booking-confirmed.html';
+      } else {
+        console.error('❌ Payment failed:', resp);
+        const msg = (resp && resp.error) ? resp.error : 'การชำระเงินล้มเหลว กรุณาลองอีกครั้ง';
+        // คืนสิทธิ์จองห้อง/เตียง (release holds)
+        try {
+          const ids = getHoldIdsFromBookingData();
+          if (ids.length) {
+            await callHoldApiBulk('inventory-hold-release.php', { hold_ids: ids, reason: 'auto_page_expired' });
+            const raw = localStorage.getItem('booking_data');
+            const bd = raw ? JSON.parse(raw) : {};
+            delete bd.hold_id; delete bd.hold_ids; delete bd.hold_expires_at; delete bd.hold_seconds; delete bd.holds_detail;
+            localStorage.setItem('booking_data', JSON.stringify(bd));
+          }
+        } catch (e) { console.warn('hold release failed (non-blocking):', e); }
+
+        alert(msg);
+      }
+    } catch (err) {
+      console.error('❌ Payment processing error:', err);
+      alert('เกิดข้อผิดพลาดระหว่างการชำระเงิน');
+    }
+  }
+
   // ---------- Helpers: Bulk Hold API (รองรับปล่อย hold_ids[] แบบ bulk) ----------
   function getHoldIdsFromBookingData() {
     try {
@@ -567,21 +752,36 @@
         // Primary: standard API path; Fallback: legacy php-api path (for local/dev)
         try{
           resp = await window.API.fetchJson('/api/v1/bookings.php', { method:'POST', body: JSON.stringify(fullPayload) });
+          console.log('✅ API response from /api/v1/bookings.php:', resp);
         }catch(err1){
+          console.warn('⚠️ /api/v1/bookings.php failed:', err1);
           apiErr = err1;
           try{
             resp = await window.API.fetchJson('/php-api/v1/bookings.php', { method:'POST', body: JSON.stringify(fullPayload) });
-          }catch(err2){ apiErr = err2; }
+            console.log('✅ API response from /php-api/v1/bookings.php:', resp);
+          }catch(err2){ 
+            console.error('❌ Both API paths failed:', err2);
+            apiErr = err2; 
+          }
         }
       }
-      if(resp && resp.ok){
-        console.log('✅ Booking created:', resp.booking);
+      
+      // Check if we have a valid booking response
+      // API.fetchJson returns JSON directly, so resp could be {ok, booking} or just the booking
+      console.log('🔍 Checking response structure:', resp);
+      const booking = resp?.booking || resp; // fallback: some APIs return booking directly
+      
+      if(booking && booking.id){
+        console.log('✅ Booking ID found:', booking.id, '| Full booking:', booking);
         try{ localStorage.setItem('booking_result', JSON.stringify(resp)); }catch(_){ }
-        try{ localStorage.setItem('booking_id', String(resp.booking.id)); }catch(_){ }
+        try{ localStorage.setItem('booking_id', String(booking.id)); }catch(_){ }
         try{ localStorage.setItem('skip_hold_release','1'); }catch(_){ }
-        window.location.href = 'payment.html'; // placeholder next step
+        
+        // เปิด Omise Pre-built Payment Form แทน redirect
+        console.log('💳 Calling openOmisePaymentModal with booking:', booking);
+        await openOmisePaymentModal(booking);
       } else {
-        console.warn('❌ Booking API failed', apiErr);
+        console.error('❌ No valid booking.id in response. resp:', resp, 'booking:', booking, 'apiErr:', apiErr);
         alert((window.currentLang==='en')? 'Failed to create booking' : 'สร้างใบจองไม่สำเร็จ');
       }
     }catch(err){
