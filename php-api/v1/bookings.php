@@ -17,6 +17,7 @@ if (!is_array($payload)) {
 function ig($a, $k, $def=null){ return (is_array($a) && array_key_exists($k,$a)) ? $a[$k] : $def; }
 
 // Basic validation
+$bookingId = ig($payload, 'bookingId'); // ✅ รับ bookingId จาก frontend
 $cart   = ig($payload, 'cart', []);
 $policy = ig($payload, 'policy', []);
 $guForm = ig($payload, 'guest_form', []);
@@ -74,6 +75,37 @@ $sum = ig($cart, 'summary_minor', []);
 
 try {
   $pdo->beginTransaction();
+
+  // ✅ เช็คก่อนสร้างใหม่: ถ้ามี bookingId และยัง PENDING อยู่ → reuse
+  if ($bookingId) {
+    $stmt = $pdo->prepare('SELECT * FROM bookings WHERE id = ? AND status = ? LIMIT 1');
+    $stmt->execute([intval($bookingId), 'PENDING']);
+    $existingBooking = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($existingBooking) {
+      // ✅ Reuse booking เดิม (ไม่สร้างใหม่)
+      error_log('[bookings] Reusing existing PENDING booking: ' . $bookingId);
+      
+      // อ่านข้อมูลเต็มจาก DB
+      $bookingData = [
+        'id' => intval($existingBooking['id']),
+        'booking_ref' => $existingBooking['booking_ref'],
+        'status' => $existingBooking['status'],
+        'check_in_date' => $existingBooking['check_in_date'],
+        'check_out_date' => $existingBooking['check_out_date'],
+        'nights' => intval($existingBooking['nights']),
+        'adults' => intval($existingBooking['adults']),
+        'children' => intval($existingBooking['children']),
+        'currency' => $existingBooking['currency'],
+        'grand_total_minor' => intval($existingBooking['grand_total_minor']),
+        'pay_now_minor' => intval($existingBooking['pay_now_minor']),
+      ];
+      
+      $pdo->commit();
+      json_out(['ok' => true, 'booking' => $bookingData, 'reused' => true]);
+      exit;
+    }
+  }
 
   // 1) Generate booking_ref: YYYYMMDD + running 8 digits
   $today = date('Ymd');

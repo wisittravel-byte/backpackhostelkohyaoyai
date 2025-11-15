@@ -1,4 +1,7 @@
 (function(){
+  // ✅ State: เก็บ booking_id ที่สร้างไว้แล้ว (ป้องกันสร้างซ้ำ)
+  let currentBookingId = null;
+
   function toTHB(n){ return Number(n).toFixed(2); }
   function round2(n){ return Math.round((Number(n)+Number.EPSILON)*100)/100; }
   // Resolve API base: localhost uses local endpoints via Apache; Production uses relative paths
@@ -62,7 +65,7 @@
     const amount = Math.round(Number(booking.grand_total_minor || booking.pay_now_minor || 0)); // หน่วยสตางค์
     if (!amount || amount <= 0) {
       console.error('❌ Invalid amount:', amount, 'from booking:', booking);
-      alert('ไม่สามารถคำนวณยอดชำระได้');
+      showCustomAlert('ไม่สามารถคำนวณยอดชำระได้');
       return;
     }
     
@@ -73,7 +76,7 @@
       console.log('✅ Omise.js ready, OmiseCard:', typeof OmiseCard);
     } catch(e) {
       console.error('❌ Omise.js not ready:', e);
-      alert('ระบบชำระเงินยังไม่พร้อม กรุณาลองใหม่อีกครั้ง');
+      showCustomAlert('ระบบชำระเงินยังไม่พร้อม กรุณาลองใหม่อีกครั้ง');
       return;
     }
 
@@ -85,6 +88,7 @@
       currency: 'thb',
       defaultPaymentMethod: 'credit_card',
       // ไม่ส่ง image เพื่อหลีกเลี่ยงปัญหา CORS/Mixed Content
+      image: 'https://www.backpackkohyao.com/assets/image/logo.png',
       frameLabel: 'Backpack Hostel Kohyaoyai',
       onCreateTokenSuccess: async function(token) {
         console.log('✅ Token received:', token);
@@ -167,8 +171,12 @@
           }
         } catch (e) { console.warn('hold confirm failed (non-blocking):', e); }
 
-        alert('ชำระเงินสำเร็จ!');
-        window.location.href = 'booking-confirmed.html';
+        // ✅ Reset state เพื่อให้การจองครั้งถัดไปสร้าง booking ใหม่
+        currentBookingId = null;
+        console.log('🔄 Reset currentBookingId after successful payment');
+        
+        showCustomAlert('ชำระเงินสำเร็จ!');
+        setTimeout(() => window.location.href = 'booking-confirmed.html', 1500);
       } else {
         console.error('❌ Payment failed:', resp);
         const msg = (resp && resp.error) ? resp.error : 'การชำระเงินล้มเหลว กรุณาลองอีกครั้ง';
@@ -184,11 +192,11 @@
           }
         } catch (e) { console.warn('hold release failed (non-blocking):', e); }
 
-        alert(msg);
+        showCustomAlert(msg);
       }
     } catch (err) {
       console.error('❌ Payment processing error:', err);
-      alert('เกิดข้อผิดพลาดระหว่างการชำระเงิน');
+      showCustomAlert('เกิดข้อผิดพลาดระหว่างการชำระเงิน');
     }
   }
 
@@ -498,7 +506,7 @@
       modal.id = 'customAlertModal';
       modal.className = 'modal-overlay';
       modal.innerHTML = `
-        <div class="modal-content compact" style="max-width:400px;" tabindex="-1">
+        <div class="modal-content compact" style="max-width:500px;" tabindex="-1">
           <div class="modal-header">
             <h3 class="color-brand">แจ้งเตือน</h3>
           </div>
@@ -557,10 +565,69 @@
     const cc = document.getElementById('countryCode');
     const mb = document.getElementById('mobile');
     const em = document.getElementById('email');
+    
     function nonEmpty(v){ return !!(v && String(v).trim().length>0); }
+    
+    // ✅ 1. Validation: Title (คำนำหน้า)
+    function validateTitle(v){
+      if(!v || v.trim() === '') return 'กรุณาเลือกคำนำหน้า';
+      return null;
+    }
+    
+    // ✅ 2-3. Validation: First/Last Name (ชื่อ/นามสกุล)
+    function validateName(v, fieldName){
+      const trimmed = (v||'').trim();
+      if(!trimmed) return `กรุณากรอก${fieldName}`;
+      // ภาษาไทย: ก-๙ รวมสะกด และวรรณยุกต์
+      const isThai = /^[ก-๙\s]+$/.test(trimmed);
+      // ภาษาอังกฤษ: A-Z, a-z และช่องว่าง
+      const isEnglish = /^[A-Za-z\s]+$/.test(trimmed);
+      if(!isThai && !isEnglish){
+        return `กรุณากรอก${fieldName}เป็นภาษาอังกฤษหรือภาษาไทยเท่านั้น`;
+      }
+      if(trimmed.length < 2 || trimmed.length > 50){
+        if(isThai) return `กรุณากรอก${fieldName}เป็นภาษาไทย 2–50 ตัวอักษร`;
+        return `กรุณากรอก${fieldName}เป็นภาษาอังกฤษ 2–50 ตัวอักษร`;
+      }
+      return null;
+    }
+    
+    // ✅ 4. Validation: Phone Number (เบอร์มือถือ)
+    function validatePhone(v){
+      const trimmed = (v||'').trim();
+      if(!trimmed) return 'กรุณากรอกเบอร์มือถือ';
+      // ต้องเป็นตัวเลขเท่านั้น
+      if(!/^\d+$/.test(trimmed)){
+        return 'กรุณากรอกเฉพาะตัวเลขเท่านั้น ไม่เกิน 13 หลัก';
+      }
+      // ความยาวไม่เกิน 13 หลัก
+      if(trimmed.length > 13){
+        return 'กรุณากรอกเฉพาะตัวเลขเท่านั้น ไม่เกิน 13 หลัก';
+      }
+      return null;
+    }
+    
+    // ✅ 5. Validation: Email (อีเมล)
+    function validateEmail(v){
+      const trimmed = (v||'').trim();
+      if(!trimmed) return 'กรุณากรอกอีเมล';
+      // ตรวจสอบรูปแบบอีเมล
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!emailPattern.test(trimmed)){
+        return 'กรุณากรอกอีเมลให้ถูกต้อง เช่น you@example.com';
+      }
+      return null;
+    }
+    
     function isEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+    
     function isContactValid(){
-      return nonEmpty(tl?.value) && nonEmpty(fn?.value) && nonEmpty(ln?.value) && nonEmpty(mb?.value) && nonEmpty(cc?.value) && isEmail(em?.value);
+      return nonEmpty(tl?.value) && 
+             validateName(fn?.value, 'ชื่อ') === null && 
+             validateName(ln?.value, 'นามสกุล') === null && 
+             validatePhone(mb?.value) === null && 
+             nonEmpty(cc?.value) && 
+             validateEmail(em?.value) === null;
     }
       // Validate other-guest fields only when booking for others
       function isOtherGuestValid(){
@@ -571,15 +638,20 @@
         const gln = document.getElementById('otherGuestLastName');
         const gcc = document.getElementById('guestPhoneCountryCode');
         const gph = document.getElementById('guestPhoneNumber');
-        return nonEmpty(gtl?.value) && nonEmpty(gfn?.value) && nonEmpty(gln?.value) && nonEmpty(gcc?.value) && nonEmpty(gph?.value);
+        return nonEmpty(gtl?.value) && 
+               validateName(gfn?.value, 'ชื่อผู้เข้าพัก') === null && 
+               validateName(gln?.value, 'นามสกุลผู้เข้าพัก') === null && 
+               nonEmpty(gcc?.value) && 
+               validatePhone(gph?.value) === null;
       }
     function focusFirstInvalid(){
-      if(!nonEmpty(tl?.value)) { tl?.focus?.(); return; }
-      if(!nonEmpty(fn?.value)) { fn?.focus?.(); return; }
-      if(!nonEmpty(ln?.value)) { ln?.focus?.(); return; }
-      if(!nonEmpty(cc?.value)) { cc?.focus?.(); return; }
-      if(!nonEmpty(mb?.value)) { mb?.focus?.(); return; }
-      if(!isEmail(em?.value)) { em?.focus?.(); return; }
+      let err = null;
+      if((err = validateTitle(tl?.value))) { showCustomAlert(err); tl?.focus?.(); return; }
+      if((err = validateName(fn?.value, 'ชื่อ'))) { showCustomAlert(err); fn?.focus?.(); return; }
+      if((err = validateName(ln?.value, 'นามสกุล'))) { showCustomAlert(err); ln?.focus?.(); return; }
+      if(!nonEmpty(cc?.value)) { showCustomAlert('กรุณาเลือกรหัสประเทศ'); cc?.focus?.(); return; }
+      if((err = validatePhone(mb?.value))) { showCustomAlert(err); mb?.focus?.(); return; }
+      if((err = validateEmail(em?.value))) { showCustomAlert(err); em?.focus?.(); return; }
     }
     function showFillContactAlert(){
       const th = 'กรุณากรอกรายละเอียดข้อมูลติดต่อในการจองให้ครบถ้วน';
@@ -589,19 +661,107 @@
     }
     function updateAgreeAvailability(){ if(agree){ agree.disabled = !(isContactValid() && isOtherGuestValid()); } }
     function updateBookBtnState(){ if(bookBtn){ if(agree && agree.checked && isContactValid() && isOtherGuestValid()) bookBtn.removeAttribute('disabled'); else bookBtn.setAttribute('disabled','disabled'); } }
-    // Attach listeners to contact inputs
-    [fn, ln, cc, mb, em].forEach(el=>{ if(!el) return; ['input','change','blur'].forEach(ev=> el.addEventListener(ev, ()=>{ updateAgreeAvailability(); updateBookBtnState(); })); });
+    
+    // ✅ Real-time validation on blur (mouse exit)
+    if(tl){
+      tl.addEventListener('blur', ()=>{
+        const err = validateTitle(tl.value);
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    if(fn){
+      fn.addEventListener('blur', ()=>{
+        const err = validateName(fn.value, 'ชื่อ');
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    if(ln){
+      ln.addEventListener('blur', ()=>{
+        const err = validateName(ln.value, 'นามสกุล');
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    if(mb){
+      mb.addEventListener('blur', ()=>{
+        const err = validatePhone(mb.value);
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    if(em){
+      em.addEventListener('blur', ()=>{
+        const err = validateEmail(em.value);
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    
+    // Attach listeners to contact inputs for real-time enabling
+    [tl, fn, ln, cc, mb, em].forEach(el=>{ if(!el) return; ['input','change'].forEach(ev=> el.addEventListener(ev, ()=>{ updateAgreeAvailability(); updateBookBtnState(); })); });
+    
+    // ✅ Validation for other-guest fields (ผู้เข้าพัก)
+    const gtl = document.getElementById('guestTitle');
+    const gfn = document.getElementById('otherGuestFirstName');
+    const gln = document.getElementById('otherGuestLastName');
+    const gcc = document.getElementById('guestPhoneCountryCode');
+    const gph = document.getElementById('guestPhoneNumber');
+    
+    if(gtl){
+      gtl.addEventListener('blur', ()=>{
+        const isOther = document.getElementById('bookingForOther')?.checked;
+        if(!isOther) return;
+        const err = validateTitle(gtl.value);
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    if(gfn){
+      gfn.addEventListener('blur', ()=>{
+        const isOther = document.getElementById('bookingForOther')?.checked;
+        if(!isOther) return;
+        const err = validateName(gfn.value, 'ชื่อผู้เข้าพัก');
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    if(gln){
+      gln.addEventListener('blur', ()=>{
+        const isOther = document.getElementById('bookingForOther')?.checked;
+        if(!isOther) return;
+        const err = validateName(gln.value, 'นามสกุลผู้เข้าพัก');
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    if(gph){
+      gph.addEventListener('blur', ()=>{
+        const isOther = document.getElementById('bookingForOther')?.checked;
+        if(!isOther) return;
+        const err = validatePhone(gph.value);
+        if(err) showCustomAlert(err);
+        updateAgreeAvailability();
+        updateBookBtnState();
+      });
+    }
+    
     // Attach listeners to other-guest fields and radio toggles to keep gating in sync
     const otherInputs = [
       document.getElementById('bookingForSelf'),
       document.getElementById('bookingForOther'),
-      document.getElementById('guestTitle'),
-      document.getElementById('otherGuestFirstName'),
-      document.getElementById('otherGuestLastName'),
-      document.getElementById('guestPhoneCountryCode'),
-      document.getElementById('guestPhoneNumber')
+      gtl, gfn, gln, gcc, gph
     ];
-    otherInputs.forEach(el=>{ if(!el) return; ['input','change','blur'].forEach(ev=> el.addEventListener(ev, ()=>{ updateAgreeAvailability(); updateBookBtnState(); })); });
+    otherInputs.forEach(el=>{ if(!el) return; ['input','change'].forEach(ev=> el.addEventListener(ev, ()=>{ updateAgreeAvailability(); updateBookBtnState(); })); });
 
     // Wire Terms modal
     const termsModal = document.getElementById('termsModal');
@@ -745,8 +905,17 @@
   const guest_form = collectGuestForm();
       const requests = collectSpecialRequests();
       const policy = collectPolicyAgreement();
-      const fullPayload = { cart, guest_form, requests, policy, channel:'WEBSITE', created_by:'website' };
-      console.log('📤 PENDING booking payload:', fullPayload);
+      // ✅ ส่ง bookingId ไปด้วย (null ในครั้งแรก, มีค่าในรอบถัดไป)
+      const fullPayload = { 
+        bookingId: currentBookingId, 
+        cart, 
+        guest_form, 
+        requests, 
+        policy, 
+        channel:'WEBSITE', 
+        created_by:'website' 
+      };
+      console.log('📤 PENDING booking payload:', fullPayload, '| Reusing bookingId:', currentBookingId);
       let resp=null; let apiErr=null;
       if(window.API && window.API.fetchJson){
         // Primary: standard API path; Fallback: legacy php-api path (for local/dev)
@@ -773,6 +942,10 @@
       
       if(booking && booking.id){
         console.log('✅ Booking ID found:', booking.id, '| Full booking:', booking);
+        // ✅ เก็บ booking_id ไว้ใช้รอบถัดไป (ป้องกันสร้างซ้ำ)
+        currentBookingId = booking.id;
+        console.log('📌 Saved currentBookingId:', currentBookingId, '| Reused:', resp?.reused || false);
+        
         try{ localStorage.setItem('booking_result', JSON.stringify(resp)); }catch(_){ }
         try{ localStorage.setItem('booking_id', String(booking.id)); }catch(_){ }
         try{ localStorage.setItem('skip_hold_release','1'); }catch(_){ }
